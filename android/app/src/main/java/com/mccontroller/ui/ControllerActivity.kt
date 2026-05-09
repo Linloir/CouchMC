@@ -13,6 +13,7 @@ import com.mccontroller.core.ConnectionState
 import com.mccontroller.core.ControllerSession
 import com.mccontroller.databinding.ActivityControllerBinding
 import com.mccontroller.net.Protocol
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -20,20 +21,25 @@ import kotlinx.coroutines.launch
  * Main controller surface (landscape, fullscreen, immersive). Owns a
  * [ControllerSession] for its lifetime; HUD reflects connection + RTT.
  *
- * Step 4 puts only a placeholder body; joystick / look pad / buttons are
- * added in Steps 5–7.
+ * Step 5: joystick wired up. Look pad / buttons / hotbar in Steps 6–7.
  */
 class ControllerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityControllerBinding
     private val session = ControllerSession()
 
+    /**
+     * Joystick state goes through a CONFLATED channel so that bursts of
+     * touch updates collapse to "the latest" — keeping the IO sender from
+     * piling up coroutines while preserving final-position correctness.
+     */
+    private val joystickChannel = Channel<Pair<Float, Float>>(Channel.CONFLATED)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityControllerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Immersive fullscreen: hide system bars, allow swipe-from-edge to peek.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, binding.root).apply {
             hide(WindowInsetsCompat.Type.systemBars())
@@ -45,7 +51,7 @@ class ControllerActivity : AppCompatActivity() {
         val port = intent.getIntExtra(ConnectActivity.EXTRA_PORT, Protocol.DEFAULT_PORT)
         val usbMode = intent.getBooleanExtra(ConnectActivity.EXTRA_USB_MODE, false)
 
-        // HUD: re-render whenever state or RTT changes.
+        // HUD: re-render on state or RTT change.
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(session.state, session.rttMs) { state, rtt -> state to rtt }
@@ -53,13 +59,30 @@ class ControllerActivity : AppCompatActivity() {
             }
         }
 
-        // Kick off the connection.
+        // Joystick wiring: view → CONFLATED channel → single-coroutine sender.
+        binding.joystick.onPositionChanged = { x, y ->
+            joystickChannel.trySend(x to y)
+        }
+        lifecycleScope.launch {
+            for ((x, y) in joystickChannel) {
+                session.sendJoystick(x, y)
+            }
+        }
+
         lifecycleScope.launch {
             session.connect(ip, port, usbMode)
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        // Safety: if the activity is backgrounded with the joystick held,
+        // make sure WASD doesn't stay pressed on the PC.
+        joystickChannel.trySend(0f to 0f)
+    }
+
     override fun onDestroy() {
+        joystickChannel.close()
         session.disconnect()
         super.onDestroy()
     }

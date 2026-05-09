@@ -17,15 +17,12 @@
         android:fontFamily="monospace"
         android:layout_gravity="top"
         android:background="@color/hud_bg"
-        tools:text="● Connected   RTT: 18ms   Sent: J=42 L=124 B=2" />
+        tools:text="● Connected   USB (TCP)   RTT: 4ms" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="#FFFFFFFF"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:text="Controller UI placeholder (Steps 5–7)" />
+    <com.mccontroller.ui.view.JoystickView
+        android:id="@+id/joystick"
+        android:layout_width="360dp"
+        android:layout_height="280dp"
+        android:layout_gravity="bottom|start" />
 
 </FrameLayout>
