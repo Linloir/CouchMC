@@ -237,10 +237,10 @@ class JoystickView @JvmOverloads constructor(
         private const val MAX_INTERVAL_MS = 16L
         private const val FADE_IN_MS = 120L
         private const val FADE_OUT_MS = 180L
-        // Sprint engagement requires pushing well past the rim (1.5x) so it
-        // doesn't trigger by accident; releases when finger is well back inside
-        // the rim (0.85x). Wide hysteresis avoids "can't stop sprinting" feel.
-        private const val SPRINT_ENGAGE_FACTOR = 1.5f
-        private const val SPRINT_DISENGAGE_FACTOR = 0.85f
+        // Symmetric sprint trigger: same radius for engage and disengage
+        // (per user request). Push past 1.2x the rim engages, pull back
+        // inside 1.2x disengages. No hysteresis band.
+        private const val SPRINT_ENGAGE_FACTOR = 1.2f
+        private const val SPRINT_DISENGAGE_FACTOR = 1.2f
     }
 }

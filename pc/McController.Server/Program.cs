@@ -29,9 +29,15 @@ var cursorInjector = new CursorInjector(monitor);
 var tcp = new TcpServer(stats);
 var udp = new UdpServer(stats);
 
+// Wire deltas come in tenths-of-pixel (Android-side SUBPIXEL_SCALE = 10),
+// so divide before applying sensitivity. Float keeps the sub-pixel info
+// for CameraCurve to accumulate via its own residual.
+const float WIRE_SUBPIXEL_SCALE = 10f;
 void HandleLookDelta(short dx, short dy)
 {
-    var (sdx, sdy) = curve.Apply(dx, dy);
+    var fdx = dx / WIRE_SUBPIXEL_SCALE;
+    var fdy = dy / WIRE_SUBPIXEL_SCALE;
+    var (sdx, sdy) = curve.Apply(fdx, fdy);
     if (sdx == 0 && sdy == 0) return;
     switch (monitor.CurrentMode)
     {

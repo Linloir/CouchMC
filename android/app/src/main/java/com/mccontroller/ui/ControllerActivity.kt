@@ -82,13 +82,15 @@ class ControllerActivity : AppCompatActivity() {
         val port = intent.getIntExtra(ConnectActivity.EXTRA_PORT, Protocol.DEFAULT_PORT)
         val usbMode = intent.getBooleanExtra(ConnectActivity.EXTRA_USB_MODE, false)
 
-        // HUD + layer-visibility: re-render on state, RTT, or mode change.
+        // HUD + layer-visibility + lookpad mode: re-render on state, RTT,
+        // or mode change.
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(session.state, session.rttMs, session.mode) { s, r, m -> Triple(s, r, m) }
                     .collect { (state, rtt, mode) ->
                         updateHud(state, rtt, mode)
                         updateLayerVisibility(mode)
+                        binding.lookPad.mode = mode
                     }
             }
         }
@@ -110,6 +112,27 @@ class ControllerActivity : AppCompatActivity() {
         // Look pad wiring: view → atomic accumulator → 8ms flush coroutine.
         binding.lookPad.onLookDelta = { dx, dy ->
             lookAccumulator.add(dx, dy)
+        }
+        // Tap / double-tap gestures on the look pad.
+        binding.lookPad.onPrimaryTap = {
+            lifecycleScope.launch {
+                session.sendButton(Protocol.ButtonId.MOUSE_LEFT, true)
+                kotlinx.coroutines.delay(50)
+                session.sendButton(Protocol.ButtonId.MOUSE_LEFT, false)
+            }
+        }
+        binding.lookPad.onSecondaryTap = {
+            lifecycleScope.launch {
+                session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, true)
+                kotlinx.coroutines.delay(50)
+                session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, false)
+            }
+        }
+        binding.lookPad.onHoldStart = {
+            lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, true) }
+        }
+        binding.lookPad.onHoldEnd = {
+            lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, false) }
         }
         lookAccumulator.start(lifecycleScope)
 
@@ -250,8 +273,15 @@ class ControllerActivity : AppCompatActivity() {
             binding.joystick,
             binding.btnSneak,
             binding.btnLmb, binding.btnRmb, binding.btnJump, binding.btnSprint,
-            binding.rowTopButtons,
+            binding.btnSwap, binding.btnInv, binding.btnEsc,
             binding.hotbar,
+        )
+    }
+
+    private val uiModeWidgets: List<View> by lazy {
+        listOf(
+            binding.btnUiLmb, binding.btnUiRmb,
+            binding.btnUiQ, binding.btnUiShift, binding.btnUiEsc,
         )
     }
 
@@ -262,12 +292,18 @@ class ControllerActivity : AppCompatActivity() {
         "btn_lmb" to binding.btnLmb,
         "btn_rmb" to binding.btnRmb,
         "btn_jump" to binding.btnJump,
-        "row_top_buttons" to binding.rowTopButtons,
+        "btn_swap" to binding.btnSwap,
+        "btn_inv" to binding.btnInv,
+        "btn_esc" to binding.btnEsc,
         "hotbar" to binding.hotbar,
     )
 
     private fun uiModeWidgetMap(): Map<String, View> = mapOf(
-        "column_ui_buttons" to binding.columnUiButtons,
+        "btn_ui_lmb" to binding.btnUiLmb,
+        "btn_ui_rmb" to binding.btnUiRmb,
+        "btn_ui_q" to binding.btnUiQ,
+        "btn_ui_shift" to binding.btnUiShift,
+        "btn_ui_esc" to binding.btnUiEsc,
     )
 
     private fun applyProfileLayout() {
@@ -283,7 +319,9 @@ class ControllerActivity : AppCompatActivity() {
         inGameWidgets.forEach {
             it.visibility = if (showInGame) View.VISIBLE else View.GONE
         }
-        binding.columnUiButtons.visibility = if (showUiMode) View.VISIBLE else View.GONE
+        uiModeWidgets.forEach {
+            it.visibility = if (showUiMode) View.VISIBLE else View.GONE
+        }
         binding.lockLayer.visibility = if (showLock) View.VISIBLE else View.GONE
     }
 

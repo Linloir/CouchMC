@@ -150,7 +150,9 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
     private fun updateModeVisibility() {
         val showInGame = currentEditMode == EditMode.InGame
         inGameViews().forEach { it.visibility = if (showInGame) View.VISIBLE else View.GONE }
-        binding.columnUiButtons.visibility = if (!showInGame) View.VISIBLE else View.GONE
+        uiModeWidgetMap().values.forEach {
+            it.visibility = if (!showInGame) View.VISIBLE else View.GONE
+        }
     }
 
     // ===== Sliders =====
@@ -347,6 +349,9 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
 
     private fun attachWidgetEditListeners() {
         for ((id, view) in allWidgetMap()) {
+            // Joystick is intentionally non-editable in v3 — its activation
+            // zone is large and dragging it would only confuse the layout.
+            if (id == "joystick") continue
             attachListener(id, view)
         }
     }
@@ -454,12 +459,18 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         "btn_lmb" to binding.btnLmb,
         "btn_rmb" to binding.btnRmb,
         "btn_jump" to binding.btnJump,
-        "row_top_buttons" to binding.rowTopButtons,
+        "btn_swap" to binding.btnSwap,
+        "btn_inv" to binding.btnInv,
+        "btn_esc" to binding.btnEsc,
         "hotbar" to binding.hotbar,
     )
 
     private fun uiModeWidgetMap(): Map<String, View> = mapOf(
-        "column_ui_buttons" to binding.columnUiButtons,
+        "btn_ui_lmb" to binding.btnUiLmb,
+        "btn_ui_rmb" to binding.btnUiRmb,
+        "btn_ui_q" to binding.btnUiQ,
+        "btn_ui_shift" to binding.btnUiShift,
+        "btn_ui_esc" to binding.btnUiEsc,
     )
 
     private fun allWidgetMap(): Map<String, View> = inGameWidgetMap() + uiModeWidgetMap()

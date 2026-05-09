@@ -58,9 +58,9 @@ object DefaultLayouts {
 
     val IN_GAME: ModeLayout = ModeLayout(
         widgets = mapOf(
-            // Joystick activation zone (left side)
+            // Joystick activation zone (left side) — not editable in v3.
             "joystick" to WidgetSpec("joystick", Anchor.BottomStart, 0f, 0f, 360f, 280f),
-            // Sneak alone above joystick (Sprint moves into right-side fan)
+            // Sneak alone above joystick (Sprint lives in the right-side fan)
             "btn_sneak" to WidgetSpec("btn_sneak", Anchor.BottomStart, 16f, 296f, 56f, 56f),
 
             // RIGHT-SIDE FAN (Honor-of-Kings style):
@@ -72,8 +72,11 @@ object DefaultLayouts {
             "btn_jump" to WidgetSpec("btn_jump", Anchor.BottomEnd, 108f, 108f, 60f, 60f),
             "btn_sprint" to WidgetSpec("btn_sprint", Anchor.BottomEnd, 30f, 140f, 60f, 60f),
 
-            // Esc / Inv / Swap row (top right)
-            "row_top_buttons" to WidgetSpec("row_top_buttons", Anchor.TopEnd, 16f, 8f, 0f, 0f),
+            // Top-right action buttons — individually editable.
+            "btn_swap" to WidgetSpec("btn_swap", Anchor.TopEnd, 16f, 8f, 48f, 48f),
+            "btn_inv" to WidgetSpec("btn_inv", Anchor.TopEnd, 72f, 8f, 48f, 48f),
+            "btn_esc" to WidgetSpec("btn_esc", Anchor.TopEnd, 128f, 8f, 48f, 48f),
+
             // Hotbar (bottom right)
             "hotbar" to WidgetSpec("hotbar", Anchor.BottomEnd, 16f, 8f, 360f, 44f),
         ),
@@ -81,7 +84,13 @@ object DefaultLayouts {
 
     val UI_MODE: ModeLayout = ModeLayout(
         widgets = mapOf(
-            "column_ui_buttons" to WidgetSpec("column_ui_buttons", Anchor.CenterStart, 24f, 0f, 0f, 0f),
+            // Five individually-editable buttons stacked from the bottom-left,
+            // sized to fit on a typical landscape screen (~400dp tall).
+            "btn_ui_lmb" to WidgetSpec("btn_ui_lmb", Anchor.BottomStart, 24f, 20f, 72f, 72f),
+            "btn_ui_rmb" to WidgetSpec("btn_ui_rmb", Anchor.BottomStart, 24f, 104f, 72f, 72f),
+            "btn_ui_q" to WidgetSpec("btn_ui_q", Anchor.BottomStart, 24f, 188f, 56f, 56f),
+            "btn_ui_shift" to WidgetSpec("btn_ui_shift", Anchor.BottomStart, 24f, 256f, 56f, 56f),
+            "btn_ui_esc" to WidgetSpec("btn_ui_esc", Anchor.BottomStart, 24f, 324f, 56f, 56f),
         ),
     )
 
@@ -91,18 +100,23 @@ object DefaultLayouts {
         uiMode = UI_MODE,
     )
 
-    /** Buttons that may have width/height edited (excluding wrap_content rows). */
+    /** Buttons that may have width/height edited (joystick excluded — v3 lock). */
     val RESIZABLE_IDS: Set<String> = setOf(
-        "joystick", "hotbar",
+        "hotbar",
         "btn_sneak", "btn_sprint",
         "btn_lmb", "btn_rmb", "btn_jump",
+        "btn_esc", "btn_inv", "btn_swap",
+        "btn_ui_lmb", "btn_ui_rmb", "btn_ui_q", "btn_ui_shift", "btn_ui_esc",
     )
 
     /** All editable widget IDs, ordered for editor UI listing. */
     val IN_GAME_IDS: List<String> = listOf(
-        "joystick", "btn_sneak", "btn_sprint",
+        "btn_sneak", "btn_sprint",
         "btn_lmb", "btn_rmb", "btn_jump",
-        "row_top_buttons", "hotbar",
+        "btn_swap", "btn_inv", "btn_esc",
+        "hotbar",
     )
-    val UI_MODE_IDS: List<String> = listOf("column_ui_buttons")
+    val UI_MODE_IDS: List<String> = listOf(
+        "btn_ui_lmb", "btn_ui_rmb", "btn_ui_q", "btn_ui_shift", "btn_ui_esc",
+    )
 }

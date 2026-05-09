@@ -27,10 +27,10 @@ public sealed class CameraCurve
         _config = config;
     }
 
-    public (int sdx, int sdy) Apply(int rawDx, int rawDy)
+    public (int sdx, int sdy) Apply(float rawDx, float rawDy)
     {
         var cam = _config.Camera;
-        var speed = MathF.Sqrt((float)(rawDx * rawDx + rawDy * rawDy));
+        var speed = MathF.Sqrt(rawDx * rawDx + rawDy * rawDy);
 
         float accelMul = cam.CurveType switch
         {

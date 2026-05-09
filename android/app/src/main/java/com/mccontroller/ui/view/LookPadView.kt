@@ -2,8 +2,10 @@ package com.mccontroller.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import com.mccontroller.core.ControllerMode
 
 /**
  * Touch surface for camera control. Reads finger movement deltas (with
@@ -20,6 +22,25 @@ class LookPadView @JvmOverloads constructor(
 
     var onLookDelta: ((dx: Int, dy: Int) -> Unit)? = null
 
+    /**
+     * Controller mode set by ControllerActivity. The gesture handler routes
+     * differently per mode:
+     * - InGame: single tap = primary tap (LMB click); double-tap-and-hold
+     *   fires hold start on second DOWN and hold end on second UP.
+     * - UiInteract: single tap = primary; double tap = secondary (RMB click).
+     * - AntiMistouch: callbacks not invoked (this view is hidden anyway).
+     */
+    var mode: ControllerMode = ControllerMode.AntiMistouch
+
+    /** Single-finger quick tap (no slide). LMB click in both gameplay modes. */
+    var onPrimaryTap: (() -> Unit)? = null
+    /** Quick double-tap. UI mode only — RMB click. */
+    var onSecondaryTap: (() -> Unit)? = null
+    /** Double-tap-and-hold start (in-game only) — LMB pressed and held. */
+    var onHoldStart: (() -> Unit)? = null
+    /** Double-tap-and-hold end (in-game only) — LMB released. */
+    var onHoldEnd: (() -> Unit)? = null
+
     private var pointerId = MotionEvent.INVALID_POINTER_ID
     private var lastX = 0f
     private var lastY = 0f
@@ -30,7 +51,38 @@ class LookPadView @JvmOverloads constructor(
     private var residualX = 0f
     private var residualY = 0f
 
+    private val gestureDetector: GestureDetector = GestureDetector(
+        context,
+        object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                if (mode != ControllerMode.AntiMistouch) onPrimaryTap?.invoke()
+                return true
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                // UI-mode shortcut: a clean double-tap fires RMB. In-game,
+                // we instead use onDoubleTapEvent below to track DOWN/UP of
+                // the second tap as the LMB hold window.
+                if (mode == ControllerMode.UiInteract) onSecondaryTap?.invoke()
+                return true
+            }
+
+            override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+                if (mode != ControllerMode.InGame) return true
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> onHoldStart?.invoke()
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> onHoldEnd?.invoke()
+                }
+                return true
+            }
+        },
+    )
+
     override fun onTouchEvent(e: MotionEvent): Boolean {
+        // Forward to gesture detector first so tap/double-tap can fire
+        // alongside our delta tracking. Both can run for the same gesture.
+        gestureDetector.onTouchEvent(e)
+
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 if (pointerId == MotionEvent.INVALID_POINTER_ID) {
@@ -67,8 +119,13 @@ class LookPadView @JvmOverloads constructor(
     }
 
     private fun emitDelta(curX: Float, curY: Float) {
-        val rawDx = curX - lastX
-        val rawDy = curY - lastY
+        // Multiply by SUBPIXEL_SCALE so wire deltas are in tenths-of-pixel.
+        // Combined with residual carryover, this gives 10x finer micro-aim
+        // resolution: a 0.3px finger move produces wire delta 3 (= 0.3 px),
+        // which the PC scales by sensitivity *and* divides by 10 to recover
+        // the actual pixel value before injecting.
+        val rawDx = (curX - lastX) * SUBPIXEL_SCALE
+        val rawDy = (curY - lastY) * SUBPIXEL_SCALE
         lastX = curX
         lastY = curY
 
@@ -82,5 +139,10 @@ class LookPadView @JvmOverloads constructor(
         if (ix != 0 || iy != 0) {
             onLookDelta?.invoke(ix, iy)
         }
+    }
+
+    companion object {
+        /** Wire deltas are scaled by this factor; PC divides by it. */
+        const val SUBPIXEL_SCALE = 10f
     }
 }
