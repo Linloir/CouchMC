@@ -4,8 +4,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
@@ -32,6 +35,19 @@ class HybridTransport {
     )
     val incoming: SharedFlow<ControlMessage> = _incoming.asSharedFlow()
 
+    /**
+     * Server-pushed mode (raw byte: 0=InGame, 1=UiInteract, 2=AntiMistouch).
+     * Updated synchronously inside the read loop so it captures STATE_CHANGE
+     * messages that arrive during the handshake — before any external
+     * collector has a chance to subscribe.
+     *
+     * StateFlow always replays the current value to new subscribers, so
+     * `ControllerSession.mode` will see the correct value on the very first
+     * collect even if the message arrived earlier.
+     */
+    private val _serverMode = MutableStateFlow<Byte>(2)  // start in AntiMistouch
+    val serverMode: StateFlow<Byte> = _serverMode.asStateFlow()
+
     val isUdpAvailable: Boolean get() = udp != null
 
     /**
@@ -47,12 +63,19 @@ class HybridTransport {
         tcp.connect(host, port)
 
         // Start the read loop in the caller's scope so cancellation propagates.
-        // The read loop both completes the handshake deferred and forwards
-        // every message to the public flow.
+        // The read loop completes the handshake deferred, captures the latest
+        // server mode into a StateFlow (so late subscribers still see it),
+        // and forwards every message to the public flow.
         scope.launch(Dispatchers.IO) {
             tcp.runReadLoop(this) { msg ->
-                if (msg is HelloAckMsg && !handshakeAck.isCompleted) {
-                    handshakeAck.complete(msg)
+                when (msg) {
+                    is HelloAckMsg -> {
+                        if (!handshakeAck.isCompleted) handshakeAck.complete(msg)
+                    }
+                    is StateChangeMsg -> {
+                        _serverMode.value = msg.mode
+                    }
+                    else -> { /* nothing eager; rest goes to the shared flow */ }
                 }
                 _incoming.tryEmit(msg)
             }

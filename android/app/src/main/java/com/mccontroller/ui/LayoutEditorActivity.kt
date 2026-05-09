@@ -449,7 +449,8 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
 
     private fun inGameWidgetMap(): Map<String, View> = mapOf(
         "joystick" to binding.joystick,
-        "row_sneak_sprint" to binding.rowSneakSprint,
+        "btn_sneak" to binding.btnSneak,
+        "btn_sprint" to binding.btnSprint,
         "btn_lmb" to binding.btnLmb,
         "btn_rmb" to binding.btnRmb,
         "btn_jump" to binding.btnJump,

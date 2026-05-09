@@ -58,17 +58,23 @@ object DefaultLayouts {
 
     val IN_GAME: ModeLayout = ModeLayout(
         widgets = mapOf(
-            // Joystick activation zone
+            // Joystick activation zone (left side)
             "joystick" to WidgetSpec("joystick", Anchor.BottomStart, 0f, 0f, 360f, 280f),
-            // Sneak / Sprint row (above joystick)
-            "row_sneak_sprint" to WidgetSpec("row_sneak_sprint", Anchor.BottomStart, 16f, 296f, 0f, 0f),
-            // LMB / RMB / Jump arc cluster
-            "btn_lmb" to WidgetSpec("btn_lmb", Anchor.BottomEnd, 20f, 20f, 76f, 76f),
-            "btn_rmb" to WidgetSpec("btn_rmb", Anchor.BottomEnd, 112f, 44f, 68f, 68f),
-            "btn_jump" to WidgetSpec("btn_jump", Anchor.BottomEnd, 44f, 124f, 60f, 60f),
-            // Esc / Inv / Swap row
+            // Sneak alone above joystick (Sprint moves into right-side fan)
+            "btn_sneak" to WidgetSpec("btn_sneak", Anchor.BottomStart, 16f, 296f, 56f, 56f),
+
+            // RIGHT-SIDE FAN (Honor-of-Kings style):
+            //   LMB is the "attack" anchor — largest, deepest into the corner.
+            //   RMB / Jump / Sprint fan out above-left along an arc of radius
+            //   ~110dp from LMB's center, at angles 180°, 135°, 90°.
+            "btn_lmb" to WidgetSpec("btn_lmb", Anchor.BottomEnd, 16f, 16f, 88f, 88f),
+            "btn_rmb" to WidgetSpec("btn_rmb", Anchor.BottomEnd, 140f, 30f, 60f, 60f),
+            "btn_jump" to WidgetSpec("btn_jump", Anchor.BottomEnd, 108f, 108f, 60f, 60f),
+            "btn_sprint" to WidgetSpec("btn_sprint", Anchor.BottomEnd, 30f, 140f, 60f, 60f),
+
+            // Esc / Inv / Swap row (top right)
             "row_top_buttons" to WidgetSpec("row_top_buttons", Anchor.TopEnd, 16f, 8f, 0f, 0f),
-            // Hotbar
+            // Hotbar (bottom right)
             "hotbar" to WidgetSpec("hotbar", Anchor.BottomEnd, 16f, 8f, 360f, 44f),
         ),
     )
@@ -87,12 +93,14 @@ object DefaultLayouts {
 
     /** Buttons that may have width/height edited (excluding wrap_content rows). */
     val RESIZABLE_IDS: Set<String> = setOf(
-        "joystick", "btn_lmb", "btn_rmb", "btn_jump", "hotbar",
+        "joystick", "hotbar",
+        "btn_sneak", "btn_sprint",
+        "btn_lmb", "btn_rmb", "btn_jump",
     )
 
     /** All editable widget IDs, ordered for editor UI listing. */
     val IN_GAME_IDS: List<String> = listOf(
-        "joystick", "row_sneak_sprint",
+        "joystick", "btn_sneak", "btn_sprint",
         "btn_lmb", "btn_rmb", "btn_jump",
         "row_top_buttons", "hotbar",
     )

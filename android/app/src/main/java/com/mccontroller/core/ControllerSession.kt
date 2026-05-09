@@ -110,19 +110,21 @@ class ControllerSession {
 
         dispatchJob = scope.launch {
             transport?.incoming?.collect { msg ->
-                when (msg) {
-                    is PongMsg -> {
-                        pendingPings.remove(msg.seq)?.let { sentAt ->
-                            _rttMs.value = (System.currentTimeMillis() - sentAt).toInt()
-                        }
-                    }
-                    is StateChangeMsg -> {
-                        _mode.value = ControllerMode.fromByte(msg.mode)
-                    }
-                    else -> {
-                        // ignore other inbound messages
+                if (msg is PongMsg) {
+                    pendingPings.remove(msg.seq)?.let { sentAt ->
+                        _rttMs.value = (System.currentTimeMillis() - sentAt).toInt()
                     }
                 }
+                // StateChangeMsg is captured eagerly by HybridTransport into
+                // its serverMode StateFlow; mirrored by the launch below so
+                // a STATE_CHANGE that arrived during handshake (before any
+                // collector subscribed to `incoming`) is still picked up.
+            }
+        }
+
+        scope.launch {
+            transport?.serverMode?.collect { byte ->
+                _mode.value = ControllerMode.fromByte(byte)
             }
         }
 

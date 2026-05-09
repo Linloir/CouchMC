@@ -1,6 +1,7 @@
 package com.mccontroller.ui
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -43,6 +44,14 @@ class ControllerActivity : AppCompatActivity() {
      * piling up coroutines while preserving final-position correctness.
      */
     private val joystickChannel = Channel<Pair<Float, Float>>(Channel.CONFLATED)
+
+    /**
+     * Hotbar slot selection goes through a CONFLATED channel + single
+     * sender coroutine so a fast swipe (e.g. 5→1 in one motion) can't
+     * out-of-order multiple hotbar key events — the consumer always sends
+     * the latest target slot and the PC ends up on the right slot.
+     */
+    private val hotbarSelectChannel = Channel<Int>(Channel.CONFLATED)
 
     // Sprint key state is the OR of two sources: the Sprint toggle button
     // and pushing the joystick past its rim. Either being true keeps SPRINT
@@ -123,8 +132,49 @@ class ControllerActivity : AppCompatActivity() {
     override fun onDestroy() {
         lookAccumulator.stop()
         joystickChannel.close()
+        hotbarSelectChannel.close()
         session.disconnect()
         super.onDestroy()
+    }
+
+    // ===== Volume key intercept =====
+    //
+    // VOL_UP/DOWN map to mouse LMB/RMB so the user can use phone hardware
+    // keys for fast attack/use without taking a finger off the look pad.
+    // Returning true consumes the event and prevents the system from
+    // changing media volume.
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event != null && event.repeatCount > 0) {
+            // Auto-repeat — first DOWN already sent; just consume.
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) return true
+            return super.onKeyDown(keyCode, event)
+        }
+        return when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, true) }
+                true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, true) }
+                true
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, false) }
+                true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, false) }
+                true
+            }
+            else -> super.onKeyUp(keyCode, event)
+        }
     }
 
     private fun wireButtons() {
@@ -163,16 +213,21 @@ class ControllerActivity : AppCompatActivity() {
 
     private fun wireHotbar() {
         binding.hotbar.onSelect = { slot ->
-            val buttonId = (Protocol.ButtonId.HOTBAR_1.toInt() + slot).toByte()
-            lifecycleScope.launch {
-                session.sendButton(buttonId, true)
-                session.sendButton(buttonId, false)
-            }
+            hotbarSelectChannel.trySend(slot)
         }
         binding.hotbar.onDrop = { _ ->
             lifecycleScope.launch {
                 session.sendButton(Protocol.ButtonId.DROP, true)
                 session.sendButton(Protocol.ButtonId.DROP, false)
+            }
+        }
+        // Single consumer: serializes sends, and on fast swipes the
+        // CONFLATED channel collapses intermediate slots to the latest.
+        lifecycleScope.launch {
+            for (slot in hotbarSelectChannel) {
+                val buttonId = (Protocol.ButtonId.HOTBAR_1.toInt() + slot).toByte()
+                session.sendButton(buttonId, true)
+                session.sendButton(buttonId, false)
             }
         }
     }
@@ -193,8 +248,8 @@ class ControllerActivity : AppCompatActivity() {
     private val inGameWidgets: List<View> by lazy {
         listOf(
             binding.joystick,
-            binding.rowSneakSprint,
-            binding.btnLmb, binding.btnRmb, binding.btnJump,
+            binding.btnSneak,
+            binding.btnLmb, binding.btnRmb, binding.btnJump, binding.btnSprint,
             binding.rowTopButtons,
             binding.hotbar,
         )
@@ -202,7 +257,8 @@ class ControllerActivity : AppCompatActivity() {
 
     private fun inGameWidgetMap(): Map<String, View> = mapOf(
         "joystick" to binding.joystick,
-        "row_sneak_sprint" to binding.rowSneakSprint,
+        "btn_sneak" to binding.btnSneak,
+        "btn_sprint" to binding.btnSprint,
         "btn_lmb" to binding.btnLmb,
         "btn_rmb" to binding.btnRmb,
         "btn_jump" to binding.btnJump,

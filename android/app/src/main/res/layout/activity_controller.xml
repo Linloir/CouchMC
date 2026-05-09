@@ -24,50 +24,38 @@
         android:layout_height="280dp"
         android:layout_gravity="bottom|start" />
 
-    <LinearLayout
-        android:id="@+id/row_sneak_sprint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!-- Sneak alone above the joystick (Sprint moves into the right-side fan). -->
+    <com.mccontroller.ui.view.ActionButtonView
+        android:id="@+id/btn_sneak"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="296dp"
-        android:orientation="horizontal">
+        app:label="SNK"
+        app:buttonMode="toggle" />
 
-        <com.mccontroller.ui.view.ActionButtonView
-            android:id="@+id/btn_sneak"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginEnd="12dp"
-            app:label="SNK"
-            app:buttonMode="toggle" />
-
-        <com.mccontroller.ui.view.ActionButtonView
-            android:id="@+id/btn_sprint"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            app:label="SPR"
-            app:buttonMode="toggle" />
-    </LinearLayout>
-
-    <!-- LMB / RMB / Jump in arc cluster (Honor-of-Kings style):
-         LMB 76dp at corner (primary), RMB 68dp upper-left, Jump 60dp above. -->
+    <!-- Right-side fan, Honor-of-Kings layout:
+         LMB 88dp at corner (attack anchor); RMB / Jump / Sprint each 60dp
+         fan out along an arc of radius ~110dp from LMB's center, at
+         angles 180°, 135°, 90°. -->
     <com.mccontroller.ui.view.ActionButtonView
         android:id="@+id/btn_lmb"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         app:label="L"
         app:buttonMode="hold" />
 
     <com.mccontroller.ui.view.ActionButtonView
         android:id="@+id/btn_rmb"
-        android:layout_width="68dp"
-        android:layout_height="68dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="112dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginEnd="140dp"
+        android:layout_marginBottom="30dp"
         app:label="R"
         app:buttonMode="hold" />
 
@@ -76,10 +64,20 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="44dp"
-        android:layout_marginBottom="124dp"
+        android:layout_marginEnd="108dp"
+        android:layout_marginBottom="108dp"
         app:label="↑"
         app:buttonMode="hold" />
+
+    <com.mccontroller.ui.view.ActionButtonView
+        android:id="@+id/btn_sprint"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="140dp"
+        app:label="SPR"
+        app:buttonMode="toggle" />
 
     <LinearLayout
         android:id="@+id/row_top_buttons"
