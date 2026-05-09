@@ -123,13 +123,13 @@ monitor.OnModeChanged += newMode =>
         mapper.ReleaseAll();
         router.ReleaseAll();
     }
-    if (newMode == Protocol.ControllerMode.InGame)
-    {
-        // WASD scancodes get eaten by Chinese / Japanese IMEs in their
-        // native input mode; force MC's foreground window to en-US so the
-        // movement keys register reliably.
-        InputLanguageManager.EnsureEnglishLayout();
-    }
+    // NOTE: previously called InputLanguageManager.EnsureEnglishLayout() here
+    // when mode flipped to InGame. Disabled because PostMessage(WM_INPUTLANGCHANGEREQUEST)
+    // on MC's HWND appears to cause MC to briefly release/re-grab the cursor,
+    // which the WindowStateMonitor then mis-reads as UiInteract / AntiMistouch.
+    // The IME helper file is kept (Input/InputLanguageManager.cs); we'll
+    // re-enable it via a less intrusive path (e.g. only on first connect,
+    // or behind a config flag).
 };
 
 try
