@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical"
+    tools:context=".ui.LayoutEditorActivity">
+
+    <!-- ==== Top toolbar: profile management + save/cancel ==== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#FF1E1E1E"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp">
+
+        <Spinner
+            android:id="@+id/spinner_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_new_profile"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/editor_new_profile"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rename_profile"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/editor_rename_profile"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_delete_profile"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/editor_delete_profile"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reset_layout"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/editor_reset"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/editor_cancel"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="16dp"
+            android:text="@string/editor_save"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- ==== Canvas: same widgets as controller layout ==== -->
+    <FrameLayout
+        android:id="@+id/canvas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/bg_dark">
+
+        <com.mccontroller.ui.view.LookPadView
+            android:id="@+id/look_pad"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.mccontroller.ui.view.JoystickView
+            android:id="@+id/joystick"
+            android:layout_width="360dp"
+            android:layout_height="280dp"
+            android:layout_gravity="bottom|start" />
+
+        <LinearLayout
+            android:id="@+id/row_sneak_sprint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="296dp"
+            android:orientation="horizontal">
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_sneak"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="12dp"
+                app:label="SNK"
+                app:buttonMode="toggle" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_sprint"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:label="SPR"
+                app:buttonMode="toggle" />
+        </LinearLayout>
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_lmb"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            app:label="L"
+            app:buttonMode="hold" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_rmb"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="112dp"
+            android:layout_marginBottom="44dp"
+            app:label="R"
+            app:buttonMode="hold" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_jump"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="44dp"
+            android:layout_marginBottom="124dp"
+            app:label="↑"
+            app:buttonMode="hold" />
+
+        <LinearLayout
+            android:id="@+id/row_top_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal">
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_esc"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                app:label="Esc"
+                app:buttonMode="tap" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_inv"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                app:label="E"
+                app:buttonMode="tap" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_swap"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:label="F"
+                app:buttonMode="tap" />
+        </LinearLayout>
+
+        <com.mccontroller.ui.view.HotbarView
+            android:id="@+id/hotbar"
+            android:layout_width="360dp"
+            android:layout_height="44dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/column_ui_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="24dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_ui_esc"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                app:label="Esc"
+                app:buttonMode="tap" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_ui_shift"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                app:label="Shft"
+                app:buttonMode="hold" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_ui_q"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                app:label="Q"
+                app:buttonMode="tap" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_ui_rmb"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginBottom="12dp"
+                app:label="R"
+                app:buttonMode="hold" />
+
+            <com.mccontroller.ui.view.ActionButtonView
+                android:id="@+id/btn_ui_lmb"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:label="L"
+                app:buttonMode="hold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txt_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="8dp"
+            android:padding="6dp"
+            android:background="#80000000"
+            android:textColor="#CCFFFFFF"
+            android:textSize="11sp"
+            android:text="@string/editor_hint" />
+    </FrameLayout>
+
+    <!-- ==== Bottom toolbar: mode tabs + L/R sliders ==== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF1E1E1E"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp">
+
+        <RadioGroup
+            android:id="@+id/mode_tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <RadioButton
+                android:id="@+id/mode_in_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/editor_mode_in_game"
+                android:textColor="#FFFFFFFF" />
+
+            <RadioButton
+                android:id="@+id/mode_ui"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/editor_mode_ui"
+                android:textColor="#FFFFFFFF" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_l_margin"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp" />
+
+            <SeekBar
+                android:id="@+id/slider_l_margin"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="8dp"
+                android:max="120" />
+
+            <TextView
+                android:id="@+id/txt_l_margin_value"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                tools:text="0" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/editor_r_margin"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp" />
+
+            <SeekBar
+                android:id="@+id/slider_r_margin"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="8dp"
+                android:max="120" />
+
+            <TextView
+                android:id="@+id/txt_r_margin_value"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                tools:text="0" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

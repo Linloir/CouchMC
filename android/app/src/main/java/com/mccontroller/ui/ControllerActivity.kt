@@ -13,6 +13,9 @@ import com.mccontroller.core.ConnectionMode
 import com.mccontroller.core.ConnectionState
 import com.mccontroller.core.ControllerMode
 import com.mccontroller.core.ControllerSession
+import com.mccontroller.core.LayoutApplier
+import com.mccontroller.core.LayoutProfile
+import com.mccontroller.core.ProfileStore
 import com.mccontroller.databinding.ActivityControllerBinding
 import com.mccontroller.input.LookAccumulator
 import com.mccontroller.net.Protocol
@@ -32,6 +35,7 @@ class ControllerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityControllerBinding
     private val session = ControllerSession()
     private val lookAccumulator = LookAccumulator(session)
+    private lateinit var activeProfile: LayoutProfile
 
     /**
      * Joystick state goes through a CONFLATED channel so that bursts of
@@ -51,6 +55,12 @@ class ControllerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityControllerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Apply the user's saved layout profile (or factory default on first run).
+        val store = ProfileStore(this)
+        val (profiles, activeName) = store.loadAll()
+        activeProfile = profiles.firstOrNull { it.name == activeName } ?: profiles.first()
+        applyProfileLayout()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, binding.root).apply {
@@ -185,6 +195,25 @@ class ControllerActivity : AppCompatActivity() {
             binding.rowTopButtons,
             binding.hotbar,
         )
+    }
+
+    private fun inGameWidgetMap(): Map<String, View> = mapOf(
+        "joystick" to binding.joystick,
+        "row_sneak_sprint" to binding.rowSneakSprint,
+        "btn_lmb" to binding.btnLmb,
+        "btn_rmb" to binding.btnRmb,
+        "btn_jump" to binding.btnJump,
+        "row_top_buttons" to binding.rowTopButtons,
+        "hotbar" to binding.hotbar,
+    )
+
+    private fun uiModeWidgetMap(): Map<String, View> = mapOf(
+        "column_ui_buttons" to binding.columnUiButtons,
+    )
+
+    private fun applyProfileLayout() {
+        LayoutApplier.applyAll(inGameWidgetMap(), activeProfile.inGame)
+        LayoutApplier.applyAll(uiModeWidgetMap(), activeProfile.uiMode)
     }
 
     private fun updateLayerVisibility(mode: ControllerMode) {

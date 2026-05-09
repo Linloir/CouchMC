@@ -31,5 +31,13 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.McController.Fullscreen" />
 
+        <activity
+            android:name=".ui.LayoutEditorActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/editor_title"
+            android:theme="@style/Theme.McController.Fullscreen" />
+
     </application>
 </manifest>
