@@ -101,6 +101,10 @@ object PacketCodec {
                     HelloAckMsg(status, udpPort)
                 } else UnknownMsg(type, payloadLen)
             }
+            Protocol.MsgType.STATE_CHANGE -> {
+                if (payloadLen >= 1) StateChangeMsg(buffer[payloadStart])
+                else UnknownMsg(type, payloadLen)
+            }
             Protocol.MsgType.PONG -> {
                 if (payloadLen >= 4) {
                     val seq = readInt32BE(buffer, payloadStart)

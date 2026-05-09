@@ -11,4 +11,6 @@
     <string name="status_connected">Connected</string>
     <string name="status_disconnected">Disconnected</string>
     <string name="status_failed">Connection failed: %1$s</string>
+    <string name="lock_screen_title">MC 不在前台</string>
+    <string name="lock_screen_subtitle">将 Minecraft 切回前台即可继续</string>
 </resources>

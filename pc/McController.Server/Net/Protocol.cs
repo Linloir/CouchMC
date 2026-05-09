@@ -13,6 +13,7 @@ public static class Protocol
     {
         public const byte Hello         = 0x01;
         public const byte HelloAck      = 0x02;
+        public const byte StateChange   = 0x03;  // S->C: mode 0/1/2
         public const byte Joystick      = 0x10;
         public const byte LookDeltaTcp  = 0x11;  // TCP fallback for USB mode
         public const byte LookDeltaUdp  = 0x11;  // same byte, but on UDP channel
@@ -26,6 +27,18 @@ public static class Protocol
         public const byte Ok                   = 0;
         public const byte ProtocolMismatch     = 1;
         public const byte ServerBusy           = 2;
+    }
+
+    /// <summary>
+    /// Operating mode driven by PC-side window/cursor state. Sent to client
+    /// via STATE_CHANGE so the phone UI can reshape (full controller vs.
+    /// cursor-driving UI vs. lock screen).
+    /// </summary>
+    public enum ControllerMode : byte
+    {
+        InGame       = 0,  // MC focused + cursor captured by GLFW
+        UiInteract   = 1,  // MC focused + cursor visible (inventory/menu)
+        AntiMistouch = 2,  // MC not in foreground
     }
 
     public static class ButtonId

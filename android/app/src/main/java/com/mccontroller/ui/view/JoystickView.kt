@@ -38,6 +38,13 @@ class JoystickView @JvmOverloads constructor(
 
     var onPositionChanged: ((x: Float, y: Float) -> Unit)? = null
 
+    /**
+     * Fires when the user pushes the stick past the rim (engage) or returns
+     * back inside the inner threshold (disengage). Independent of the
+     * Sprint toggle button — caller OR-combines the two.
+     */
+    var onSprintExtensionChanged: ((engaged: Boolean) -> Unit)? = null
+
     private val density = resources.displayMetrics.density
     private fun dp(v: Float) = v * density
 
@@ -86,6 +93,8 @@ class JoystickView @JvmOverloads constructor(
     private var lastSentY = 0f
     private var lastSentTime = 0L
 
+    private var sprintEngaged = false
+
     init {
         // Shadow + BlurMaskFilter need software rendering on most API levels.
         setLayerType(LAYER_TYPE_SOFTWARE, null)
@@ -120,6 +129,10 @@ class JoystickView @JvmOverloads constructor(
                     lastSentX = 0f
                     lastSentY = 0f
                     lastSentTime = System.currentTimeMillis()
+                    if (sprintEngaged) {
+                        sprintEngaged = false
+                        onSprintExtensionChanged?.invoke(false)
+                    }
                     fadeOut()
                 }
             }
@@ -150,6 +163,16 @@ class JoystickView @JvmOverloads constructor(
             knobY = touchY
         }
         invalidate()
+
+        // Sprint-on-extend: hysteresis between two thresholds so it doesn't
+        // chatter when the finger sits near the rim.
+        val engageDist = baseRadius * SPRINT_ENGAGE_FACTOR
+        val disengageDist = baseRadius * SPRINT_DISENGAGE_FACTOR
+        val newEngaged = if (sprintEngaged) dist > disengageDist else dist > engageDist
+        if (newEngaged != sprintEngaged) {
+            sprintEngaged = newEngaged
+            onSprintExtensionChanged?.invoke(newEngaged)
+        }
 
         val normX = (knobX - baseX) / baseRadius
         val normY = -(knobY - baseY) / baseRadius   // flip: UP = positive
@@ -214,5 +237,8 @@ class JoystickView @JvmOverloads constructor(
         private const val MAX_INTERVAL_MS = 16L
         private const val FADE_IN_MS = 120L
         private const val FADE_OUT_MS = 180L
+        // Push past 1.2x the rim to engage sprint; back to 1.0x to disengage.
+        private const val SPRINT_ENGAGE_FACTOR = 1.2f
+        private const val SPRINT_DISENGAGE_FACTOR = 1.0f
     }
 }

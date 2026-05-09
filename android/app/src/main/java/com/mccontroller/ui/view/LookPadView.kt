@@ -24,6 +24,12 @@ class LookPadView @JvmOverloads constructor(
     private var lastX = 0f
     private var lastY = 0f
 
+    // Sub-pixel residual: fractional deltas that didn't quite cross 1px get
+    // carried into the next emit. Without this, slow finger drift truncates
+    // to zero and fine aiming / cursor micro-movement feels unresponsive.
+    private var residualX = 0f
+    private var residualY = 0f
+
     override fun onTouchEvent(e: MotionEvent): Boolean {
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
@@ -31,6 +37,10 @@ class LookPadView @JvmOverloads constructor(
                     pointerId = e.getPointerId(e.actionIndex)
                     lastX = e.getX(e.actionIndex)
                     lastY = e.getY(e.actionIndex)
+                    // Reset residual so a stale fraction from a previous
+                    // gesture doesn't bleed into this one.
+                    residualX = 0f
+                    residualY = 0f
                 }
             }
             MotionEvent.ACTION_MOVE -> {
@@ -57,12 +67,20 @@ class LookPadView @JvmOverloads constructor(
     }
 
     private fun emitDelta(curX: Float, curY: Float) {
-        val dx = curX - lastX
-        val dy = curY - lastY
+        val rawDx = curX - lastX
+        val rawDy = curY - lastY
         lastX = curX
         lastY = curY
-        if (dx != 0f || dy != 0f) {
-            onLookDelta?.invoke(dx.toInt(), dy.toInt())
+
+        val totalX = rawDx + residualX
+        val totalY = rawDy + residualY
+        val ix = totalX.toInt()
+        val iy = totalY.toInt()
+        residualX = totalX - ix
+        residualY = totalY - iy
+
+        if (ix != 0 || iy != 0) {
+            onLookDelta?.invoke(ix, iy)
         }
     }
 }

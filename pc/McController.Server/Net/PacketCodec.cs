@@ -39,6 +39,15 @@ public static class PacketCodec
         return buf;
     }
 
+    public static byte[] EncodeStateChange(Protocol.ControllerMode mode)
+    {
+        var buf = new byte[2 + 1 + 1];
+        BinaryPrimitives.WriteUInt16BigEndian(buf.AsSpan(0, 2), 1 + 1);
+        buf[2] = Protocol.MsgType.StateChange;
+        buf[3] = (byte)mode;
+        return buf;
+    }
+
     // ===== TCP framing (incoming) =====
 
     /// <summary>

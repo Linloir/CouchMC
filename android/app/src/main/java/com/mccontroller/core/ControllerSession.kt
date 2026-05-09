@@ -3,6 +3,7 @@ package com.mccontroller.core
 import com.mccontroller.net.HybridTransport
 import com.mccontroller.net.PacketCodec
 import com.mccontroller.net.PongMsg
+import com.mccontroller.net.StateChangeMsg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -39,10 +40,18 @@ class ControllerSession {
     private val _rttMs = MutableStateFlow<Int?>(null)
     val rttMs: StateFlow<Int?> = _rttMs.asStateFlow()
 
+    /**
+     * Current controller mode pushed by the PC server. Defaults to
+     * AntiMistouch so the lock screen shows immediately at startup,
+     * giving way only when the first STATE_CHANGE arrives.
+     */
+    private val _mode = MutableStateFlow(ControllerMode.AntiMistouch)
+    val mode: StateFlow<ControllerMode> = _mode.asStateFlow()
+
     private var transport: HybridTransport? = null
     private var sessionScope: CoroutineScope? = null
     private var pingJob: Job? = null
-    private var pongListenJob: Job? = null
+    private var dispatchJob: Job? = null
 
     suspend fun connect(host: String, port: Int, isUsbMode: Boolean) {
         if (_state.value is ConnectionState.Connected || _state.value is ConnectionState.Connecting) return
@@ -70,17 +79,18 @@ class ControllerSession {
 
     fun disconnect() {
         pingJob?.cancel()
-        pongListenJob?.cancel()
+        dispatchJob?.cancel()
         sessionScope?.cancel()
         transport?.close()
         transport = null
         sessionScope = null
         pingJob = null
-        pongListenJob = null
+        dispatchJob = null
         if (_state.value !is ConnectionState.Failed) {
             _state.value = ConnectionState.Disconnected
         }
         _rttMs.value = null
+        _mode.value = ControllerMode.AntiMistouch
     }
 
     suspend fun sendButton(buttonId: Byte, down: Boolean) {
@@ -98,11 +108,19 @@ class ControllerSession {
     private fun startPingLoop(scope: CoroutineScope) {
         val pendingPings = ConcurrentHashMap<Int, Long>()
 
-        pongListenJob = scope.launch {
+        dispatchJob = scope.launch {
             transport?.incoming?.collect { msg ->
-                if (msg is PongMsg) {
-                    pendingPings.remove(msg.seq)?.let { sentAt ->
-                        _rttMs.value = (System.currentTimeMillis() - sentAt).toInt()
+                when (msg) {
+                    is PongMsg -> {
+                        pendingPings.remove(msg.seq)?.let { sentAt ->
+                            _rttMs.value = (System.currentTimeMillis() - sentAt).toInt()
+                        }
+                    }
+                    is StateChangeMsg -> {
+                        _mode.value = ControllerMode.fromByte(msg.mode)
+                    }
+                    else -> {
+                        // ignore other inbound messages
                     }
                 }
             }

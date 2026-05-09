@@ -11,6 +11,7 @@ object Protocol {
     object MsgType {
         const val HELLO: Byte = 0x01
         const val HELLO_ACK: Byte = 0x02
+        const val STATE_CHANGE: Byte = 0x03   // S->C: mode 0/1/2
         const val JOYSTICK: Byte = 0x10
         const val LOOK_DELTA_TCP: Byte = 0x11
         const val LOOK_DELTA_UDP: Byte = 0x11

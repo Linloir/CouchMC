@@ -45,11 +45,25 @@ In **USB mode** (the Android client connects via `127.0.0.1` after the host runs
 |---|---|---|---|---|
 | `0x01` | `HELLO` | `u8 protoVer, u32 clientId, u8 wantsUdp` | C→S | 1× per session |
 | `0x02` | `HELLO_ACK` | `u8 status, u16 udpPort` | S→C | 1× per session |
+| `0x03` | `STATE_CHANGE` | `u8 mode` (0=InGame, 1=UiInteract, 2=AntiMistouch) | S→C | on connect + on mode change |
 | `0x10` | `JOYSTICK` | `i16 x, i16 y` (fixed-point: actual value × 10000, range ±10000) | C→S | throttled, ≤ 60 Hz |
 | `0x11` | `LOOK_DELTA_TCP` | `u32 seq, i16 dx, i16 dy` | C→S | ~125 Hz (USB / UDP fallback only) |
 | `0x20` | `BUTTON` | `u8 buttonId, u8 down` (0 = up, 1 = down) | C→S | edge-triggered |
 | `0xF0` | `PING` | `u32 seqNum` | C→S | 1 Hz |
 | `0xF1` | `PONG` | `u32 seqNum` (echoes the PING seqNum) | S→C | immediate |
+
+### STATE_CHANGE semantics
+
+The PC server polls the foreground window + cursor visibility every 100ms
+(with 1-tick debounce) and pushes a `STATE_CHANGE` whenever the derived
+mode changes. The first `STATE_CHANGE` is sent immediately after `HELLO_ACK`
+so the client can render the correct initial UI.
+
+| mode | Server detects | Client UI | Server LOOK routing |
+|---|---|---|---|
+| 0 InGame | MC focused + GLFW cursor captured (`CURSORINFO.flags == 0`) | Full controller (joystick + buttons + hotbar) | `SendInput(MOUSEEVENTF_MOVE)` relative |
+| 1 UiInteract | MC focused + cursor visible | LookPad drives cursor; reduced button set (LMB/RMB/Esc/Q/Shift) | `SetCursorPos` clamped to MC client rect |
+| 2 AntiMistouch | MC not in foreground | Full-screen lock overlay; touches blocked | LOOK packets dropped server-side |
 
 ### HELLO_ACK status codes
 - `0` — OK, connection accepted

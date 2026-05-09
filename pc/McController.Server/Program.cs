@@ -23,13 +23,30 @@ var mapper = new JoystickToWasdMapper(injector, cfg);
 var router = new ButtonRouter(injector, cfg);
 var stats = new ConnectionStats();
 
+var monitor = new WindowStateMonitor();
+var cursorInjector = new CursorInjector(monitor);
+
 var tcp = new TcpServer(stats);
 var udp = new UdpServer(stats);
 
 void HandleLookDelta(short dx, short dy)
 {
     var (sdx, sdy) = curve.Apply(dx, dy);
-    if (sdx != 0 || sdy != 0) injector.MouseMoveRelative(sdx, sdy);
+    if (sdx == 0 && sdy == 0) return;
+    switch (monitor.CurrentMode)
+    {
+        case Protocol.ControllerMode.InGame:
+            // Raw-input style relative move into MC's GLFW capture.
+            injector.MouseMoveRelative(sdx, sdy);
+            break;
+        case Protocol.ControllerMode.UiInteract:
+            // Cooked cursor move (visible cursor), clamped to MC window.
+            cursorInjector.ApplyDelta(sdx, sdy);
+            break;
+        case Protocol.ControllerMode.AntiMistouch:
+            // Drop the delta — phone shouldn't be sending in this mode anyway.
+            break;
+    }
     stats.IncrementLook();
 }
 
@@ -49,6 +66,9 @@ tcp.OnPacket += msg =>
             curve.Reset();
             mapper.ReleaseAll();
             router.ReleaseAll();
+            // Push current controller mode immediately so the client UI
+            // doesn't render in-game widgets before knowing the real state.
+            tcp.Send(PacketCodec.EncodeStateChange(monitor.CurrentMode));
             break;
 
         case JoystickMsg j:
@@ -87,10 +107,23 @@ tcp.OnClientDisconnected += () =>
 
 udp.OnLookDelta += HandleLookDelta;
 
+monitor.OnModeChanged += newMode =>
+{
+    Console.WriteLine($"[Mode] -> {newMode}");
+    tcp.Send(PacketCodec.EncodeStateChange(newMode));
+    if (newMode == Protocol.ControllerMode.AntiMistouch)
+    {
+        // Safety: don't leave keys/buttons stuck if the user can't see the screen.
+        mapper.ReleaseAll();
+        router.ReleaseAll();
+    }
+};
+
 try
 {
     tcp.Start(cfg.Port);
     udp.Start(cfg.Port);
+    monitor.Start();
 }
 catch (SocketException ex)
 {
@@ -104,7 +137,7 @@ PrintStartupBanner(cfg);
 Application.EnableVisualStyles();
 Application.SetCompatibleTextRenderingDefault(false);
 
-using var form = new TuningForm(cfg, stats, ConfigPath);
+using var form = new TuningForm(cfg, stats, monitor, ConfigPath);
 
 // Ctrl+C in console gracefully closes the form (which triggers shutdown below).
 Console.CancelKeyPress += (_, e) =>
@@ -122,6 +155,7 @@ Application.Run(form);
 Console.WriteLine("Form closed; shutting down server...");
 mapper.ReleaseAll();
 router.ReleaseAll();
+monitor.Stop();
 tcp.Stop();
 udp.Stop();
 Console.WriteLine("Bye.");

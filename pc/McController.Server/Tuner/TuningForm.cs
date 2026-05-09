@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using McController.Server.Config;
 using McController.Server.Diag;
+using McController.Server.Net;
 
 namespace McController.Server.Tuner;
 
@@ -17,6 +18,7 @@ public sealed class TuningForm : Form
 {
     private readonly ServerConfig _cfg;
     private readonly ConnectionStats _stats;
+    private readonly WindowStateMonitor _monitor;
     private readonly string _configPath;
 
     private readonly System.Windows.Forms.Timer _refreshTimer;
@@ -26,6 +28,7 @@ public sealed class TuningForm : Form
     // Status row labels
     private Label _lblConn = null!;
     private Label _lblMode = null!;
+    private Label _lblControllerMode = null!;
     private Label _lblRtt = null!;
     private Label _lblPkts = null!;
     private Label _lblDropped = null!;
@@ -52,10 +55,11 @@ public sealed class TuningForm : Form
     private TrackBar _trkExit = null!;
     private Label _lblExitVal = null!;
 
-    public TuningForm(ServerConfig cfg, ConnectionStats stats, string configPath)
+    public TuningForm(ServerConfig cfg, ConnectionStats stats, WindowStateMonitor monitor, string configPath)
     {
         _cfg = cfg;
         _stats = stats;
+        _monitor = monitor;
         _configPath = configPath;
 
         Text = "MC Controller — Server (Step 3)";
@@ -114,13 +118,15 @@ public sealed class TuningForm : Form
 
     private GroupBox BuildStatusGroup(int top, out Label conn, out Label mode, out Label rtt, out Label pkts, out Label dropped)
     {
-        var g = new GroupBox { Text = "Status", Top = top, Left = 10, Width = 440, Height = 125 };
+        var g = new GroupBox { Text = "Status", Top = top, Left = 10, Width = 440, Height = 145 };
         conn = new Label { Top = 22, Left = 10, Width = 410, Height = 18, Text = "● Disconnected", ForeColor = Color.Gray };
-        mode = new Label { Top = 42, Left = 10, Width = 410, Height = 18, Text = "Mode: —" };
-        rtt = new Label { Top = 62, Left = 10, Width = 410, Height = 18, Text = "RTT: — (Android-side; this UI shows server-side stats)" };
-        pkts = new Label { Top = 82, Left = 10, Width = 410, Height = 18, Text = "Pkts/s: J=0  L=0  B=0" };
-        dropped = new Label { Top = 102, Left = 10, Width = 410, Height = 18, Text = "UDP dropped: 0" };
-        g.Controls.Add(conn); g.Controls.Add(mode); g.Controls.Add(rtt); g.Controls.Add(pkts); g.Controls.Add(dropped);
+        mode = new Label { Top = 42, Left = 10, Width = 410, Height = 18, Text = "Transport: —" };
+        _lblControllerMode = new Label { Top = 62, Left = 10, Width = 410, Height = 18, Text = "MC mode: —" };
+        rtt = new Label { Top = 82, Left = 10, Width = 410, Height = 18, Text = "RTT: — (Android HUD shows live RTT)" };
+        pkts = new Label { Top = 102, Left = 10, Width = 410, Height = 18, Text = "Pkts/s: J=0  L=0  B=0" };
+        dropped = new Label { Top = 122, Left = 10, Width = 410, Height = 18, Text = "UDP dropped: 0" };
+        g.Controls.Add(conn); g.Controls.Add(mode); g.Controls.Add(_lblControllerMode);
+        g.Controls.Add(rtt); g.Controls.Add(pkts); g.Controls.Add(dropped);
         return g;
     }
 
@@ -338,7 +344,18 @@ public sealed class TuningForm : Form
             _lblConn.Text = "● Disconnected";
             _lblConn.ForeColor = Color.Gray;
         }
-        _lblMode.Text = $"Mode: {_stats.Mode ?? "—"}";
+        _lblMode.Text = $"Transport: {_stats.Mode ?? "—"}";
+
+        var mcMode = _monitor.CurrentMode switch
+        {
+            Protocol.ControllerMode.InGame       => ("In-game (cursor captured)", Color.LimeGreen),
+            Protocol.ControllerMode.UiInteract   => ("UI interact (cursor visible)", Color.DodgerBlue),
+            Protocol.ControllerMode.AntiMistouch => ("Anti-mistouch (MC unfocused)", Color.OrangeRed),
+            _ => ("—", Color.Gray),
+        };
+        _lblControllerMode.Text = $"MC mode: {mcMode.Item1}";
+        _lblControllerMode.ForeColor = mcMode.Item2;
+
         _lblDropped.Text = $"UDP dropped: {_stats.UdpDropped}";
     }
 

@@ -40,6 +40,13 @@ class HotbarView @JvmOverloads constructor(
     private var pressedSlot = -1
     private var pointerId = MotionEvent.INVALID_POINTER_ID
 
+    /**
+     * Sticky flag: once the finger has crossed to a different slot during
+     * this gesture, drop is disabled for the remainder of the gesture.
+     * Reset to false on each fresh ACTION_DOWN.
+     */
+    private var hasSwiped = false
+
     private val handler = Handler(Looper.getMainLooper())
     private var dropPending: Runnable? = null
 
@@ -88,6 +95,7 @@ class HotbarView @JvmOverloads constructor(
                         pointerId = e.getPointerId(e.actionIndex)
                         pressedSlot = slot
                         selectedSlot = slot
+                        hasSwiped = false  // fresh gesture
                         onSelect?.invoke(slot)
                         scheduleLongPress()
                         invalidate()
@@ -95,19 +103,21 @@ class HotbarView @JvmOverloads constructor(
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                // If finger drifts to a different slot, cancel any pending drop
-                // and re-select. This matches the mobile MC behavior of
-                // sliding across slots to switch.
+                // If the finger crosses to another slot we treat it as a swipe.
+                // First swipe disables drop for this gesture (sticky); any
+                // pending or in-progress drop is also cancelled here.
                 val idx = e.findPointerIndex(pointerId)
                 if (idx >= 0) {
                     val slot = slotAt(e.getX(idx))
                     if (slot >= 0 && slot != pressedSlot) {
+                        hasSwiped = true
                         cancelDropTimer()
                         pressedSlot = slot
                         selectedSlot = slot
                         onSelect?.invoke(slot)
-                        scheduleLongPress()
                         invalidate()
+                        // Intentionally do NOT reschedule long-press: the
+                        // user is swiping, not pressing-and-holding.
                     }
                 }
             }
@@ -115,6 +125,7 @@ class HotbarView @JvmOverloads constructor(
                 if (e.getPointerId(e.actionIndex) == pointerId) {
                     pointerId = MotionEvent.INVALID_POINTER_ID
                     pressedSlot = -1
+                    hasSwiped = false
                     isDropping = false
                     cancelDropTimer()
                     invalidate()
