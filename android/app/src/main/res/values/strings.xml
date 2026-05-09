@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MC Controller</string>
+    <string name="connect_title">Connect to PC</string>
+    <string name="ip_address_hint">PC IP address</string>
+    <string name="port_hint">Port</string>
+    <string name="default_port">34555</string>
+    <string name="connect_wifi">Connect (WiFi)</string>
+    <string name="connect_usb">Connect (USB / 127.0.0.1)</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_failed">Connection failed: %1$s</string>
+</resources>
