@@ -156,6 +156,9 @@ class ControllerActivity : AppCompatActivity() {
                 session.sendButton(Protocol.ButtonId.SPRINT, newEffective)
             }
         }
+        // Keep the Sprint button's visual in sync with the effective state so
+        // it lights up whether sprint was triggered by tap or by joystick.
+        binding.btnSprint.setToggleState(newEffective)
     }
 
     private fun wireHotbar() {

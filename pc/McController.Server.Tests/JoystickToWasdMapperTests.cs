@@ -125,6 +125,19 @@ public class JoystickToWasdMapperTests
     }
 
     [Fact]
+    public void AllThresholdsZero_ReleaseAtZero_StillReleases()
+    {
+        // Regression for "stuck A key" bug: with all thresholds at 0, sending
+        // (0, 0) (release) must still lift the held key. The mapper now uses
+        // <= for the dead-zone and exit-threshold checks.
+        var (inj, m) = MakeMapper(deadZone: 0f, enter: 0f, exit: 0f);
+        m.Update(0f, 0.5f);  // press W (0.5 > 0)
+        inj.Clear();
+        m.Update(0f, 0f);    // release event
+        Assert.Contains(inj.Calls, c => c is FakeInputInjector.KeyCall { Scancode: Scancodes.W, Down: false });
+    }
+
+    [Fact]
     public void Stick_StuckBetweenExitEnter_DoesNotChatter()
     {
         var (inj, m) = MakeMapper(enter: 0.30f, exit: 0.20f);

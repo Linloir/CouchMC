@@ -52,7 +52,9 @@ public sealed class JoystickToWasdMapper
         var cfg = _config.Movement;
         var abs = Math.Abs(v);
 
-        if (abs < cfg.DeadZone)
+        // Use <= so that abs=0 (release event) always triggers release,
+        // even when the user has set DeadZone or ExitThreshold to 0.
+        if (abs <= cfg.DeadZone)
         {
             if (posDown) { _injector.Key(posKey, false); posDown = false; }
             if (negDown) { _injector.Key(negKey, false); negDown = false; }
@@ -68,7 +70,7 @@ public sealed class JoystickToWasdMapper
                 _injector.Key(posKey, true);
                 posDown = true;
             }
-            else if (posDown && abs < cfg.ExitThreshold)
+            else if (posDown && abs <= cfg.ExitThreshold)
             {
                 _injector.Key(posKey, false);
                 posDown = false;
@@ -83,7 +85,7 @@ public sealed class JoystickToWasdMapper
                 _injector.Key(negKey, true);
                 negDown = true;
             }
-            else if (negDown && abs < cfg.ExitThreshold)
+            else if (negDown && abs <= cfg.ExitThreshold)
             {
                 _injector.Key(negKey, false);
                 negDown = false;

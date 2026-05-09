@@ -52,7 +52,10 @@ public sealed class CameraConfig
 
 public sealed class MovementConfig
 {
-    public float DeadZone { get; set; } = 0.15f;
+    // Default 0 — most direct response. The mapper uses <= for both
+    // dead zone and exit threshold so a v=0 release event always lifts
+    // the held key, even with everything at 0.
+    public float DeadZone { get; set; } = 0f;
     public float EnterThreshold { get; set; } = 0.30f;
     public float ExitThreshold { get; set; } = 0.20f;
 }

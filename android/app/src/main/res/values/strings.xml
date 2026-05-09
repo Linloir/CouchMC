@@ -30,7 +30,9 @@
     <string name="editor_mode_ui">UI 操作</string>
     <string name="editor_l_margin">左边距偏移</string>
     <string name="editor_r_margin">右边距偏移</string>
-    <string name="editor_hint">单指拖动按钮调整位置 · 双指捏合调整大小</string>
+    <string name="editor_hint">单击选中 · 拖动移动 · 双指任意位置缩放选中按钮 · 空白处取消选中</string>
+    <string name="editor_reset_position">恢复位置</string>
+    <string name="editor_reset_size">恢复大小</string>
     <string name="editor_new_profile_dialog">新方案名称</string>
     <string name="editor_rename_profile_dialog">新名称</string>
     <string name="editor_delete_confirm">删除方案 \"%1$s\"？</string>

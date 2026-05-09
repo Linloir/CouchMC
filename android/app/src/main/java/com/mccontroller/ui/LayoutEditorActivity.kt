@@ -1,8 +1,12 @@
 package com.mccontroller.ui
 
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -22,17 +26,22 @@ import com.mccontroller.core.ModeLayout
 import com.mccontroller.core.ProfileStore
 import com.mccontroller.core.WidgetSpec
 import com.mccontroller.databinding.ActivityLayoutEditorBinding
-import kotlin.math.sqrt
+import com.mccontroller.ui.view.EditorCanvas
 
 /**
- * Layout editor: drag-to-move + pinch-to-resize each widget per mode,
- * manage multiple named profiles, and adjust global L/R margin offsets.
+ * Full-screen layout editor.
  *
- * Edit gestures override the widgets' normal behavior (joystick doesn't
- * drive WASD here, hotbar doesn't trigger drop, etc.) — `setOnTouchListener`
- * on each widget pre-empts its `onTouchEvent` and consumes the gesture.
+ * - Canvas fills the screen (so widget positions match the in-game look 1:1).
+ * - Top + bottom toolbars float over the canvas with semi-transparent
+ *   backgrounds; a single toggle button collapses both off-screen.
+ * - Tap a widget = select; drag a widget = move (auto-selects on first
+ *   movement); two-finger pinch (anywhere on screen) resizes the
+ *   currently-selected widget; tap on empty canvas = deselect.
+ * - Reset Position / Reset Size buttons appear when something is
+ *   selected and only restore that widget's position or size from
+ *   factory defaults — leaving everything else untouched.
  */
-class LayoutEditorActivity : AppCompatActivity() {
+class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
 
     private lateinit var binding: ActivityLayoutEditorBinding
     private lateinit var store: ProfileStore
@@ -40,6 +49,11 @@ class LayoutEditorActivity : AppCompatActivity() {
     private val workingProfiles = mutableListOf<LayoutProfile>()
     private var activeIdx = 0
     private var currentEditMode: EditMode = EditMode.InGame
+
+    private var selectedId: String? = null
+    private var toolbarsCollapsed = false
+
+    private val selectionDrawable: Drawable by lazy { makeSelectionDrawable() }
 
     enum class EditMode { InGame, UiInteract }
 
@@ -55,6 +69,8 @@ class LayoutEditorActivity : AppCompatActivity() {
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
 
+        binding.canvas.callback = this
+
         store = ProfileStore(this)
         val (loaded, activeName) = store.loadAll()
         workingProfiles.addAll(loaded)
@@ -64,11 +80,32 @@ class LayoutEditorActivity : AppCompatActivity() {
         setupModeTabs()
         setupSliders()
         setupActions()
+        setupResetSelectionButtons()
+        setupToolbarToggle()
         attachWidgetEditListeners()
 
         applyCurrentToCanvas()
         updateModeVisibility()
         refreshSliders()
+        updateSelectionUi()
+    }
+
+    // ===== EditorCanvas.Callback =====
+
+    override fun onPinch(scaleFactor: Float) {
+        val id = selectedId ?: return
+        if (id !in DefaultLayouts.RESIZABLE_IDS) return
+        updateSpec(id) { spec ->
+            val newW = (spec.widthDp * scaleFactor).coerceIn(40f, 600f)
+            val newH = if (spec.heightDp > 0)
+                (spec.heightDp * scaleFactor).coerceIn(30f, 600f)
+            else 0f
+            spec.copy(widthDp = newW, heightDp = newH)
+        }
+    }
+
+    override fun onTapEmpty() {
+        setSelectedWidget(null)
     }
 
     // ===== Profile spinner =====
@@ -79,6 +116,7 @@ class LayoutEditorActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (position != activeIdx) {
                     activeIdx = position
+                    setSelectedWidget(null)
                     applyCurrentToCanvas()
                     refreshSliders()
                 }
@@ -103,6 +141,7 @@ class LayoutEditorActivity : AppCompatActivity() {
         binding.modeTabs.setOnCheckedChangeListener { _, id ->
             currentEditMode =
                 if (id == binding.modeInGame.id) EditMode.InGame else EditMode.UiInteract
+            setSelectedWidget(null)  // selection doesn't carry across modes
             updateModeVisibility()
             refreshSliders()
         }
@@ -147,7 +186,7 @@ class LayoutEditorActivity : AppCompatActivity() {
         binding.txtRMarginValue.text = mode.rightOffsetDp.toInt().toString()
     }
 
-    // ===== Action buttons =====
+    // ===== Profile actions =====
 
     private fun setupActions() {
         binding.btnSave.setOnClickListener {
@@ -169,7 +208,6 @@ class LayoutEditorActivity : AppCompatActivity() {
                 Toast.makeText(this, "名称已存在", Toast.LENGTH_SHORT).show()
                 return@showInputDialog
             }
-            // New profile copies the active one as a starting point.
             val source = workingProfiles[activeIdx]
             workingProfiles.add(source.copy(name = name))
             activeIdx = workingProfiles.size - 1
@@ -201,6 +239,7 @@ class LayoutEditorActivity : AppCompatActivity() {
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 workingProfiles.removeAt(activeIdx)
                 if (activeIdx >= workingProfiles.size) activeIdx = workingProfiles.size - 1
+                setSelectedWidget(null)
                 refreshSpinner()
                 applyCurrentToCanvas()
                 refreshSliders()
@@ -215,6 +254,7 @@ class LayoutEditorActivity : AppCompatActivity() {
             inGame = DefaultLayouts.IN_GAME,
             uiMode = DefaultLayouts.UI_MODE,
         )
+        setSelectedWidget(null)
         applyCurrentToCanvas()
         refreshSliders()
     }
@@ -232,6 +272,135 @@ class LayoutEditorActivity : AppCompatActivity() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    // ===== Reset position / size for selection =====
+
+    private fun setupResetSelectionButtons() {
+        binding.btnResetPosition.setOnClickListener {
+            val id = selectedId ?: return@setOnClickListener
+            val def = defaultSpec(id) ?: return@setOnClickListener
+            updateSpec(id) {
+                it.copy(
+                    anchor = def.anchor,
+                    edgeMarginDp = def.edgeMarginDp,
+                    verticalMarginDp = def.verticalMarginDp,
+                )
+            }
+        }
+        binding.btnResetSize.setOnClickListener {
+            val id = selectedId ?: return@setOnClickListener
+            val def = defaultSpec(id) ?: return@setOnClickListener
+            updateSpec(id) { it.copy(widthDp = def.widthDp, heightDp = def.heightDp) }
+        }
+    }
+
+    private fun defaultSpec(id: String): WidgetSpec? =
+        DefaultLayouts.IN_GAME.widgets[id] ?: DefaultLayouts.UI_MODE.widgets[id]
+
+    // ===== Selection state =====
+
+    private fun setSelectedWidget(id: String?) {
+        if (selectedId == id) return
+        selectedId?.let { allWidgetMap()[it]?.foreground = null }
+        selectedId = id
+        id?.let { allWidgetMap()[it]?.foreground = selectionDrawable }
+        updateSelectionUi()
+    }
+
+    private fun updateSelectionUi() {
+        val id = selectedId
+        binding.txtSelectedLabel.visibility = if (id != null) View.VISIBLE else View.GONE
+        binding.txtSelectedLabel.text = id?.let { "已选: $it" } ?: ""
+        binding.btnResetPosition.visibility = if (id != null) View.VISIBLE else View.GONE
+        binding.btnResetSize.visibility =
+            if (id != null && id in DefaultLayouts.RESIZABLE_IDS) View.VISIBLE else View.GONE
+    }
+
+    private fun makeSelectionDrawable(): Drawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = resources.displayMetrics.density * 6f
+        setStroke(
+            (resources.displayMetrics.density * 2.5f).toInt(),
+            Color.parseColor("#FFE8C547"),
+        )
+    }
+
+    // ===== Toolbar collapse / expand =====
+
+    private fun setupToolbarToggle() {
+        binding.btnToggleToolbars.setOnClickListener {
+            toolbarsCollapsed = !toolbarsCollapsed
+            animateToolbars()
+        }
+    }
+
+    private fun animateToolbars() {
+        val topTarget = if (toolbarsCollapsed) -binding.toolbarTop.height.toFloat() else 0f
+        val bottomTarget = if (toolbarsCollapsed) binding.toolbarBottom.height.toFloat() else 0f
+        binding.toolbarTop.animate().translationY(topTarget).setDuration(180).start()
+        binding.toolbarBottom.animate().translationY(bottomTarget).setDuration(180).start()
+        binding.txtHint.animate().alpha(if (toolbarsCollapsed) 0f else 1f).setDuration(180).start()
+    }
+
+    // ===== Drag handling on each widget =====
+
+    private fun attachWidgetEditListeners() {
+        for ((id, view) in allWidgetMap()) {
+            attachListener(id, view)
+        }
+    }
+
+    private fun attachListener(id: String, view: View) {
+        var startRawX = 0f
+        var startRawY = 0f
+        var startEdge = 0f
+        var startVert = 0f
+        var didMove = false
+        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop.toFloat()
+        val density = resources.displayMetrics.density
+
+        view.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    val spec = currentSpec(id) ?: return@setOnTouchListener false
+                    startRawX = event.rawX
+                    startRawY = event.rawY
+                    startEdge = spec.edgeMarginDp
+                    startVert = spec.verticalMarginDp
+                    didMove = false
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val rawDx = event.rawX - startRawX
+                    val rawDy = event.rawY - startRawY
+                    val moved = (rawDx * rawDx + rawDy * rawDy) > (touchSlop * touchSlop)
+                    if (moved) {
+                        if (!didMove) {
+                            didMove = true
+                            // First movement → also select this widget
+                            if (selectedId != id) setSelectedWidget(id)
+                        }
+                        val spec = currentSpec(id) ?: return@setOnTouchListener true
+                        val edgeSign = if (spec.anchor.isStart()) 1f else -1f
+                        val vertSign = if (spec.anchor.isTop()) 1f else -1f
+                        val dxDp = rawDx / density
+                        val dyDp = rawDy / density
+                        val newEdge = (startEdge + dxDp * edgeSign).coerceAtLeast(0f)
+                        val newVert = (startVert + dyDp * vertSign).coerceAtLeast(0f)
+                        updateSpec(id) {
+                            it.copy(edgeMarginDp = newEdge, verticalMarginDp = newVert)
+                        }
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (!didMove) setSelectedWidget(id)  // tap → select
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    // Canvas grabbed for pinch — treat as a non-tap, no select change.
+                }
+            }
+            true
+        }
     }
 
     // ===== State helpers =====
@@ -255,101 +424,6 @@ class LayoutEditorActivity : AppCompatActivity() {
         LayoutApplier.applyAll(uiModeWidgetMap(), profile.uiMode)
     }
 
-    // ===== Drag / pinch listeners =====
-
-    private fun attachWidgetEditListeners() {
-        for ((id, view) in inGameWidgetMap() + uiModeWidgetMap()) {
-            attachListener(id, view)
-        }
-    }
-
-    private fun attachListener(id: String, view: View) {
-        var startX = 0f
-        var startY = 0f
-        var startEdge = 0f
-        var startVert = 0f
-        var startWidth = 0f
-        var startHeight = 0f
-        var startDistance = 0f
-        var resizeMode = false
-
-        val density = resources.displayMetrics.density
-
-        view.setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    val spec = currentSpec(id) ?: return@setOnTouchListener false
-                    startX = event.rawX
-                    startY = event.rawY
-                    startEdge = spec.edgeMarginDp
-                    startVert = spec.verticalMarginDp
-                    startWidth = spec.widthDp
-                    startHeight = spec.heightDp
-                    resizeMode = false
-                }
-                MotionEvent.ACTION_POINTER_DOWN -> {
-                    if (event.pointerCount >= 2 && id in DefaultLayouts.RESIZABLE_IDS) {
-                        startDistance = pointerDistance(event)
-                        // Re-anchor size baseline to current spec at pinch start.
-                        currentSpec(id)?.let {
-                            startWidth = it.widthDp
-                            startHeight = it.heightDp
-                        }
-                        resizeMode = true
-                    }
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (resizeMode && event.pointerCount >= 2 &&
-                        id in DefaultLayouts.RESIZABLE_IDS && startDistance > 0
-                    ) {
-                        val curDist = pointerDistance(event)
-                        val scale = curDist / startDistance
-                        val newW = (startWidth * scale).coerceIn(40f, 480f)
-                        // For square buttons, keep 1:1; for hotbar/joystick, scale H by same factor.
-                        val newH = if (startHeight > 0)
-                            (startHeight * scale).coerceIn(30f, 480f)
-                        else 0f
-                        updateSpec(id) { it.copy(widthDp = newW, heightDp = newH) }
-                    } else if (!resizeMode) {
-                        val spec = currentSpec(id) ?: return@setOnTouchListener false
-                        val dxDp = (event.rawX - startX) / density
-                        val dyDp = (event.rawY - startY) / density
-                        val edgeSign = if (spec.anchor.isStart()) 1f else -1f
-                        val vertSign = if (spec.anchor.isTop()) 1f else -1f
-                        val newEdge = (startEdge + dxDp * edgeSign).coerceAtLeast(0f)
-                        val newVert = (startVert + dyDp * vertSign).coerceAtLeast(0f)
-                        updateSpec(id) {
-                            it.copy(edgeMarginDp = newEdge, verticalMarginDp = newVert)
-                        }
-                    }
-                }
-                MotionEvent.ACTION_POINTER_UP -> {
-                    if (event.pointerCount <= 2) {
-                        resizeMode = false
-                        // Reset drag baseline if a finger was lifted mid-gesture.
-                        startX = event.rawX
-                        startY = event.rawY
-                        currentSpec(id)?.let {
-                            startEdge = it.edgeMarginDp
-                            startVert = it.verticalMarginDp
-                        }
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    resizeMode = false
-                }
-            }
-            true  // consume; pre-empts the widget's normal onTouchEvent
-        }
-    }
-
-    private fun pointerDistance(e: MotionEvent): Float {
-        if (e.pointerCount < 2) return 0f
-        val dx = e.getX(0) - e.getX(1)
-        val dy = e.getY(0) - e.getY(1)
-        return sqrt(dx * dx + dy * dy)
-    }
-
     private fun currentSpec(id: String): WidgetSpec? = when (currentEditMode) {
         EditMode.InGame -> workingProfiles[activeIdx].inGame.widgets[id]
         EditMode.UiInteract -> workingProfiles[activeIdx].uiMode.widgets[id]
@@ -360,8 +434,7 @@ class LayoutEditorActivity : AppCompatActivity() {
             val cur = mode.widgets[id] ?: return@mutateMode mode
             mode.copy(widgets = mode.widgets + (id to transform(cur)))
         }
-        // Apply the new spec to the actual view immediately.
-        val view = inGameWidgetMap()[id] ?: uiModeWidgetMap()[id] ?: return
+        val view = allWidgetMap()[id] ?: return
         val spec = currentSpec(id) ?: return
         LayoutApplier.apply(view, spec, currentMode())
     }
@@ -387,6 +460,8 @@ class LayoutEditorActivity : AppCompatActivity() {
     private fun uiModeWidgetMap(): Map<String, View> = mapOf(
         "column_ui_buttons" to binding.columnUiButtons,
     )
+
+    private fun allWidgetMap(): Map<String, View> = inGameWidgetMap() + uiModeWidgetMap()
 
     private fun inGameViews(): List<View> = inGameWidgetMap().values.toList()
 }

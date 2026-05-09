@@ -155,4 +155,16 @@ class ActionButtonView @JvmOverloads constructor(
             invalidate()
         }
     }
+
+    /**
+     * Override the visual toggle state from outside (no event fired).
+     * Used so that the Sprint button can light up when sprint is engaged
+     * via the joystick-extension gesture, not just by pressing the button.
+     */
+    fun setToggleState(state: Boolean) {
+        if (toggleState != state) {
+            toggleState = state
+            invalidate()
+        }
+    }
 }
