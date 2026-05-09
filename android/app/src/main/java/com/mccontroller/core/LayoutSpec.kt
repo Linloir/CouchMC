@@ -4,9 +4,9 @@ package com.mccontroller.core
  * Position anchor for a widget. Maps to FrameLayout gravity flags.
  */
 enum class Anchor {
-    TopStart, TopEnd,
+    TopStart, TopCenter, TopEnd,
     CenterStart, CenterEnd,
-    BottomStart, BottomEnd,
+    BottomStart, BottomCenter, BottomEnd,
 }
 
 /**
@@ -77,8 +77,11 @@ object DefaultLayouts {
             "btn_inv" to WidgetSpec("btn_inv", Anchor.TopEnd, 72f, 8f, 48f, 48f),
             "btn_esc" to WidgetSpec("btn_esc", Anchor.TopEnd, 128f, 8f, 48f, 48f),
 
-            // Hotbar (bottom right)
-            "hotbar" to WidgetSpec("hotbar", Anchor.BottomEnd, 16f, 8f, 360f, 44f),
+            // Hotbar — bottom-center, narrower (288dp = 9 slots × 32dp) so it
+            // doesn't overlap with the right-side button fan. The slight overlap
+            // with the joystick activation zone is fine since the joystick fades
+            // when not in use.
+            "hotbar" to WidgetSpec("hotbar", Anchor.BottomCenter, 0f, 8f, 288f, 40f),
         ),
     )
 

@@ -29,9 +29,11 @@ object LayoutApplier {
                     else FrameLayout.LayoutParams.WRAP_CONTENT
 
         // Horizontal margin: which side depends on anchor + add per-mode offset.
+        // Horizontally-centered anchors ignore both edge margin and offset.
         val edgeOffset = when (spec.anchor) {
             Anchor.BottomStart, Anchor.CenterStart, Anchor.TopStart -> mode.leftOffsetDp
             Anchor.BottomEnd, Anchor.CenterEnd, Anchor.TopEnd -> mode.rightOffsetDp
+            Anchor.TopCenter, Anchor.BottomCenter -> 0f
         }
         val horizPx = ((spec.edgeMarginDp + edgeOffset) * density).toInt().coerceAtLeast(0)
         when (spec.anchor) {
@@ -43,17 +45,21 @@ object LayoutApplier {
                 lp.marginEnd = horizPx
                 lp.marginStart = 0
             }
+            Anchor.TopCenter, Anchor.BottomCenter -> {
+                lp.marginStart = 0
+                lp.marginEnd = 0
+            }
         }
 
         // Vertical margin: top vs bottom anchors. Center anchors use bottomMargin
         // as a "below center" offset so users can shift the column up/down.
         val vertPx = (spec.verticalMarginDp * density).toInt()
         when (spec.anchor) {
-            Anchor.TopStart, Anchor.TopEnd -> {
+            Anchor.TopStart, Anchor.TopEnd, Anchor.TopCenter -> {
                 lp.topMargin = vertPx
                 lp.bottomMargin = 0
             }
-            Anchor.BottomStart, Anchor.BottomEnd -> {
+            Anchor.BottomStart, Anchor.BottomEnd, Anchor.BottomCenter -> {
                 lp.topMargin = 0
                 lp.bottomMargin = vertPx
             }
@@ -75,10 +81,12 @@ object LayoutApplier {
 
     private fun anchorToGravity(anchor: Anchor): Int = when (anchor) {
         Anchor.TopStart -> Gravity.TOP or Gravity.START
+        Anchor.TopCenter -> Gravity.TOP or Gravity.CENTER_HORIZONTAL
         Anchor.TopEnd -> Gravity.TOP or Gravity.END
         Anchor.CenterStart -> Gravity.CENTER_VERTICAL or Gravity.START
         Anchor.CenterEnd -> Gravity.CENTER_VERTICAL or Gravity.END
         Anchor.BottomStart -> Gravity.BOTTOM or Gravity.START
+        Anchor.BottomCenter -> Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         Anchor.BottomEnd -> Gravity.BOTTOM or Gravity.END
     }
 }

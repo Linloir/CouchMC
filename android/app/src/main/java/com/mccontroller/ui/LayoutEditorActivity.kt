@@ -386,7 +386,14 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
                             if (selectedId != id) setSelectedWidget(id)
                         }
                         val spec = currentSpec(id) ?: return@setOnTouchListener true
-                        val edgeSign = if (spec.anchor.isStart()) 1f else -1f
+                        // Horizontally-centered anchors (Top/BottomCenter) are
+                        // always centered horizontally — drag the widget up/down
+                        // only; horizontal drag is a no-op for them.
+                        val edgeSign = when {
+                            spec.anchor.isHorizontalCenter() -> 0f
+                            spec.anchor.isStart() -> 1f
+                            else -> -1f
+                        }
                         val vertSign = if (spec.anchor.isTop()) 1f else -1f
                         val dxDp = rawDx / density
                         val dyDp = rawDy / density
@@ -448,7 +455,10 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         this == Anchor.TopStart || this == Anchor.BottomStart || this == Anchor.CenterStart
 
     private fun Anchor.isTop() =
-        this == Anchor.TopStart || this == Anchor.TopEnd
+        this == Anchor.TopStart || this == Anchor.TopEnd || this == Anchor.TopCenter
+
+    private fun Anchor.isHorizontalCenter() =
+        this == Anchor.TopCenter || this == Anchor.BottomCenter
 
     // ===== Widget maps =====
 

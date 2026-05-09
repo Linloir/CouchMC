@@ -219,6 +219,17 @@ class ControllerActivity : AppCompatActivity() {
             sprintFromToggle = down
             updateSprint()
         }
+
+        // Drag-while-held on LMB/RMB also nudges the camera, but only when
+        // the lookpad isn't already capturing camera with another finger.
+        // Without that guard, the lookpad's deltas double up.
+        val dragRouting: (Int, Int) -> Unit = { dx, dy ->
+            if (!binding.lookPad.isDragging) {
+                lookAccumulator.add(dx, dy)
+            }
+        }
+        binding.btnLmb.onDragDelta = dragRouting
+        binding.btnRmb.onDragDelta = dragRouting
     }
 
     private fun updateSprint() {

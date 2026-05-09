@@ -38,12 +38,29 @@ class ActionButtonView @JvmOverloads constructor(
 
     var onStateChanged: ((down: Boolean) -> Unit)? = null
 
+    /**
+     * Fires while a HOLD-mode button is held and the finger drifts over it.
+     * Delta is in tenths-of-pixel (matches LookPadView's wire scaling so the
+     * caller can route directly into the look accumulator).
+     * Caller is responsible for deciding whether to apply this — typically
+     * only when the lookpad isn't already capturing camera with another
+     * finger.
+     */
+    var onDragDelta: ((dx: Int, dy: Int) -> Unit)? = null
+
     private val density = resources.displayMetrics.density
     private fun dp(v: Float) = v * density
 
     private var pressed = false
     private var toggleState = false
     private var pointerId = MotionEvent.INVALID_POINTER_ID
+
+    // For drag-while-held (HOLD mode only). Sub-pixel residual matches the
+    // LookPadView pipeline so very slow micro-aim is preserved.
+    private var dragLastX = 0f
+    private var dragLastY = 0f
+    private var dragResidualX = 0f
+    private var dragResidualY = 0f
 
     private val backdropPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(60, 0, 0, 0)
@@ -100,6 +117,10 @@ class ActionButtonView @JvmOverloads constructor(
                     pointerId = e.getPointerId(e.actionIndex)
                     pressed = true
                     invalidate()
+                    dragLastX = e.getX(e.actionIndex)
+                    dragLastY = e.getY(e.actionIndex)
+                    dragResidualX = 0f
+                    dragResidualY = 0f
                     when (mode) {
                         Mode.HOLD -> onStateChanged?.invoke(true)
                         Mode.TOGGLE -> {
@@ -107,6 +128,24 @@ class ActionButtonView @JvmOverloads constructor(
                             onStateChanged?.invoke(toggleState)
                         }
                         Mode.TAP -> onStateChanged?.invoke(true)
+                    }
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (mode == Mode.HOLD && pressed) {
+                    val idx = e.findPointerIndex(pointerId)
+                    if (idx >= 0) {
+                        val curX = e.getX(idx)
+                        val curY = e.getY(idx)
+                        val rawDx = (curX - dragLastX) * SUBPIXEL_SCALE + dragResidualX
+                        val rawDy = (curY - dragLastY) * SUBPIXEL_SCALE + dragResidualY
+                        val ix = rawDx.toInt()
+                        val iy = rawDy.toInt()
+                        dragResidualX = rawDx - ix
+                        dragResidualY = rawDy - iy
+                        dragLastX = curX
+                        dragLastY = curY
+                        if (ix != 0 || iy != 0) onDragDelta?.invoke(ix, iy)
                     }
                 }
             }
@@ -146,6 +185,12 @@ class ActionButtonView @JvmOverloads constructor(
         // Label (vertically centered: y baseline = cy - (ascent+descent)/2)
         val baseline = cy - (labelPaint.ascent() + labelPaint.descent()) / 2
         canvas.drawText(label, cx, baseline, labelPaint)
+    }
+
+    companion object {
+        // Same factor LookPadView uses; keeps wire deltas consistent across
+        // both touch surfaces.
+        private const val SUBPIXEL_SCALE = 10f
     }
 
     /** Programmatically reset toggle state without firing events. */

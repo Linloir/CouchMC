@@ -139,7 +139,11 @@ class HotbarView @JvmOverloads constructor(
         if (width == 0) return -1
         val slotW = width.toFloat() / slotCount
         val s = (x / slotW).toInt()
-        return if (s in 0 until slotCount) s else -1
+        // Clamp out-of-bounds touches to the nearest extreme slot. This way
+        // a fast swipe that overshoots past slot 0 or slot 8 still ends on
+        // the intended extreme rather than getting stuck on the last slot
+        // the finger crossed while still inside the hotbar.
+        return s.coerceIn(0, slotCount - 1)
     }
 
     private fun scheduleLongPress() {

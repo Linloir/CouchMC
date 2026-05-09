@@ -123,6 +123,13 @@ monitor.OnModeChanged += newMode =>
         mapper.ReleaseAll();
         router.ReleaseAll();
     }
+    if (newMode == Protocol.ControllerMode.InGame)
+    {
+        // WASD scancodes get eaten by Chinese / Japanese IMEs in their
+        // native input mode; force MC's foreground window to en-US so the
+        // movement keys register reliably.
+        InputLanguageManager.EnsureEnglishLayout();
+    }
 };
 
 try

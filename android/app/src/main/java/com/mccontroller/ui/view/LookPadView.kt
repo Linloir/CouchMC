@@ -45,6 +45,14 @@ class LookPadView @JvmOverloads constructor(
     private var lastX = 0f
     private var lastY = 0f
 
+    /**
+     * True while the user is actively dragging the lookpad. Used by
+     * ControllerActivity to suppress "L/R drag-on-button" camera input
+     * when the lookpad already owns camera control via another finger.
+     */
+    val isDragging: Boolean
+        get() = pointerId != MotionEvent.INVALID_POINTER_ID
+
     // Sub-pixel residual: fractional deltas that didn't quite cross 1px get
     // carried into the next emit. Without this, slow finger drift truncates
     // to zero and fine aiming / cursor micro-movement feels unresponsive.
