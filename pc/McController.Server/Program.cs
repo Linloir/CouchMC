@@ -1,10 +1,12 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Windows.Forms;
 using McController.Server.Config;
 using McController.Server.Diag;
 using McController.Server.Input;
 using McController.Server.Net;
+using McController.Server.Tuner;
 
 if (args.Length > 0 && string.Equals(args[0], "--selftest", StringComparison.OrdinalIgnoreCase))
 {
@@ -99,51 +101,25 @@ catch (SocketException ex)
 
 PrintStartupBanner(cfg);
 
-// Stats reporter (1 Hz). Only logs when a client is connected to keep idle quiet.
-var statsCts = new CancellationTokenSource();
-var statsTask = Task.Run(async () =>
+Application.EnableVisualStyles();
+Application.SetCompatibleTextRenderingDefault(false);
+
+using var form = new TuningForm(cfg, stats, ConfigPath);
+
+// Ctrl+C in console gracefully closes the form (which triggers shutdown below).
+Console.CancelKeyPress += (_, e) =>
 {
-    long lastJ = 0, lastL = 0, lastB = 0;
-    var sw = System.Diagnostics.Stopwatch.StartNew();
-    bool wasConnected = false;
-    while (!statsCts.IsCancellationRequested)
+    e.Cancel = true;
+    if (form.IsHandleCreated)
     {
-        try { await Task.Delay(1000, statsCts.Token).ConfigureAwait(false); }
-        catch (OperationCanceledException) { break; }
-
-        var elapsed = sw.Elapsed.TotalSeconds;
-        sw.Restart();
-
-        var j = stats.JoystickCount;
-        var l = stats.LookCount;
-        var b = stats.ButtonCount;
-
-        if (stats.Connected)
-        {
-            var dj = (j - lastJ) / elapsed;
-            var dl = (l - lastL) / elapsed;
-            var db = (b - lastB) / elapsed;
-            Console.WriteLine(
-                $"  pkts/s: J={dj,5:F0} L={dl,5:F0} B={db,5:F0}   udpDropped={stats.UdpDropped}   mode={stats.Mode}");
-        }
-        else if (wasConnected)
-        {
-            Console.WriteLine("  (idle)");
-        }
-
-        wasConnected = stats.Connected;
-        lastJ = j; lastL = l; lastB = b;
+        try { form.Invoke(() => form.Close()); }
+        catch { /* form may be closing already */ }
     }
-});
+};
 
-// Wait for Ctrl+C
-var exitEvent = new ManualResetEventSlim(false);
-Console.CancelKeyPress += (_, e) => { e.Cancel = true; exitEvent.Set(); };
-exitEvent.Wait();
+Application.Run(form);
 
-Console.WriteLine();
-Console.WriteLine("Shutting down...");
-statsCts.Cancel();
+Console.WriteLine("Form closed; shutting down server...");
 mapper.ReleaseAll();
 router.ReleaseAll();
 tcp.Stop();
@@ -152,7 +128,7 @@ Console.WriteLine("Bye.");
 
 static void PrintStartupBanner(ServerConfig cfg)
 {
-    Console.WriteLine("=== MC Controller — Server (Step 2) ===");
+    Console.WriteLine("=== MC Controller — Server (Step 3) ===");
     Console.WriteLine();
     Console.WriteLine($"Listening on TCP+UDP port {cfg.Port}.");
     Console.WriteLine();
@@ -170,9 +146,6 @@ static void PrintStartupBanner(ServerConfig cfg)
         }
     }
     Console.WriteLine();
-    Console.WriteLine($"Camera sensitivity: {cfg.Camera.UserSensitivity:F2}  curve: {cfg.Camera.CurveType}");
-    Console.WriteLine($"Movement deadZone: {cfg.Movement.DeadZone:F2}  enter: {cfg.Movement.EnterThreshold:F2}  exit: {cfg.Movement.ExitThreshold:F2}");
-    Console.WriteLine();
-    Console.WriteLine("Press Ctrl+C to stop.");
+    Console.WriteLine("Tuning UI is open in a separate window. Close it (or press Ctrl+C here) to stop.");
     Console.WriteLine();
 }
