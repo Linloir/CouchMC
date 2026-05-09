@@ -7,6 +7,19 @@
     android:keepScreenOn="true"
     tools:context=".ui.ControllerActivity">
 
+    <!-- Look pad: full-screen behind everything else. Joystick on top
+         claims its corner; HUD doesn't consume touches. -->
+    <com.mccontroller.ui.view.LookPadView
+        android:id="@+id/look_pad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.mccontroller.ui.view.JoystickView
+        android:id="@+id/joystick"
+        android:layout_width="360dp"
+        android:layout_height="280dp"
+        android:layout_gravity="bottom|start" />
+
     <TextView
         android:id="@+id/txt_hud"
         android:layout_width="match_parent"
@@ -18,11 +31,5 @@
         android:layout_gravity="top"
         android:background="@color/hud_bg"
         tools:text="● Connected   USB (TCP)   RTT: 4ms" />
-
-    <com.mccontroller.ui.view.JoystickView
-        android:id="@+id/joystick"
-        android:layout_width="360dp"
-        android:layout_height="280dp"
-        android:layout_gravity="bottom|start" />
 
 </FrameLayout>

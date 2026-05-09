@@ -12,6 +12,7 @@ import com.mccontroller.core.ConnectionMode
 import com.mccontroller.core.ConnectionState
 import com.mccontroller.core.ControllerSession
 import com.mccontroller.databinding.ActivityControllerBinding
+import com.mccontroller.input.LookAccumulator
 import com.mccontroller.net.Protocol
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
@@ -27,6 +28,7 @@ class ControllerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityControllerBinding
     private val session = ControllerSession()
+    private val lookAccumulator = LookAccumulator(session)
 
     /**
      * Joystick state goes through a CONFLATED channel so that bursts of
@@ -69,6 +71,12 @@ class ControllerActivity : AppCompatActivity() {
             }
         }
 
+        // Look pad wiring: view → atomic accumulator → 8ms flush coroutine.
+        binding.lookPad.onLookDelta = { dx, dy ->
+            lookAccumulator.add(dx, dy)
+        }
+        lookAccumulator.start(lifecycleScope)
+
         lifecycleScope.launch {
             session.connect(ip, port, usbMode)
         }
@@ -82,6 +90,7 @@ class ControllerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        lookAccumulator.stop()
         joystickChannel.close()
         session.disconnect()
         super.onDestroy()
