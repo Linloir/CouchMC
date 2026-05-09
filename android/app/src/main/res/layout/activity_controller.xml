@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,28 +8,134 @@
     android:keepScreenOn="true"
     tools:context=".ui.ControllerActivity">
 
-    <!-- Look pad: full-screen behind everything else. Joystick on top
-         claims its corner; HUD doesn't consume touches. -->
+    <!-- Bottom-most layer: catches every camera swipe outside the
+         joystick zone and the action buttons. -->
     <com.mccontroller.ui.view.LookPadView
         android:id="@+id/look_pad"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Joystick activation zone (left-bottom). Drawn over the look pad
+         so its corner handles touches first. -->
     <com.mccontroller.ui.view.JoystickView
         android:id="@+id/joystick"
         android:layout_width="360dp"
         android:layout_height="280dp"
         android:layout_gravity="bottom|start" />
 
+    <!-- Mid-frequency: Sneak / Sprint, above the joystick. Toggle latched. -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="296dp"
+        android:orientation="horizontal">
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_sneak"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            app:label="SNK"
+            app:buttonMode="toggle" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_sprint"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:label="SPR"
+            app:buttonMode="toggle" />
+    </LinearLayout>
+
+    <!-- High-frequency: LMB / RMB at thumb-natural rest, bottom-right. -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        android:orientation="horizontal">
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_lmb"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginEnd="12dp"
+            app:label="L"
+            app:buttonMode="hold" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_rmb"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            app:label="R"
+            app:buttonMode="hold" />
+    </LinearLayout>
+
+    <!-- Jump centered above the LMB/RMB pair. -->
+    <com.mccontroller.ui.view.ActionButtonView
+        android:id="@+id/btn_jump"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="58dp"
+        android:layout_marginBottom="148dp"
+        app:label="↑"
+        app:buttonMode="hold" />
+
+    <!-- Low-frequency: Esc / Inv / Swap top-right. -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal">
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_esc"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            app:label="Esc"
+            app:buttonMode="tap" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_inv"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            app:label="E"
+            app:buttonMode="tap" />
+
+        <com.mccontroller.ui.view.ActionButtonView
+            android:id="@+id/btn_swap"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:label="F"
+            app:buttonMode="tap" />
+    </LinearLayout>
+
+    <!-- Hotbar 1..9, bottom-right. Tap = select; long-press = drop loop. -->
+    <com.mccontroller.ui.view.HotbarView
+        android:id="@+id/hotbar"
+        android:layout_width="360dp"
+        android:layout_height="44dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- HUD top-start, wrap_content so it doesn't cover top-end buttons. -->
     <TextView
         android:id="@+id/txt_hud"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="#FFFFFFFF"
         android:textSize="12sp"
         android:fontFamily="monospace"
-        android:layout_gravity="top"
+        android:layout_gravity="top|start"
         android:background="@color/hud_bg"
         tools:text="● Connected   USB (TCP)   RTT: 4ms" />
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ActionButtonView">
+        <attr name="label" format="string" />
+        <attr name="buttonMode" format="enum">
+            <enum name="hold" value="0" />
+            <enum name="toggle" value="1" />
+            <enum name="tap" value="2" />
+        </attr>
+    </declare-styleable>
+</resources>

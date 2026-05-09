@@ -14,6 +14,7 @@ import com.mccontroller.core.ControllerSession
 import com.mccontroller.databinding.ActivityControllerBinding
 import com.mccontroller.input.LookAccumulator
 import com.mccontroller.net.Protocol
+import com.mccontroller.ui.view.ActionButtonView
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -77,6 +78,9 @@ class ControllerActivity : AppCompatActivity() {
         }
         lookAccumulator.start(lifecycleScope)
 
+        wireButtons()
+        wireHotbar()
+
         lifecycleScope.launch {
             session.connect(ip, port, usbMode)
         }
@@ -94,6 +98,38 @@ class ControllerActivity : AppCompatActivity() {
         joystickChannel.close()
         session.disconnect()
         super.onDestroy()
+    }
+
+    private fun wireButtons() {
+        fun bind(btn: ActionButtonView, buttonId: Byte) {
+            btn.onStateChanged = { down ->
+                lifecycleScope.launch { session.sendButton(buttonId, down) }
+            }
+        }
+        bind(binding.btnSneak, Protocol.ButtonId.SNEAK)
+        bind(binding.btnSprint, Protocol.ButtonId.SPRINT)
+        bind(binding.btnJump, Protocol.ButtonId.JUMP)
+        bind(binding.btnLmb, Protocol.ButtonId.MOUSE_LEFT)
+        bind(binding.btnRmb, Protocol.ButtonId.MOUSE_RIGHT)
+        bind(binding.btnEsc, Protocol.ButtonId.ESC)
+        bind(binding.btnInv, Protocol.ButtonId.INVENTORY)
+        bind(binding.btnSwap, Protocol.ButtonId.SWAP_HAND)
+    }
+
+    private fun wireHotbar() {
+        binding.hotbar.onSelect = { slot ->
+            val buttonId = (Protocol.ButtonId.HOTBAR_1.toInt() + slot).toByte()
+            lifecycleScope.launch {
+                session.sendButton(buttonId, true)
+                session.sendButton(buttonId, false)
+            }
+        }
+        binding.hotbar.onDrop = { _ ->
+            lifecycleScope.launch {
+                session.sendButton(Protocol.ButtonId.DROP, true)
+                session.sendButton(Protocol.ButtonId.DROP, false)
+            }
+        }
     }
 
     private fun updateHud(state: ConnectionState, rtt: Int?) {
