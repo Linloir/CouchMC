@@ -109,7 +109,7 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_new"
-                                style="@style/Widget.Material3.Button.IconButton.Filled"
+                                style="@style/Widget.McController.IconButton.Circle.Filled"
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="8dp"
@@ -117,7 +117,6 @@
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_new_profile"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.McController.Circle"
                                 app:icon="@drawable/ic_add"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"
@@ -125,7 +124,7 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_rename"
-                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                                style="@style/Widget.McController.IconButton.Circle.Tonal"
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
@@ -133,7 +132,6 @@
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_rename_profile"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.McController.Circle"
                                 app:icon="@drawable/ic_edit"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"
@@ -141,7 +139,7 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_delete"
-                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                                style="@style/Widget.McController.IconButton.Circle.Tonal"
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
@@ -150,7 +148,6 @@
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_delete_profile"
                                 android:backgroundTint="?attr/colorErrorContainer"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.McController.Circle"
                                 app:icon="@drawable/ic_delete"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"

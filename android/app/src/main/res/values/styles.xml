@@ -39,19 +39,21 @@
     </style>
 
     <!--
-        Shape overlay that forces a fully-rounded ("pill / circle") corner
-        on a button by setting cornerSize to 50 % of the side. Used as
-        app:shapeAppearanceOverlay on the profile icon-buttons.
-
-        The Material 3 IconButton.Filled style already sets cornerSize to
-        a small fixed dp value via the shape system. Setting
-        app:cornerRadius or even app:shapeAppearance on the layout proved
-        unreliable — the IconButton's own cornerSize still won in some
-        states. shapeAppearanceOverlay is applied last and decisively
-        replaces the cornerSize.
+        Wrapping styles that force the M3 icon-button variants to render
+        as actual circles. The Material 1.11 IconButton.Filled style sets
+        cornerSize to a small fixed dp value (≈8 dp), which beats both
+        app:cornerRadius and app:shapeAppearanceOverlay set on the layout
+        element. Extending the variant and overriding cornerSize at the
+        style level is the only reliable way — the child style's
+        attribute wins against its parent's same-named attribute.
     -->
-    <style name="ShapeAppearance.McController.Circle" parent="">
-        <item name="cornerFamily">rounded</item>
+    <style name="Widget.McController.IconButton.Circle.Filled"
+        parent="Widget.Material3.Button.IconButton.Filled">
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="Widget.McController.IconButton.Circle.Tonal"
+        parent="Widget.Material3.Button.IconButton.Filled.Tonal">
         <item name="cornerSize">50%</item>
     </style>
 </resources>
