@@ -57,12 +57,23 @@
                 android:textSize="17sp"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:includeFontPadding="false"
                 tools:text="JonDesk" />
 
+            <!--
+                Height is pinned to the icon's natural 24 dp instead of the
+                Material-default 36–48 dp because the parent row uses
+                gravity="center_vertical": a taller ImageButton forces the
+                row taller than the title TextView, which then puts ~7 dp
+                of empty space above the title (within paddingTop) and
+                broke the visual symmetry with the bottom padding. Width
+                stays at 36 dp + a 4 dp negative end-margin so the
+                horizontal touch target / visual position is unchanged.
+            -->
             <ImageButton
                 android:id="@+id/host_overflow"
                 android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_height="24dp"
                 android:layout_marginEnd="-6dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_more_vert"
