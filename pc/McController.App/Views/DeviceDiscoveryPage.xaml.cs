@@ -33,6 +33,11 @@ public sealed partial class DeviceDiscoveryPage : Page
         _adb = new AdbDiscovery(DispatcherQueue);
         _adb.OnUpdate += OnAdbUpdate;
 
+        // Collapse the InfoBar back into 0-height when the user dismisses
+        // it; otherwise IsOpen=false leaves the layout slot allocated and
+        // creates a permanent gap.
+        AdbInfoBar.Closed += (_, _) => AdbInfoBar.Visibility = Visibility.Collapsed;
+
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
     }
@@ -145,6 +150,7 @@ public sealed partial class DeviceDiscoveryPage : Page
     {
         AdbInfoBar.Message = msg;
         AdbInfoBar.Severity = severity;
+        AdbInfoBar.Visibility = Visibility.Visible;
         AdbInfoBar.IsOpen = true;
     }
 }

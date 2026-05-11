@@ -14,7 +14,8 @@
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
                   Padding="40,8,40,40">
-        <StackPanel MaxWidth="1200" HorizontalAlignment="Center" Spacing="0">
+        <Grid HorizontalAlignment="Center" MaxWidth="1600">
+        <StackPanel HorizontalAlignment="Stretch" Spacing="0">
 
             <TextBlock Text="设备发现" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器"
@@ -50,12 +51,17 @@
                 </Button>
             </tk:SettingsCard>
 
+            <!-- InfoBar's IsOpen=false doesn't fully collapse its layout slot,
+                 so we toggle Visibility in code (see DeviceDiscoveryPage.xaml.cs
+                 ShowInfo/AdbInfoBar.Closing) to keep the gap tight when no
+                 feedback is showing. -->
             <InfoBar x:Name="AdbInfoBar"
                      IsOpen="False"
                      IsClosable="True"
+                     Visibility="Collapsed"
                      Margin="0,8,0,0"/>
 
-            <ItemsControl x:Name="UsbDeviceList" Margin="0,8,0,0">
+            <ItemsControl x:Name="UsbDeviceList" Margin="0,4,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Padding="16,12,16,12"
@@ -124,5 +130,6 @@
             </tk:SettingsCard>
 
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>
