@@ -2,18 +2,18 @@ package com.mccontroller.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.PopupMenu
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
@@ -25,80 +25,88 @@ import com.mccontroller.core.HostListItem
 import com.mccontroller.core.HostRepository
 import com.mccontroller.core.HostStore
 import com.mccontroller.core.SavedHost
-import com.mccontroller.databinding.ActivityHomeBinding
 import com.mccontroller.databinding.DialogAddHostBinding
+import com.mccontroller.databinding.FragmentHomeBinding
 import com.mccontroller.net.ConnectivityProbe
 import com.mccontroller.net.DiscoveryClient
 import com.mccontroller.net.Protocol
 import com.mccontroller.ui.adapter.HostListAdapter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 /**
- * Main entry. Lists hosts (USB shortcut + saved + LAN-discovered),
- * connects on tap (after a TCP reachability probe), and offers a manual
- * "Add host" action. Settings live behind the toolbar cog.
+ * Hosts the list of saved + discovered PCs. Tapping a card runs a TCP
+ * reachability probe, then transitions into [ControllerActivity] on
+ * success. The system USB entry is auto-seeded by [HostStore] — it can
+ * be renamed and have its port changed but never deleted.
  *
- * Designed around a ViewModel so the DiscoveryClient survives config
- * changes (e.g. dark-mode flip) without restarting the UDP socket.
+ * Add-host action lives in the top-app-bar (trailing icon). Settings is
+ * reachable through the bottom navigation bar on [MainActivity].
  */
-class HomeActivity : AppCompatActivity() {
+class HomeFragment : Fragment() {
 
-    private lateinit var binding: ActivityHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var adapter: HostListAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        binding = ActivityHomeBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         applyEdgeToEdgeInsets()
 
         adapter = HostListAdapter(
             onHostClick = ::onHostClick,
             onHostOverflow = ::onHostOverflow,
-            onUsbClick = ::onUsbClick,
             isHostConnecting = { viewModel.connectingKey.value == it.key },
         )
         binding.list.adapter = adapter
-        binding.list.layoutManager = LinearLayoutManager(this)
-        binding.list.itemAnimator = null   // ListAdapter handles animations; suppress flicker
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.itemAnimator = null
 
-        binding.fabAdd.setOnClickListener { showAddHostDialog() }
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.action_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
+                R.id.action_add_host -> { showAddHostDialog(); true }
                 else -> false
             }
         }
 
-        viewModel.start(this)
+        viewModel.start(requireActivity().applicationContext)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(viewModel.items, viewModel.connectingKey) { items, _ -> items }
                     .collect { adapter.submitList(it) }
             }
         }
     }
 
-    override fun onDestroy() {
-        // ViewModel handles teardown via onCleared.
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun applyEdgeToEdgeInsets() {
+        // The bottom nav owns the bottom inset (see MainActivity). We only
+        // pad the top of the app bar so the toolbar isn't behind the
+        // status bar / camera notch.
         ViewCompat.setOnApplyWindowInsetsListener(binding.appBar) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updatePadding(top = bars.top)
@@ -106,62 +114,37 @@ class HomeActivity : AppCompatActivity() {
         }
         ViewCompat.setOnApplyWindowInsetsListener(binding.list) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // List bottom inset = system nav inset + extra for FAB clearance
             v.updatePadding(
-                left = bars.left + dp(16),
-                right = bars.right + dp(16),
-                bottom = bars.bottom + dp(96),
+                left = bars.left,
+                right = bars.right,
+                bottom = dp(8),
             )
-            insets
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fabAdd) { v, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            (v.layoutParams as android.view.ViewGroup.MarginLayoutParams).apply {
-                bottomMargin = bars.bottom + dp(16)
-                rightMargin = bars.right + dp(16)
-            }
-            v.requestLayout()
             insets
         }
     }
 
     // -------------------------------------------------------------- click handlers
 
-    private fun onUsbClick() {
-        connectAndLaunch(
-            ip = "127.0.0.1",
-            port = Protocol.DEFAULT_PORT,
-            isUsbMode = true,
-            savedHostId = null,
-            keyForBusyIndicator = HostListItem.UsbShortcut.key,
-            displayName = getString(R.string.home_usb_label),
-        )
-    }
-
     private fun onHostClick(item: HostListItem) {
-        val (ip, port, savedId, name) = when (item) {
-            is HostListItem.Saved -> HostTarget(item.ip, item.port, item.saved.id, item.name)
-            is HostListItem.Discovered -> HostTarget(item.ip, item.port, null, item.name)
+        val target = when (item) {
+            is HostListItem.Saved -> HostTarget(item.ip, item.port, item.saved.id, item.name, item.saved.isSystem)
+            is HostListItem.Discovered -> HostTarget(item.ip, item.port, null, item.name, isUsb = false)
             else -> return
         }
-        connectAndLaunch(
-            ip = ip,
-            port = port,
-            isUsbMode = false,
-            savedHostId = savedId,
-            keyForBusyIndicator = item.key,
-            displayName = name,
-        )
+        connectAndLaunch(target, key = item.key)
     }
 
     private fun onHostOverflow(item: HostListItem, anchor: View) {
         val saved = (item as? HostListItem.Saved)?.saved ?: return
-        val popup = PopupMenu(this, anchor)
+        val popup = PopupMenu(requireContext(), anchor)
         popup.menu.add(0, MENU_RENAME, 0, R.string.hostmenu_rename)
-        popup.menu.add(0, MENU_REMOVE, 1, R.string.hostmenu_remove)
+        if (!saved.isSystem) popup.menu.add(0, MENU_PORT, 1, R.string.addhost_port)
+        if (!saved.isSystem) popup.menu.add(0, MENU_REMOVE, 2, R.string.hostmenu_remove)
+        else popup.menu.add(0, MENU_PORT, 1, R.string.addhost_port)
         popup.setOnMenuItemClickListener {
             when (it.itemId) {
                 MENU_RENAME -> { showRenameDialog(saved); true }
+                MENU_PORT -> { showEditPortDialog(saved); true }
                 MENU_REMOVE -> { showRemoveDialog(saved); true }
                 else -> false
             }
@@ -171,39 +154,32 @@ class HomeActivity : AppCompatActivity() {
 
     // --------------------------------------------------------------- connection
 
-    private fun connectAndLaunch(
-        ip: String,
-        port: Int,
-        isUsbMode: Boolean,
-        savedHostId: String?,
-        keyForBusyIndicator: String,
-        displayName: String,
-    ) {
-        if (viewModel.connectingKey.value != null) return       // de-bounce double taps
-        viewModel.connectingKey.value = keyForBusyIndicator
+    private fun connectAndLaunch(target: HostTarget, key: String) {
+        if (viewModel.connectingKey.value != null) return
+        viewModel.connectingKey.value = key
 
-        lifecycleScope.launch {
-            val msg = getString(R.string.home_connecting, displayName)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val msg = getString(R.string.home_connecting, target.name)
             val bar = Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE).also { it.show() }
 
-            val result = ConnectivityProbe.probe(ip, port)
+            val result = ConnectivityProbe.probe(target.ip, target.port)
             bar.dismiss()
             viewModel.connectingKey.value = null
 
             when (result) {
                 ConnectivityProbe.Result.Ok -> {
-                    val intent = Intent(this@HomeActivity, ControllerActivity::class.java).apply {
-                        putExtra(ControllerActivity.EXTRA_IP, ip)
-                        putExtra(ControllerActivity.EXTRA_PORT, port)
-                        putExtra(ControllerActivity.EXTRA_USB_MODE, isUsbMode)
-                        savedHostId?.let { putExtra(ControllerActivity.EXTRA_SAVED_HOST_ID, it) }
+                    val intent = Intent(requireContext(), ControllerActivity::class.java).apply {
+                        putExtra(ControllerActivity.EXTRA_IP, target.ip)
+                        putExtra(ControllerActivity.EXTRA_PORT, target.port)
+                        putExtra(ControllerActivity.EXTRA_USB_MODE, target.isUsb)
+                        target.savedId?.let { putExtra(ControllerActivity.EXTRA_SAVED_HOST_ID, it) }
                     }
                     startActivity(intent)
                 }
                 is ConnectivityProbe.Result.Failed -> {
                     Snackbar.make(
                         binding.root,
-                        getString(R.string.home_connect_failed, displayName),
+                        getString(R.string.home_connect_failed, target.name),
                         Snackbar.LENGTH_LONG,
                     ).show()
                 }
@@ -215,7 +191,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun showAddHostDialog() {
         val dlgBinding = DialogAddHostBinding.inflate(layoutInflater)
-        val dlg = MaterialAlertDialogBuilder(this)
+        val dlg = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.addhost_title)
             .setView(dlgBinding.root)
             .setNegativeButton(R.string.addhost_cancel, null)
@@ -242,11 +218,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun showRenameDialog(host: SavedHost) {
-        val edit = EditText(this).apply {
+        val edit = EditText(requireContext()).apply {
             setText(host.name)
             setSelection(text.length)
         }
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.hostmenu_rename)
             .setView(edit)
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -256,8 +232,30 @@ class HomeActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showEditPortDialog(host: SavedHost) {
+        val edit = EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(host.port.toString())
+            setSelection(text.length)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.addhost_port)
+            .setView(edit)
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                val port = edit.text.toString().trim().toIntOrNull() ?: return@setPositiveButton
+                if (port !in 1..65535) return@setPositiveButton
+                // Re-save with same name + ip + new port. For the system USB
+                // host this also gives the user a way to track a non-default
+                // PC port; the singleton-id semantics keep it pinned.
+                viewModel.hostStore.changePort(host.id, port)
+            }
+            .show()
+    }
+
     private fun showRemoveDialog(host: SavedHost) {
-        MaterialAlertDialogBuilder(this)
+        if (host.isSystem) return
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.hostmenu_remove)
             .setMessage(getString(R.string.hostmenu_remove_confirm, host.name))
             .setNegativeButton(R.string.hostmenu_remove_no, null)
@@ -269,13 +267,20 @@ class HomeActivity : AppCompatActivity() {
 
     // -------------------------------------------------------------- helpers
 
-    private data class HostTarget(val ip: String, val port: Int, val savedId: String?, val name: String)
+    private data class HostTarget(
+        val ip: String,
+        val port: Int,
+        val savedId: String?,
+        val name: String,
+        val isUsb: Boolean,
+    )
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 
     companion object {
         private const val MENU_RENAME = 1
-        private const val MENU_REMOVE = 2
+        private const val MENU_PORT = 2
+        private const val MENU_REMOVE = 3
 
         private val IPV4 = Pattern.compile(
             "^(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)" +
@@ -287,12 +292,9 @@ class HomeActivity : AppCompatActivity() {
 }
 
 /**
- * Holds the DiscoveryClient + HostRepository across config changes so
- * the UDP listener doesn't tear down on dark-mode flips. Exposes the
- * combined item stream and a single "host currently connecting" key.
- *
- * The discovery socket is created lazily on first [start] so unit tests
- * that don't need it (or that haven't called start) don't open ports.
+ * Survives config changes so the DiscoveryClient keeps running across
+ * a dark-mode flip. Exposes the merged item stream + which host is
+ * currently being probed.
  */
 class HomeViewModel : ViewModel() {
 
@@ -304,17 +306,17 @@ class HomeViewModel : ViewModel() {
 
     private val readyFlag = MutableStateFlow(false)
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     val items: StateFlow<List<HostListItem>> =
         readyFlag.flatMapLatest { ready ->
             if (!ready) flow<List<HostListItem>> { emit(emptyList()) }
             else HostRepository(hostStore, discovery!!).items
         }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun start(host: AppCompatActivity) {
+    fun start(appContext: android.content.Context) {
         if (readyFlag.value) return
-        hostStore = HostStore.get(host.applicationContext)
-        discovery = DiscoveryClient(host.applicationContext).also { it.start(viewModelScope) }
+        hostStore = HostStore.get(appContext)
+        discovery = DiscoveryClient(appContext).also { it.start(viewModelScope) }
         readyFlag.value = true
     }
 

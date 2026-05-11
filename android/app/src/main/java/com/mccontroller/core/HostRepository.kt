@@ -2,7 +2,6 @@ package com.mccontroller.core
 
 import com.mccontroller.R
 import com.mccontroller.net.DiscoveryClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -11,13 +10,11 @@ import kotlinx.coroutines.flow.combine
  * ordered list of [HostListItem] the home-screen RecyclerView renders.
  *
  * Order:
- *   1. USB shortcut (always)
- *   2. "Saved" header
- *   3. Saved hosts, sorted by `lastConnectedAt` desc (nulls last). Each
- *      one carries the matching live record, if any, so the row can
- *      show the green-dot / MC-foreground indicator.
- *   4. "On this network" header
- *   5. Discovered hosts that are NOT already in saved, sorted by name.
+ *   1. "Saved" header
+ *   2. System hosts first (USB loopback), then user-saved hosts sorted by
+ *      `lastConnectedAt` desc (nulls last), tie-broken by name.
+ *   3. "On this network" header
+ *   4. Discovered hosts not already in saved, sorted by name.
  *
  * Empty sections get an [HostListItem.Empty] placeholder.
  */
@@ -25,16 +22,16 @@ class HostRepository(
     private val store: HostStore,
     private val discovery: DiscoveryClient,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     val items: Flow<List<HostListItem>> =
         combine(store.hosts, discovery.discovered) { saved, live ->
             buildList<HostListItem> {
-                add(HostListItem.UsbShortcut)
-
                 // --- Saved section ---
                 add(HostListItem.Header(R.string.home_section_saved))
                 val sortedSaved = saved.sortedWith(
-                    compareByDescending<SavedHost> { it.lastConnectedAt ?: -1L }
+                    // System hosts pin to the top; user hosts then sort by
+                    // recency desc, then name.
+                    compareByDescending<SavedHost> { it.isSystem }
+                        .thenByDescending { it.lastConnectedAt ?: -1L }
                         .thenBy { it.name.lowercase() },
                 )
                 if (sortedSaved.isEmpty()) {

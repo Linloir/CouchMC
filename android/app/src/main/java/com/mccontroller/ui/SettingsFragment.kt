@@ -2,18 +2,18 @@ package com.mccontroller.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.mccontroller.BuildConfig
@@ -24,38 +24,38 @@ import com.mccontroller.core.HotbarSwipeMode
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ProfileStore
 import com.mccontroller.core.SettingsStore
-import com.mccontroller.databinding.ActivitySettingsBinding
+import com.mccontroller.databinding.FragmentSettingsBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * App-wide preferences. Composed of a few stacked Material 3 cards;
- * intentionally simple, no `androidx.preference` indirection.
- *
- * The hotbar swipe mode, edge offsets, and gesture toggles live here
- * (not on LayoutProfile) because the user wants them app-wide, not
- * per-profile. The layout editor only owns button geometry now.
- *
- * Each settings widget reflects the latest [AppSettings] StateFlow and
- * writes back via [SettingsStore.update].
+ * App-wide preferences. Sections are pure Material 3 cards; backing
+ * stores are [SettingsStore] (app-wide tunables) and [ProfileStore]
+ * (layout profiles).
  */
-class SettingsActivity : AppCompatActivity() {
+class SettingsFragment : Fragment() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var settingsStore: SettingsStore
     private lateinit var profileStore: ProfileStore
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         applyEdgeToEdgeInsets()
 
-        settingsStore = SettingsStore.get(this)
-        profileStore = ProfileStore(this)
-
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        settingsStore = SettingsStore.get(requireContext())
+        profileStore = ProfileStore(requireContext())
 
         wireLayoutShortcuts()
         wireProfileSection()
@@ -66,8 +66,8 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.txtVersion.text = getString(R.string.settings_version, BuildConfig.VERSION_NAME)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 settingsStore.settings.collectLatest { render(it) }
             }
         }
@@ -75,8 +75,12 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh active-profile label when returning from the editor.
         renderActiveProfileButton()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     // ----------------------------------------------------------- insets
@@ -89,7 +93,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         ViewCompat.setOnApplyWindowInsetsListener(binding.scroller) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updatePadding(left = bars.left, right = bars.right, bottom = bars.bottom)
+            v.updatePadding(left = bars.left, right = bars.right)
             insets
         }
     }
@@ -111,7 +115,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun launchEditor(mode: String) {
-        val intent = Intent(this, LayoutEditorActivity::class.java).apply {
+        val intent = Intent(requireContext(), LayoutEditorActivity::class.java).apply {
             putExtra(LayoutEditorActivity.EXTRA_MODE, mode)
         }
         startActivity(intent)
@@ -133,7 +137,7 @@ class SettingsActivity : AppCompatActivity() {
         val (profiles, activeName) = profileStore.loadAll()
         val names = profiles.map { it.name }
         val currentIdx = names.indexOf(activeName).coerceAtLeast(0)
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.settings_active_profile)
             .setSingleChoiceItems(names.toTypedArray(), currentIdx) { dlg, idx ->
                 profileStore.setActive(names[idx])
@@ -145,8 +149,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showNewProfileDialog() {
-        val edit = EditText(this)
-        MaterialAlertDialogBuilder(this)
+        val edit = EditText(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.settings_new_profile_dialog)
             .setView(edit)
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -169,8 +173,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showRenameProfileDialog() {
         val (_, activeName) = profileStore.loadAll()
-        val edit = EditText(this).apply { setText(activeName); setSelection(text.length) }
-        MaterialAlertDialogBuilder(this)
+        val edit = EditText(requireContext()).apply { setText(activeName); setSelection(text.length) }
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.settings_rename_profile_dialog)
             .setView(edit)
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -188,13 +192,13 @@ class SettingsActivity : AppCompatActivity() {
     private fun showDeleteProfileDialog() {
         val (profiles, activeName) = profileStore.loadAll()
         if (profiles.size < 2) {
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(requireContext())
                 .setMessage(R.string.settings_cannot_delete_last)
                 .setPositiveButton(R.string.dialog_ok, null)
                 .show()
             return
         }
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.settings_delete_profile)
             .setMessage(getString(R.string.settings_delete_confirm, activeName))
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -216,8 +220,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun wireGestureSwitches() {
+        // The <include>'s android:id (row_in_game_quick) overrides the
+        // included layout root's own id (switch_row), so we can't
+        // findViewById(R.id.switch_row) on it — the root IS the row.
         wireSwitchRow(
-            row = binding.rowInGameQuick.root.findViewById(R.id.switch_row),
+            row = binding.rowInGameQuick.root,
             switch = binding.rowInGameQuick.root.findViewById(R.id.switch_value),
             title = binding.rowInGameQuick.root.findViewById(R.id.switch_title),
             summary = binding.rowInGameQuick.root.findViewById(R.id.switch_summary),
@@ -227,7 +234,7 @@ class SettingsActivity : AppCompatActivity() {
             setValue = { v -> settingsStore.update { it.copy(inGameQuickClicks = v) } },
         )
         wireSwitchRow(
-            row = binding.rowUiQuick.root.findViewById(R.id.switch_row),
+            row = binding.rowUiQuick.root,
             switch = binding.rowUiQuick.root.findViewById(R.id.switch_value),
             title = binding.rowUiQuick.root.findViewById(R.id.switch_title),
             summary = binding.rowUiQuick.root.findViewById(R.id.switch_summary),
@@ -260,7 +267,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun wireVolumePickers() {
         wirePickerRow(
-            row = binding.rowVolUp.root.findViewById(R.id.picker_row),
+            row = binding.rowVolUp.root,
             title = binding.rowVolUp.root.findViewById(R.id.picker_title),
             value = binding.rowVolUp.root.findViewById(R.id.picker_value),
             titleRes = R.string.settings_volume_up,
@@ -268,7 +275,7 @@ class SettingsActivity : AppCompatActivity() {
             setValue = { v -> settingsStore.update { it.copy(volumeUpBinding = v) } },
         )
         wirePickerRow(
-            row = binding.rowVolDown.root.findViewById(R.id.picker_row),
+            row = binding.rowVolDown.root,
             title = binding.rowVolDown.root.findViewById(R.id.picker_title),
             value = binding.rowVolDown.root.findViewById(R.id.picker_value),
             titleRes = R.string.settings_volume_down,
@@ -305,7 +312,7 @@ class SettingsActivity : AppCompatActivity() {
         val labels = options.map { it.second }.toTypedArray()
         val currentIdx = options.indexOfFirst { it.first == getCurrent() }
             .coerceAtLeast(0)
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(titleRes)
             .setSingleChoiceItems(labels, currentIdx) { dlg, idx ->
                 val chosen = options[idx].first
@@ -358,7 +365,6 @@ class SettingsActivity : AppCompatActivity() {
             HotbarSwipeMode.Precise -> R.id.btn_hotbar_precise
             HotbarSwipeMode.Relative -> R.id.btn_hotbar_relative
         }
-        // check(...) on MaterialButtonToggleGroup is idempotent if already on
         binding.toggleHotbarMode.check(checked)
         binding.txtHotbarSummary.setText(
             when (s.hotbarSwipeMode) {

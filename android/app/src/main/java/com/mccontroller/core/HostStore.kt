@@ -21,8 +21,31 @@ class HostStore(ctx: Context) {
 
     private val prefs = ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    private val _hosts = MutableStateFlow(loadAll())
+    private val _hosts = MutableStateFlow(loadAll().ensureSystemHost())
     val hosts: StateFlow<List<SavedHost>> = _hosts
+
+    init {
+        // Make sure the system USB host is persisted from first install.
+        if (_hosts.value.any { it.isSystem } &&
+            _hosts.value.firstOrNull { it.isSystem }?.let { sys ->
+                prefs.getString(KEY_BLOB, null)?.contains(SavedHost.SYSTEM_USB_ID) != true
+            } == true
+        ) {
+            persist(_hosts.value)
+        }
+    }
+
+    private fun List<SavedHost>.ensureSystemHost(): List<SavedHost> =
+        if (any { it.isSystem }) this
+        else listOf(systemUsbDefault()) + this
+
+    private fun systemUsbDefault() = SavedHost(
+        id = SavedHost.SYSTEM_USB_ID,
+        name = "USB",
+        ip = "127.0.0.1",
+        port = 34555,
+        lastConnectedAt = null,
+    )
 
     /** Insert if `(ip, port)` doesn't exist; otherwise update name only. */
     @Synchronized
@@ -66,8 +89,26 @@ class HostStore(ctx: Context) {
         _hosts.value = next
     }
 
+    /** Updates a host's port without losing identity (id preserved). */
+    @Synchronized
+    fun changePort(id: String, newPort: Int) {
+        if (newPort !in 1..65535) return
+        val next = _hosts.value.map {
+            if (it.id == id) it.copy(port = newPort) else it
+        }
+        persist(next)
+        _hosts.value = next
+    }
+
+    /**
+     * Removes a host. No-op for the system USB entry — it always reappears
+     * because [ensureSystemHost] re-seeds it. The adapter UI also hides
+     * the delete option for system entries, but this is a belt-and-braces
+     * guard in case it's wired wrong.
+     */
     @Synchronized
     fun delete(id: String) {
+        if (id == SavedHost.SYSTEM_USB_ID) return
         val next = _hosts.value.filterNot { it.id == id }
         persist(next)
         _hosts.value = next

@@ -21,6 +21,14 @@
     <string name="home_disconnected">Disconnected</string>
     <string name="home_usb_label">USB-attached PC</string>
     <string name="home_usb_subtitle">Local loopback (127.0.0.1)</string>
+    <string name="home_host_last_connected">last used %1$s</string>
+
+    <!-- Relative time labels used in host card meta text. -->
+    <string name="time_just_now">just now</string>
+    <string name="time_min_ago">%1$d min ago</string>
+    <string name="time_hr_ago">%1$d hr ago</string>
+    <string name="time_day_ago">%1$d days ago</string>
+    <string name="time_long_ago">long ago</string>
 
     <!-- Add-host dialog -->
     <string name="addhost_title">Add host</string>

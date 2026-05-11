@@ -3,9 +3,14 @@ package com.mccontroller.core
 /**
  * A host the user has manually saved or previously connected to.
  *
- * Persisted via [HostStore]. `lastConnectedAt` is what drives the
+ * Persisted via [HostStore]. `lastConnectedAt` drives the
  * "recently used → top of list" sort. `id` is a stable UUID so renames
  * don't break references.
+ *
+ * The special id [SYSTEM_USB_ID] marks the auto-seeded loopback entry
+ * for `adb reverse` USB mode. That entry can be renamed and have its
+ * port changed, but cannot be deleted — see [HostStore.delete] and the
+ * adapter overflow menu's gating logic.
  */
 data class SavedHost(
     val id: String,
@@ -13,7 +18,15 @@ data class SavedHost(
     val ip: String,
     val port: Int,
     val lastConnectedAt: Long?,
-)
+) {
+    /** True if this is the auto-provided 127.0.0.1 USB shortcut. */
+    val isSystem: Boolean get() = id == SYSTEM_USB_ID
+
+    companion object {
+        /** Stable id for the auto-seeded USB-loopback entry. */
+        const val SYSTEM_USB_ID = "system-usb"
+    }
+}
 
 /** Source channel that surfaced a discovered host. */
 enum class DiscoverySource { UdpBroadcast, Mdns }
@@ -21,8 +34,7 @@ enum class DiscoverySource { UdpBroadcast, Mdns }
 /**
  * A host learned from the network (UDP broadcast or mDNS). Ephemeral —
  * lives only while we keep seeing announces. The home repository merges
- * these with [SavedHost] entries by `(ip, port)` so a saved host that's
- * also live on the network is shown as one row.
+ * these with [SavedHost] entries by `(ip, port)`.
  */
 data class DiscoveredHost(
     val ip: String,
@@ -55,11 +67,6 @@ sealed class HostListItem {
 
     data class Empty(val messageResId: Int, val sectionKey: String) : HostListItem() {
         override val key get() = "empty_$sectionKey"
-    }
-
-    /** USB / 127.0.0.1 quick-connect card. Always at the top of the list. */
-    object UsbShortcut : HostListItem() {
-        override val key get() = "usb_shortcut"
     }
 
     /** Section: a saved host (may or may not also be currently discovered). */

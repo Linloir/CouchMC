@@ -127,8 +127,13 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun setBasePosition(tx: Float, ty: Float) {
-        // Keep the rim + knob + halo + a little slack inside view bounds.
-        val safeMargin = baseRadius + knobRadius + haloRadius * 0.5f + dp(4f)
+        // Keep the rim + knob (not the halo — clipping a transparent
+        // gradient is invisible) inside view bounds. Earlier this also
+        // accounted for haloRadius, which over-clamped the activation
+        // zone enough that touches anywhere outside the centre band
+        // produced the same base position — joystick stopped feeling
+        // dynamic. Halo extending past the edge is fine.
+        val safeMargin = baseRadius + knobRadius + dp(4f)
         baseX = tx.coerceIn(safeMargin, width - safeMargin)
         baseY = ty.coerceIn(safeMargin, height - safeMargin)
     }

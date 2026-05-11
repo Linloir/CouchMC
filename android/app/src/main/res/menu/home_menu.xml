@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Top-app-bar overflow / direct actions for HomeActivity. -->
+<!-- Home fragment's top-app-bar actions. Settings moved to the bottom nav. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/home_open_settings"
+        android:id="@+id/action_add_host"
+        android:icon="@drawable/ic_add"
+        android:title="@string/home_add_manual"
         app:showAsAction="always" />
 </menu>

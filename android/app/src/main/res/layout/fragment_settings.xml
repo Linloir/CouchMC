@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Settings page. Edge-to-edge, scrollable, grouped by section.
-    Each section is a Material 3 outlined card with rows inside. Rows
-    expose a leading title + optional summary + trailing widget (switch,
-    slider, segmented buttons, or "navigate" chevron).
+    Settings fragment — visually identical to the old activity_settings;
+    the only differences are that there's no nav-back arrow on the
+    toolbar (the bottom nav owns navigation now) and the content scrolls
+    underneath nothing on the bottom because the bottom nav handles
+    its own inset.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,9 +29,7 @@
             android:layout_height="?attr/actionBarSize"
             app:title="@string/settings_title"
             app:titleTextAppearance="?attr/textAppearanceHeadlineSmall"
-            app:titleTextColor="?attr/colorOnSurface"
-            app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="?attr/colorOnSurface" />
+            app:titleTextColor="?attr/colorOnSurface" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
-            android:paddingBottom="48dp">
+            android:paddingBottom="32dp">
 
             <!-- ============================== LAYOUT ============================== -->
             <TextView
@@ -105,8 +105,7 @@
                             app:icon="@drawable/ic_chevron_right"
                             app:iconGravity="end"
                             app:iconPadding="8dp"
-                            tools:text="Default"
-                            xmlns:tools="http://schemas.android.com/tools" />
+                            tools:text="Default" />
 
                     </LinearLayout>
 
