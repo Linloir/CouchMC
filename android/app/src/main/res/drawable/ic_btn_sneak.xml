@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Sneak glyph — small person in a deep squat. Head sits lower in
-    the frame than the jump glyph (so the two icons are visually
-    distinct at a glance), short torso, arms hanging forward for
-    balance, legs bent wide so feet land near the ground line. Reads
-    as "low profile / crouched".
+    Sneak — side-view crouch, facing right. Head leans forward, spine
+    arches as a hunched curve from neck to hip, both legs deeply bent
+    so feet sit near a ground line. Arms drop forward and back from
+    the chest. Head position is much lower in the frame than the
+    jump glyph (y=8 vs y=3.8) so the two icons read as different at
+    a glance.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -12,58 +13,57 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
 
-    <!-- Head (positioned LOWER than in ic_btn_jump.xml so the
-         silhouette reads as crouched) -->
+    <!-- Head leaning forward, low in the frame -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 12,7.2 m -2.1,0 a 2.1,2.1 0 1,0 4.2,0 a 2.1,2.1 0 1,0 -4.2,0" />
+        android:pathData="M 15.4,7.5 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
 
-    <!-- Short torso -->
+    <!-- Hunched spine — curved stroke from neck down + back to hip -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 14.2,9.6 Q 11.4,12.4 10.6,15" />
+
+    <!-- Front arm dropping forward / out -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.4"
         android:strokeLineCap="round"
         android:fillColor="#00000000"
-        android:pathData="M 12,9.6 L 12,13.6" />
+        android:pathData="M 13.4,10.8 L 16.8,13.6" />
 
-    <!-- Left arm hanging forward / out for balance -->
+    <!-- Back arm dropping back -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.4"
         android:strokeLineCap="round"
         android:fillColor="#00000000"
-        android:pathData="M 12,10.6 L 7.4,13.6" />
+        android:pathData="M 12.4,10.6 L 9,13" />
 
-    <!-- Right arm -->
+    <!-- Front leg, deep squat: hip → knee forward+low → foot at ground -->
     <path
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.4"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M 12,10.6 L 16.6,13.6" />
-
-    <!-- Left leg in deep squat (hip → knee wide out → foot near ground) -->
-    <path
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.4"
+        android:strokeWidth="2.6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 12,13.6 L 5.8,17 L 5.8,20.2" />
+        android:pathData="M 10.6,15 L 14.4,17.4 L 18,20.6" />
 
-    <!-- Right leg -->
+    <!-- Back leg, also bent: hip → knee back+low → foot at ground -->
     <path
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.4"
+        android:strokeWidth="2.6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 12,13.6 L 18.2,17 L 18.2,20.2" />
+        android:pathData="M 10.6,15 L 6.6,17 L 5.4,20.6" />
 
-    <!-- Ground line (faint, runs under the feet) -->
+    <!-- Ground line -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillAlpha="0.5"
-        android:pathData="M 3.5,21.6 L 20.5,21.6 L 20.5,23 L 3.5,23 Z" />
+        android:fillAlpha="0.45"
+        android:pathData="M 3,21.4 L 21,21.4 L 21,22.8 L 3,22.8 Z" />
 
 </vector>
