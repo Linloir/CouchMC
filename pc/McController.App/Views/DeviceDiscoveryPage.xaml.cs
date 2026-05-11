@@ -30,13 +30,8 @@ public sealed partial class DeviceDiscoveryPage : Page
     public DeviceDiscoveryPage()
     {
         InitializeComponent();
-        _adb = new AdbDiscovery(DispatcherQueue);
+        _adb = new AdbDiscovery(DispatcherQueue, _host.Config.Port);
         _adb.OnUpdate += OnAdbUpdate;
-
-        // Collapse the InfoBar back into 0-height when the user dismisses
-        // it; otherwise IsOpen=false leaves the layout slot allocated and
-        // creates a permanent gap.
-        AdbInfoBar.Closed += (_, _) => AdbInfoBar.Visibility = Visibility.Collapsed;
 
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
@@ -103,54 +98,4 @@ public sealed partial class DeviceDiscoveryPage : Page
         UsbEmptyText.Visibility = devices.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private async void AdbReverse_Click(object sender, RoutedEventArgs e)
-    {
-        ShowInfo("正在执行 adb reverse...", InfoBarSeverity.Informational);
-        try
-        {
-            var psi = new ProcessStartInfo("adb", $"reverse tcp:{_host.Config.Port} tcp:{_host.Config.Port}")
-            {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-            };
-            using var proc = Process.Start(psi);
-            if (proc is null)
-            {
-                ShowInfo("无法启动 adb，请检查 PATH 中是否包含 platform-tools", InfoBarSeverity.Error);
-                return;
-            }
-            var stderrTask = proc.StandardError.ReadToEndAsync();
-            await proc.WaitForExitAsync();
-            var stderr = await stderrTask;
-
-            if (proc.ExitCode == 0)
-            {
-                ShowInfo($"已转发 tcp:{_host.Config.Port} → 手机本地。可在手机端连接 127.0.0.1。",
-                         InfoBarSeverity.Success);
-            }
-            else
-            {
-                var msg = string.IsNullOrWhiteSpace(stderr) ? $"adb 退出码 {proc.ExitCode}" : stderr.Trim();
-                ShowInfo($"adb reverse 失败：{msg}", InfoBarSeverity.Error);
-            }
-        }
-        catch (System.ComponentModel.Win32Exception)
-        {
-            ShowInfo("未找到 adb，请将 platform-tools 加入 PATH", InfoBarSeverity.Error);
-        }
-        catch (Exception ex)
-        {
-            ShowInfo($"adb reverse 失败：{ex.Message}", InfoBarSeverity.Error);
-        }
-    }
-
-    private void ShowInfo(string msg, InfoBarSeverity severity)
-    {
-        AdbInfoBar.Message = msg;
-        AdbInfoBar.Severity = severity;
-        AdbInfoBar.Visibility = Visibility.Visible;
-        AdbInfoBar.IsOpen = true;
-    }
 }

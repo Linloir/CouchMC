@@ -30,18 +30,25 @@ public sealed class AdbDiscovery : IDisposable
 
     public int PollIntervalMs { get; set; } = 3000;
 
+    /// <summary>Port to auto-forward via <c>adb reverse</c> on each new device.</summary>
+    public int ReversePort { get; }
+
     private readonly DispatcherQueue _ui;
     private readonly Dictionary<string, string> _modelCache = new();
     private readonly Dictionary<string, bool> _appCache = new();
+    // Serials we've already reverse-forwarded since last connect, so we
+    // don't re-run adb reverse every 3 s. Cleared when the device drops.
+    private readonly HashSet<string> _forwardedSerials = new();
     private CancellationTokenSource? _cts;
     // Cache of the last list we emitted. If a new poll produces an
     // equivalent list, we skip the OnUpdate call so the UI's ItemsControl
     // doesn't rebuild every 3 s and flicker.
     private List<Device>? _lastEmitted;
 
-    public AdbDiscovery(DispatcherQueue ui)
+    public AdbDiscovery(DispatcherQueue ui, int reversePort)
     {
         _ui = ui;
+        ReversePort = reversePort;
     }
 
     public void Start()
@@ -116,7 +123,36 @@ public sealed class AdbDiscovery : IDisposable
             bool hasApp = await HasControllerApp(serial, ct);
             list.Add(new Device(serial, model, state, hasApp));
         }
+
+        // Auto-forward the server port on any newly-ready USB device so the
+        // phone can connect via 127.0.0.1 with no manual user step.
+        foreach (var d in list)
+        {
+            if (d.State == "device" && _forwardedSerials.Add(d.Serial))
+            {
+                _ = AutoReverse(d.Serial, ct);
+            }
+        }
+        // Drop serials that vanished so we'll re-forward if they come back.
+        var seen = new HashSet<string>(list.ConvertAll(d => d.Serial));
+        _forwardedSerials.RemoveWhere(s => !seen.Contains(s));
+
         return list;
+    }
+
+    private async Task AutoReverse(string serial, CancellationToken ct)
+    {
+        try
+        {
+            await RunAdb($"-s {serial} reverse tcp:{ReversePort} tcp:{ReversePort}", ct);
+            Debug.WriteLine($"[Adb] auto-forwarded port {ReversePort} for {serial}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Adb] auto-forward for {serial} failed: {ex.Message}");
+            // Allow retry on the next poll cycle.
+            _forwardedSerials.Remove(serial);
+        }
     }
 
     private async Task<string> GetModel(string serial, CancellationToken ct)
