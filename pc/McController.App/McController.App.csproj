@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ApplicationIcon></ApplicationIcon>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,8 @@
        WPF doesn't render SVG natively, so the actual sidebar icons live in
        Themes/AppIcons.xaml as DrawingImage resources. Skip the build copy. -->
   <ItemGroup>
-    <None Include="Assets\**\*" />
+    <None Include="Assets\icons\**\*" />
+    <Resource Include="Assets\app.ico" />
   </ItemGroup>
 
 </Project>

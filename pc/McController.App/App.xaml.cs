@@ -17,6 +17,21 @@ public partial class App : Application
             return;
         }
 
+        if (e.Args.Length > 0 && string.Equals(e.Args[0], "--generate-icon", StringComparison.OrdinalIgnoreCase))
+        {
+            // Rasterize the GrassBlockIcon DrawingImage to a multi-frame .ico
+            // for the executable's File Explorer / Start menu display.
+            // Run once after changes to the source vector; commit the output.
+            var outPath = e.Args.Length > 1
+                ? e.Args[1]
+                : System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Assets", "app.ico");
+            outPath = System.IO.Path.GetFullPath(outPath);
+            IconBaker.BakeGrassBlockToIco(outPath);
+            MessageBox.Show($"已生成 {outPath}", "Icon baked");
+            Shutdown();
+            return;
+        }
+
         // ApplicationThemeManager wires WPF-UI's dynamic theme resources
         // (TextFillColorPrimaryBrush, CardBackgroundFillColorDefaultBrush,
         // etc.) so the Pages — which use DynamicResource lookups for text

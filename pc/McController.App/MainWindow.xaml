@@ -6,6 +6,7 @@
                  Title="MC Controller"
                  Width="1100" Height="720"
                  MinWidth="900" MinHeight="560"
+                 Icon="pack://application:,,,/Assets/app.ico"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
                  WindowCornerPreference="Round"
@@ -19,7 +20,7 @@
 
         <ui:TitleBar Grid.Row="0" Title="MC Controller">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="{StaticResource ControllerIcon}" Width="16" Height="16"/>
+                <ui:ImageIcon Source="{StaticResource GrassBlockIcon}" Width="16" Height="16"/>
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
