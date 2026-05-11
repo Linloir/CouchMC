@@ -24,13 +24,22 @@ public partial class SettingsPage : Page
 {
     private readonly ServerHost _host = App.Host;
     private readonly ProfileManager _profiles;
-    private bool _loading;
+    // Start in loading state — InitializeComponent() parses the XAML and
+    // setting Slider.Minimum/Maximum coerces Value, which fires
+    // ValueChanged BEFORE the constructor body runs. The handlers all
+    // bail out when _loading is true, so this guard keeps the synthetic
+    // initial events from crashing on uninitialized state.
+    private bool _loading = true;
     private readonly DispatcherTimer _saveStatusTimer;
 
     public SettingsPage()
     {
-        InitializeComponent();
+        // _profiles must be live before InitializeComponent so that even
+        // any handler that ignores the _loading flag still has a real
+        // ProfileManager to read from.
         _profiles = new ProfileManager(_host);
+
+        InitializeComponent();
 
         _saveStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _saveStatusTimer.Tick += (_, _) => { SaveStatus.Text = ""; _saveStatusTimer.Stop(); };

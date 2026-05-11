@@ -3,7 +3,9 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       Title="设备发现"
-      Background="Transparent">
+      Background="Transparent"
+      TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      TextElement.FontSize="13">
 
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -12,8 +14,8 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="36,16,36,36" MaxWidth="900" HorizontalAlignment="Stretch">
 
-            <TextBlock Text="设备发现" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,16"/>
-            <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器" Opacity="0.6" Margin="0,0,0,20"/>
+            <TextBlock Text="设备发现" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,2"/>
+            <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
 
             <!-- ===== 当前连接 ===== -->
             <ui:Card Margin="0,0,0,12">
