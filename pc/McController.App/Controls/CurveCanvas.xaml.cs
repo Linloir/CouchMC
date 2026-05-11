@@ -2,6 +2,7 @@ using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using Windows.Foundation;
 using McController.Core.Config;
 
@@ -12,8 +13,13 @@ namespace McController.App.Controls;
 ///
 /// X axis: raw finger speed (pixels/frame, 0..MaxInput).
 /// Y axis: effective on-screen pixels after curve + user sensitivity.
-/// Dashed line is the y = x identity reference (no scaling), so the live
+/// Dashed line is the y = x identity reference (no scaling) so the live
 /// curve always shows up as a distinct line above it.
+///
+/// Implementation note: the live curve uses <see cref="Polyline"/> with
+/// its <see cref="Polyline.Points"/> assigned a fresh
+/// <see cref="PointCollection"/> each redraw. Path.Data with a new
+/// PathGeometry didn't reliably trigger re-render in WinUI 3.
 /// </summary>
 public sealed partial class CurveCanvas : UserControl
 {
@@ -27,8 +33,20 @@ public sealed partial class CurveCanvas : UserControl
     public CurveCanvas()
     {
         InitializeComponent();
-        SizeChanged += (_, _) => Redraw();
-        Loaded += (_, _) => Redraw();
+        SizeChanged += (_, _) =>
+        {
+            // Match the inner Canvas to the host so children using
+            // Canvas absolute coords lay out into the visible region.
+            PlotCanvas.Width = ActualWidth;
+            PlotCanvas.Height = ActualHeight;
+            Redraw();
+        };
+        Loaded += (_, _) =>
+        {
+            PlotCanvas.Width = ActualWidth;
+            PlotCanvas.Height = ActualHeight;
+            Redraw();
+        };
     }
 
     public void SetCamera(CameraConfig camera)
@@ -49,8 +67,8 @@ public sealed partial class CurveCanvas : UserControl
         var displayMax = Math.Max(MaxOutput, maxOut * 1.1);
 
         GridPath.Data = BuildGridGeometry(w, h);
-        ReferencePath.Data = BuildIdentityReferenceGeometry(w, h, displayMax);
-        CurvePath.Data = BuildCurveGeometry(_camera, w, h, displayMax);
+        ReferenceLine.Points = BuildIdentityReferencePoints(w, h, displayMax);
+        CurveLine.Points = BuildCurvePoints(_camera, w, h, displayMax);
     }
 
     private Geometry BuildGridGeometry(double w, double h)
@@ -59,24 +77,36 @@ public sealed partial class CurveCanvas : UserControl
         for (int i = 0; i <= 4; i++)
         {
             double x = PadL + w * i / 4;
-            g.Children.Add(new LineGeometry { StartPoint = new Point(x, PadT), EndPoint = new Point(x, PadT + h) });
+            g.Children.Add(new LineGeometry
+            {
+                StartPoint = new Point(x, PadT),
+                EndPoint = new Point(x, PadT + h),
+            });
             double y = PadT + h * i / 4;
-            g.Children.Add(new LineGeometry { StartPoint = new Point(PadL, y), EndPoint = new Point(PadL + w, y) });
+            g.Children.Add(new LineGeometry
+            {
+                StartPoint = new Point(PadL, y),
+                EndPoint = new Point(PadL + w, y),
+            });
         }
         return g;
     }
 
-    private Geometry BuildIdentityReferenceGeometry(double w, double h, double displayMax)
+    private PointCollection BuildIdentityReferencePoints(double w, double h, double displayMax)
     {
         double xEnd = PadL + w;
         double yEnd = PadT + h - h * (MaxInput / displayMax);
         yEnd = Math.Max(PadT, yEnd);
-        return new LineGeometry { StartPoint = new Point(PadL, PadT + h), EndPoint = new Point(xEnd, yEnd) };
+        return new PointCollection
+        {
+            new Point(PadL, PadT + h),
+            new Point(xEnd, yEnd),
+        };
     }
 
-    private Geometry BuildCurveGeometry(CameraConfig c, double w, double h, double displayMax)
+    private PointCollection BuildCurvePoints(CameraConfig c, double w, double h, double displayMax)
     {
-        var figure = new PathFigure { StartPoint = new Point(PadL, PadT + h) };
+        var pts = new PointCollection { new Point(PadL, PadT + h) };
         for (int i = 1; i <= Samples; i++)
         {
             double raw = MaxInput * i / Samples;
@@ -84,11 +114,9 @@ public sealed partial class CurveCanvas : UserControl
             double px = PadL + w * (raw / MaxInput);
             double py = PadT + h - h * (output / displayMax);
             py = Math.Max(PadT, py);
-            figure.Segments.Add(new LineSegment { Point = new Point(px, py) });
+            pts.Add(new Point(px, py));
         }
-        var geometry = new PathGeometry();
-        geometry.Figures.Add(figure);
-        return geometry;
+        return pts;
     }
 
     private static double SampleOutput(CameraConfig c, double rawSpeed)

@@ -44,7 +44,7 @@
                 </tk:SettingsCard.HeaderIcon>
                 <Border x:Name="StatusPill"
                         CornerRadius="12" Padding="12,5,12,5"
-                        Background="{ThemeResource ControlAlternativeFillColorTertiaryBrush}"
+                        Background="{ThemeResource ControlFillColorTertiaryBrush}"
                         VerticalAlignment="Center">
                     <TextBlock x:Name="StatusPillText" Text="未连接" FontSize="12"/>
                 </Border>

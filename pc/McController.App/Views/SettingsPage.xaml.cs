@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Windows.Globalization.NumberFormatting;
 using McController.App.Services;
 using McController.Core.Config;
 
@@ -39,7 +40,41 @@ public sealed partial class SettingsPage : Page
         _saveStatusTimer.IsRepeating = false;
         _saveStatusTimer.Tick += (_, _) => SaveStatus.Text = "";
 
+        ConfigureNumberFormatters();
         Loaded += OnLoaded;
+    }
+
+    /// <summary>
+    /// Without an explicit NumberFormatter, NumberBox shows machine-precision
+    /// doubles like 0.30000000000000004 which overflows the input. Set a
+    /// FractionDigits-clamped formatter per box so the displayed text matches
+    /// the slider's step granularity.
+    /// </summary>
+    private void ConfigureNumberFormatters()
+    {
+        var fmt2 = NewFormatter(2);
+        var fmt3 = NewFormatter(3);
+        var fmtInt = NewFormatter(0);
+
+        PortBox.NumberFormatter = fmtInt;
+        SensitivityNumber.NumberFormatter = fmt2;
+        AccelFactorNumber.NumberFormatter = fmt3;
+        AccelExpNumber.NumberFormatter = fmt2;
+        MaxMulNumber.NumberFormatter = fmt2;
+        DeadZoneNumber.NumberFormatter = fmt2;
+        EnterNumber.NumberFormatter = fmt2;
+        ExitNumber.NumberFormatter = fmt2;
+    }
+
+    private static DecimalFormatter NewFormatter(int fractionDigits)
+    {
+        var f = new DecimalFormatter
+        {
+            IntegerDigits = 1,
+            FractionDigits = fractionDigits,
+            IsGrouped = false,
+        };
+        return f;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

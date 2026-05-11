@@ -67,7 +67,7 @@
                     <Slider x:Name="SensitivitySlider" Width="220"
                             Minimum="0.5" Maximum="3.0" StepFrequency="0.05"
                             ValueChanged="SensitivitySlider_ValueChanged"/>
-                    <NumberBox x:Name="SensitivityNumber" Width="100"
+                    <NumberBox x:Name="SensitivityNumber" Width="120"
                                Minimum="0.5" Maximum="3.0" SmallChange="0.05"
                                SpinButtonPlacementMode="Compact"
                                ValueChanged="SensitivityNumber_ValueChanged"/>
@@ -92,7 +92,7 @@
                             <Slider x:Name="AccelFactorSlider" Width="220"
                                     Minimum="0" Maximum="0.05" StepFrequency="0.001"
                                     ValueChanged="AccelFactorSlider_ValueChanged"/>
-                            <NumberBox x:Name="AccelFactorNumber" Width="100"
+                            <NumberBox x:Name="AccelFactorNumber" Width="120"
                                        Minimum="0" Maximum="0.05" SmallChange="0.001"
                                        SpinButtonPlacementMode="Compact"
                                        ValueChanged="AccelFactorNumber_ValueChanged"/>
@@ -103,7 +103,7 @@
                             <Slider x:Name="AccelExpSlider" Width="220"
                                     Minimum="0.5" Maximum="2.5" StepFrequency="0.05"
                                     ValueChanged="AccelExpSlider_ValueChanged"/>
-                            <NumberBox x:Name="AccelExpNumber" Width="100"
+                            <NumberBox x:Name="AccelExpNumber" Width="120"
                                        Minimum="0.5" Maximum="2.5" SmallChange="0.05"
                                        SpinButtonPlacementMode="Compact"
                                        ValueChanged="AccelExpNumber_ValueChanged"/>
@@ -114,7 +114,7 @@
                             <Slider x:Name="MaxMulSlider" Width="220"
                                     Minimum="1" Maximum="5" StepFrequency="0.1"
                                     ValueChanged="MaxMulSlider_ValueChanged"/>
-                            <NumberBox x:Name="MaxMulNumber" Width="100"
+                            <NumberBox x:Name="MaxMulNumber" Width="120"
                                        Minimum="1" Maximum="5" SmallChange="0.1"
                                        SpinButtonPlacementMode="Compact"
                                        ValueChanged="MaxMulNumber_ValueChanged"/>
@@ -131,14 +131,11 @@
             <!-- ===== 移动 ===== -->
             <TextBlock Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
             <tk:SettingsCard Header="死区" Description="摇杆中心忽略的范围">
-                <tk:SettingsCard.HeaderIcon>
-                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74F;"/>
-                </tk:SettingsCard.HeaderIcon>
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="DeadZoneSlider" Width="220"
                             Minimum="0" Maximum="0.5" StepFrequency="0.01"
                             ValueChanged="DeadZoneSlider_ValueChanged"/>
-                    <NumberBox x:Name="DeadZoneNumber" Width="100"
+                    <NumberBox x:Name="DeadZoneNumber" Width="120"
                                Minimum="0" Maximum="0.5" SmallChange="0.01"
                                SpinButtonPlacementMode="Compact"
                                ValueChanged="DeadZoneNumber_ValueChanged"/>
@@ -149,7 +146,7 @@
                     <Slider x:Name="EnterSlider" Width="220"
                             Minimum="0" Maximum="0.6" StepFrequency="0.01"
                             ValueChanged="EnterSlider_ValueChanged"/>
-                    <NumberBox x:Name="EnterNumber" Width="100"
+                    <NumberBox x:Name="EnterNumber" Width="120"
                                Minimum="0" Maximum="0.6" SmallChange="0.01"
                                SpinButtonPlacementMode="Compact"
                                ValueChanged="EnterNumber_ValueChanged"/>
@@ -160,7 +157,7 @@
                     <Slider x:Name="ExitSlider" Width="220"
                             Minimum="0" Maximum="0.5" StepFrequency="0.01"
                             ValueChanged="ExitSlider_ValueChanged"/>
-                    <NumberBox x:Name="ExitNumber" Width="100"
+                    <NumberBox x:Name="ExitNumber" Width="120"
                                Minimum="0" Maximum="0.5" SmallChange="0.01"
                                SpinButtonPlacementMode="Compact"
                                ValueChanged="ExitNumber_ValueChanged"/>

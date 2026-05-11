@@ -40,7 +40,9 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            AppWindow.Resize(new SizeInt32 { Width = 1100, Height = 720 });
+            // Wide enough that the settings cards (header + slider 220 +
+            // NumberBox 120 + padding) don't wrap or clip on the first paint.
+            AppWindow.Resize(new SizeInt32 { Width = 1280, Height = 820 });
         }
         catch { }
     }
