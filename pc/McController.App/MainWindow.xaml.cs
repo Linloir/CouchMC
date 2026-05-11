@@ -63,16 +63,15 @@ public sealed partial class MainWindow : Window
 
     private void Nav_Loaded(object sender, RoutedEventArgs e)
     {
-        // First-launch landing is Settings (Discovery is empty until a phone
-        // connects). Use SlideNavigationTransitionInfo for the Win11-style
-        // page slide.
+        // First-launch landing is Device Discovery — it's where the user
+        // pairs their phone, so it's the natural starting point.
         foreach (var item in Nav.MenuItems)
         {
             if (item is NavigationViewItem parent)
             {
                 foreach (var child in parent.MenuItems)
                 {
-                    if (child is NavigationViewItem nvi && (nvi.Tag as string) == "settings")
+                    if (child is NavigationViewItem nvi && (nvi.Tag as string) == "discovery")
                     {
                         Nav.SelectedItem = nvi;
                         break;
@@ -82,7 +81,7 @@ public sealed partial class MainWindow : Window
             }
         }
         ContentFrame.Navigate(
-            typeof(Views.SettingsPage),
+            typeof(Views.DeviceDiscoveryPage),
             null,
             new SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight });
     }
