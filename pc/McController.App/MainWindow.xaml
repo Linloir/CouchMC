@@ -20,7 +20,9 @@
 
         <ui:TitleBar Grid.Row="0" Title="MC Controller">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/Assets/app.ico" Width="16" Height="16"/>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/app.ico"
+                              Width="20" Height="20"
+                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 

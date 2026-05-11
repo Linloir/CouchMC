@@ -51,4 +51,13 @@
     <color name="status_online">#2E7D32</color>
     <color name="status_offline">#8B8E92</color>
     <color name="status_busy">#E68A00</color>
+
+    <!--
+        Legacy color aliases — still referenced by activity_controller.xml
+        and activity_layout_editor.xml. Both are intentionally always-dark
+        (overlay-style) so they don't pivot with the theme. Will be inlined
+        when those layouts are refactored.
+    -->
+    <color name="bg_dark">#212121</color>
+    <color name="hud_bg">#80000000</color>
 </resources>

@@ -75,9 +75,13 @@ public static class IconBaker
 
     private static void DrawGrassBlock(DrawingContext ctx, int size)
     {
+        // Center the visual mass of the cube. An isometric cube reads
+        // bottom-heavy because the bottom-front vertex is the widest visible
+        // point while the top is a single apex — nudging the geometry up by
+        // a few percent puts the perceived weight on the canvas centerline.
         double cx = size / 2.0;
-        double cy = size / 2.0 + size * 0.02;   // nudge down slightly for visual balance
-        double scale = size * 0.36;
+        double cy = size / 2.0 - size * 0.025;
+        double scale = size * 0.42;
 
         Point P(double x, double y, double z) =>
             new(cx + (x - y) * Cos30 * scale,

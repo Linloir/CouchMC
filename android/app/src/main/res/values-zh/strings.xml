@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MC 控制器</string>
+
+    <!-- Home -->
+    <string name="home_title">宿主机</string>
+    <string name="home_subtitle">选择要连接的 PC</string>
+    <string name="home_section_saved">已保存</string>
+    <string name="home_section_discovered">局域网内</string>
+    <string name="home_empty_discovered">正在搜索局域网…</string>
+    <string name="home_empty_saved">暂无保存的宿主机</string>
+    <string name="home_add_manual">添加宿主机</string>
+    <string name="home_open_settings">设置</string>
+    <string name="home_host_status_idle">可连接</string>
+    <string name="home_host_status_busy">使用中</string>
+    <string name="home_host_status_offline">离线</string>
+    <string name="home_host_mc_foreground">Minecraft 已启动</string>
+    <string name="home_host_mc_background">未检测到 Minecraft</string>
+    <string name="home_connecting">正在连接 %1$s…</string>
+    <string name="home_connect_failed">无法连接到 %1$s</string>
+    <string name="home_disconnected">已断开</string>
+    <string name="home_usb_label">USB 连接的 PC</string>
+    <string name="home_usb_subtitle">本地回环 (127.0.0.1)</string>
+
+    <!-- Add-host dialog -->
+    <string name="addhost_title">添加宿主机</string>
+    <string name="addhost_name">名称（可选）</string>
+    <string name="addhost_ip">IP 地址</string>
+    <string name="addhost_port">端口</string>
+    <string name="addhost_default_port">34555</string>
+    <string name="addhost_save">保存</string>
+    <string name="addhost_cancel">取消</string>
+    <string name="addhost_invalid_ip">请输入有效的 IPv4 地址</string>
+    <string name="addhost_invalid_port">端口必须在 1–65535 之间</string>
+
+    <!-- Saved-host actions -->
+    <string name="hostmenu_rename">重命名</string>
+    <string name="hostmenu_remove">移除</string>
+    <string name="hostmenu_remove_confirm">移除宿主机「%1$s」？</string>
+    <string name="hostmenu_remove_yes">移除</string>
+    <string name="hostmenu_remove_no">取消</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_section_layout">布局</string>
+    <string name="settings_layout_in_game">局内按键布局</string>
+    <string name="settings_layout_in_game_summary">摇杆、操作按键、物品栏的位置与大小</string>
+    <string name="settings_layout_ui">UI 操作按键布局</string>
+    <string name="settings_layout_ui_summary">游戏暂停或打开物品栏时显示的按键</string>
+
+    <string name="settings_section_profile">布局方案</string>
+    <string name="settings_active_profile">当前方案</string>
+    <string name="settings_new_profile">新建方案</string>
+    <string name="settings_rename_profile">重命名方案</string>
+    <string name="settings_delete_profile">删除方案</string>
+    <string name="settings_new_profile_dialog">新方案名称</string>
+    <string name="settings_rename_profile_dialog">新名称</string>
+    <string name="settings_delete_confirm">删除方案「%1$s」？</string>
+    <string name="settings_cannot_delete_last">至少保留一个方案</string>
+
+    <string name="settings_section_hotbar">物品栏</string>
+    <string name="settings_hotbar_swipe_mode">滑动模式</string>
+    <string name="settings_hotbar_mode_precise">精确</string>
+    <string name="settings_hotbar_mode_precise_summary">选中手指当前所在的格子</string>
+    <string name="settings_hotbar_mode_relative">相对</string>
+    <string name="settings_hotbar_mode_relative_summary">滚轮手感：每滑动约 32dp 切换一格，到达两端后循环</string>
+
+    <string name="settings_section_gestures">触控板手势</string>
+    <string name="settings_in_game_quick_clicks">局内快捷点击</string>
+    <string name="settings_in_game_quick_clicks_summary">单击 = LMB 点击；单击后再次按下滑动 = 按住 LMB 移动视角。关闭后触控板仅控制视角。</string>
+    <string name="settings_ui_quick_clicks">UI 操作快捷点击</string>
+    <string name="settings_ui_quick_clicks_summary">单击 = LMB、双击 = RMB、单击 + 按下滑动 = 按住 LMB、双击 + 按下滑动 = 按住 RMB。关闭后触控板仅驱动光标。</string>
+
+    <string name="settings_section_volume">音量键</string>
+    <string name="settings_volume_up">音量 +</string>
+    <string name="settings_volume_down">音量 -</string>
+    <string name="settings_volume_binding_none">未绑定</string>
+    <string name="settings_volume_binding_pick">选择动作</string>
+
+    <string name="settings_section_margins">边距偏移</string>
+    <string name="settings_left_margin">左边距偏移</string>
+    <string name="settings_right_margin">右边距偏移</string>
+    <string name="settings_margin_value_format">%1$+d dp</string>
+
+    <string name="settings_section_about">关于</string>
+    <string name="settings_version">版本 %1$s</string>
+
+    <!-- Button-binding picker -->
+    <string name="binding_none">未绑定</string>
+    <string name="binding_mouse_left">鼠标左键</string>
+    <string name="binding_mouse_right">鼠标右键</string>
+    <string name="binding_jump">跳跃</string>
+    <string name="binding_sneak">潜行（开关）</string>
+    <string name="binding_sprint">疾跑（开关）</string>
+    <string name="binding_inventory">物品栏</string>
+    <string name="binding_drop">丢弃</string>
+    <string name="binding_swap_hand">切换副手</string>
+    <string name="binding_esc">暂停 / Esc</string>
+    <string name="binding_hotbar_1">物品栏 1</string>
+    <string name="binding_hotbar_2">物品栏 2</string>
+    <string name="binding_hotbar_3">物品栏 3</string>
+    <string name="binding_hotbar_4">物品栏 4</string>
+    <string name="binding_hotbar_5">物品栏 5</string>
+    <string name="binding_hotbar_6">物品栏 6</string>
+    <string name="binding_hotbar_7">物品栏 7</string>
+    <string name="binding_hotbar_8">物品栏 8</string>
+    <string name="binding_hotbar_9">物品栏 9</string>
+
+    <!-- Controller (in-game HUD) -->
+    <string name="lock_screen_title">MC 不在前台</string>
+    <string name="lock_screen_subtitle">将 Minecraft 切回前台即可继续</string>
+
+    <!-- Layout editor -->
+    <string name="editor_title_in_game">局内布局</string>
+    <string name="editor_title_ui">UI 操作布局</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_cancel">放弃</string>
+    <string name="editor_reset">恢复默认</string>
+    <string name="editor_hint">单击选中 · 拖动移动 · 双指任意位置缩放 · 空白处取消选中</string>
+    <string name="editor_reset_position">恢复位置</string>
+    <string name="editor_reset_size">恢复大小</string>
+    <string name="editor_unsaved_title">放弃未保存的更改？</string>
+    <string name="editor_unsaved_keep">继续编辑</string>
+    <string name="editor_unsaved_discard">放弃</string>
+
+    <!-- Dialog defaults -->
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_cancel">取消</string>
+
+    <!-- Legacy strings (transitional — see English file). -->
+    <string name="connect_title">连接到 PC</string>
+    <string name="ip_address_hint">PC IP 地址</string>
+    <string name="port_hint">端口</string>
+    <string name="default_port">34555</string>
+    <string name="connect_wifi">通过 WiFi 连接</string>
+    <string name="connect_usb">通过 USB 连接（127.0.0.1）</string>
+    <string name="status_connecting">连接中…</string>
+    <string name="status_connected">已连接</string>
+    <string name="status_disconnected">已断开</string>
+    <string name="status_failed">连接失败：%1$s</string>
+    <string name="profile_picker_label">布局方案</string>
+    <string name="edit_layout">编辑布局</string>
+    <string name="editor_title">布局编辑</string>
+    <string name="editor_new_profile">新方案</string>
+    <string name="editor_rename_profile">重命名</string>
+    <string name="editor_delete_profile">删除</string>
+    <string name="editor_mode_in_game">局内</string>
+    <string name="editor_mode_ui">UI 操作</string>
+    <string name="editor_l_margin">左边距偏移</string>
+    <string name="editor_r_margin">右边距偏移</string>
+    <string name="editor_hotbar_mode_precise">物品栏：精确</string>
+    <string name="editor_hotbar_mode_relative">物品栏：相对</string>
+    <string name="editor_new_profile_dialog">新方案名称</string>
+    <string name="editor_rename_profile_dialog">新名称</string>
+    <string name="editor_delete_confirm">删除方案「%1$s」？</string>
+    <string name="editor_cannot_delete_last">至少保留一个方案</string>
+</resources>

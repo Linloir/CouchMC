@@ -48,4 +48,8 @@
     <color name="status_online">#7BD789</color>
     <color name="status_offline">#9BA0A4</color>
     <color name="status_busy">#FFB762</color>
+
+    <!-- Legacy aliases (overlay-style, intentionally always dark). -->
+    <color name="bg_dark">#212121</color>
+    <color name="hud_bg">#80000000</color>
 </resources>
