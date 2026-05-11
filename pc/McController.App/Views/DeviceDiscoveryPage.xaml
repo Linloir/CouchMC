@@ -8,29 +8,13 @@
 
     <Page.Resources>
         <util:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
-        <!-- USB device row. ListView's built-in selection + pointer-hover
-             visual states give us the highlight animation natively. -->
-        <Style x:Key="DeviceListStyle" TargetType="ListView">
-            <Setter Property="SelectionMode" Value="None"/>
-            <Setter Property="IsItemClickEnabled" Value="False"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="ItemContainerStyle">
-                <Setter.Value>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Padding" Value="12,10,12,10"/>
-                        <Setter Property="Margin" Value="0,2,0,2"/>
-                    </Style>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Page.Resources>
 
     <ScrollViewer x:Name="Scroller"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
                   Padding="40,8,40,40">
-        <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="0">
+        <StackPanel MaxWidth="920" HorizontalAlignment="Center" Spacing="0">
 
             <TextBlock Text="设备发现" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器"
@@ -71,35 +55,42 @@
                      IsClosable="True"
                      Margin="0,8,0,0"/>
 
-            <ListView x:Name="UsbDeviceList" Style="{StaticResource DeviceListStyle}" Margin="0,8,0,0">
-                <ListView.ItemTemplate>
+            <ItemsControl x:Name="UsbDeviceList" Margin="0,8,0,0">
+                <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnSpacing="14">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Width="36" Height="36" CornerRadius="6"
-                                    Background="{ThemeResource SubtleFillColorTertiaryBrush}"
-                                    VerticalAlignment="Center">
-                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;" FontSize="18"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                <TextBlock Text="{Binding Model}" FontWeight="SemiBold"/>
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <TextBlock Text="{Binding Serial}" Opacity="0.55" FontSize="12"/>
-                                    <TextBlock Text="·" Opacity="0.4" FontSize="12"/>
-                                    <TextBlock Text="{Binding State}" Opacity="0.55" FontSize="12"/>
-                                    <TextBlock Text="·" Opacity="0.4" FontSize="12"
-                                               Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
-                                    <TextBlock Text="已安装 App" Foreground="#34D8B8" FontSize="12"
-                                               Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
+                        <Border Padding="16,12,16,12"
+                                Margin="0,2,0,2"
+                                CornerRadius="4"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" CornerRadius="6"
+                                        Background="{ThemeResource SubtleFillColorTertiaryBrush}"
+                                        VerticalAlignment="Center">
+                                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;" FontSize="18"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock Text="{Binding Model}" FontWeight="SemiBold"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Serial}" Opacity="0.55" FontSize="12"/>
+                                        <TextBlock Text="·" Opacity="0.4" FontSize="12"/>
+                                        <TextBlock Text="{Binding State}" Opacity="0.55" FontSize="12"/>
+                                        <TextBlock Text="·" Opacity="0.4" FontSize="12"
+                                                   Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
+                                        <TextBlock Text="已安装 App" Foreground="#34D8B8" FontSize="12"
+                                                   Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </Grid>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
             <TextBlock x:Name="UsbEmptyText"
                        Text="未检测到 USB 设备 · 请用数据线连接手机并开启 USB 调试"
                        Opacity="0.55" FontSize="12" Margin="0,8,0,0"/>

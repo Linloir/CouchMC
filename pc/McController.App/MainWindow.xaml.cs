@@ -1,10 +1,12 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Graphics;
+using WinRT.Interop;
 
 namespace McController.App;
 
@@ -40,12 +42,24 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            // Wide enough that the settings cards (header + slider 220 +
-            // NumberBox 120 + padding) don't wrap or clip on the first paint.
-            AppWindow.Resize(new SizeInt32 { Width = 1280, Height = 820 });
+            // AppWindow.Resize takes physical pixels, so multiply by the
+            // window's DPI scale to keep the on-screen size consistent on
+            // high-DPI displays (otherwise 1280 physical = ~853 logical
+            // at 150% scale and the window looks tiny).
+            var hwnd = WindowNative.GetWindowHandle(this);
+            double scale = GetDpiForWindow(hwnd) / 96.0;
+            if (scale <= 0) scale = 1.0;
+            AppWindow.Resize(new SizeInt32
+            {
+                Width = (int)(1400 * scale),
+                Height = (int)(900 * scale),
+            });
         }
         catch { }
     }
+
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
 
     private void Nav_Loaded(object sender, RoutedEventArgs e)
     {

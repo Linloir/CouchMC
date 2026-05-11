@@ -30,6 +30,10 @@ public sealed class AdbDiscovery : IDisposable
     private readonly Dictionary<string, string> _modelCache = new();
     private readonly Dictionary<string, bool> _appCache = new();
     private CancellationTokenSource? _cts;
+    // Cache of the last list we emitted. If a new poll produces an
+    // equivalent list, we skip the OnUpdate call so the UI's ItemsControl
+    // doesn't rebuild every 3 s and flicker.
+    private List<Device>? _lastEmitted;
 
     public AdbDiscovery(DispatcherQueue ui)
     {
@@ -58,15 +62,35 @@ public sealed class AdbDiscovery : IDisposable
             try
             {
                 var devices = await Probe(ct);
-                _ui.TryEnqueue(() => OnUpdate?.Invoke(devices));
+                if (!ListsEqual(devices, _lastEmitted))
+                {
+                    _lastEmitted = devices;
+                    _ui.TryEnqueue(() => OnUpdate?.Invoke(devices));
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[Adb] poll failed: {ex.Message}");
-                _ui.TryEnqueue(() => OnUpdate?.Invoke(Array.Empty<Device>()));
+                if (_lastEmitted is null || _lastEmitted.Count > 0)
+                {
+                    _lastEmitted = new List<Device>();
+                    _ui.TryEnqueue(() => OnUpdate?.Invoke(Array.Empty<Device>()));
+                }
             }
             try { await Task.Delay(PollIntervalMs, ct); } catch (TaskCanceledException) { return; }
         }
+    }
+
+    private static bool ListsEqual(List<Device>? a, List<Device>? b)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        if (a is null || b is null) return false;
+        if (a.Count != b.Count) return false;
+        for (int i = 0; i < a.Count; i++)
+        {
+            if (!a[i].Equals(b[i])) return false;
+        }
+        return true;
     }
 
     private async Task<List<Device>> Probe(CancellationToken ct)
