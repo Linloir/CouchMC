@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Inventory — backpack silhouette.
-
-    Top: a small curved handle/loop above the main body. Two short
-    "strap roots" sit either side of the loop where the shoulder
-    straps would attach.
-
-    Main body: a filled rounded rectangle with two cutouts using
-    fillType=evenOdd:
-      - A thin horizontal stripe near the top, reading as the bag's
-        main flap edge.
-      - A larger rounded rectangle in the lower-middle, reading as
-        the front pocket. The cutout shows the button background
-        through it, so the pocket is naturally distinct from the
-        main bag in any colour scheme.
+    Inventory — backpack silhouette modelled on the user-supplied
+    reference image:
+      • Two short rectangular strap loops at the very top.
+      • A pillow-shaped bag that pinches in at the top (right under
+        the straps) and curves outward to a wider lower half.
+      • Two small rectangular side bumps at the lower-middle, like
+        side-pocket / water-bottle protrusions.
+      • A flat bottom with rounded corners.
+      • A clear rounded-rectangle front pocket as an evenOdd cutout
+        so the pocket shows through to the button background — works
+        in both light and dark themes without colour variants.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -21,30 +18,24 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
 
-    <!-- Top handle / loop -->
+    <!-- Left strap loop -->
     <path
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.8"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M 9.5,5 Q 12,2.8 14.5,5" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M 8.4,2.4 L 9.8,2.4 A 0.4,0.4 0 0 1 10.2,2.8 L 10.2,6 L 8,6 L 8,2.8 A 0.4,0.4 0 0 1 8.4,2.4 Z" />
 
-    <!-- Strap roots (small humps at the top of the bag where straps attach) -->
+    <!-- Right strap loop -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 6.5,6.5 L 8,6.5 L 8.4,8 L 6.1,8 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M 16,6.5 L 17.5,6.5 L 17.9,8 L 15.6,8 Z" />
+        android:pathData="M 14.2,2.4 L 15.6,2.4 A 0.4,0.4 0 0 1 16,2.8 L 16,6 L 13.8,6 L 13.8,2.8 A 0.4,0.4 0 0 1 14.2,2.4 Z" />
 
     <!--
-        Main bag body. fillType=evenOdd makes the inner sub-paths
-        ("flap stripe" + "pocket") read as transparent cutouts in
-        the filled outer rectangle.
+        Main bag silhouette + side bumps + pocket cutout. Single path,
+        evenOdd fill so the pocket reads as a hole through to the
+        button background colour.
     -->
     <path
         android:fillColor="#FFFFFF"
         android:fillType="evenOdd"
-        android:pathData="M 5.5,7.6 L 18.5,7.6 A 1.6,1.6 0 0 1 20.1,9.2 L 20.1,19.6 A 1.6,1.6 0 0 1 18.5,21.2 L 5.5,21.2 A 1.6,1.6 0 0 1 3.9,19.6 L 3.9,9.2 A 1.6,1.6 0 0 1 5.5,7.6 Z M 6.6,10.4 L 17.4,10.4 L 17.4,11.5 L 6.6,11.5 Z M 8,13.6 L 16,13.6 A 0.6,0.6 0 0 1 16.6,14.2 L 16.6,18.4 A 0.6,0.6 0 0 1 16,19 L 8,19 A 0.6,0.6 0 0 1 7.4,18.4 L 7.4,14.2 A 0.6,0.6 0 0 1 8,13.6 Z" />
+        android:pathData="M 8,6 C 4.8,6.4 4,9 4,12 L 4,14.4 L 2.4,14.4 L 2.4,18.2 L 4,18.2 L 4,20.4 A 1.6,1.6 0 0 0 5.6,22 L 18.4,22 A 1.6,1.6 0 0 0 20,20.4 L 20,18.2 L 21.6,18.2 L 21.6,14.4 L 20,14.4 L 20,12 C 20,9 19.2,6.4 16,6 Z M 8.4,14 L 15.6,14 A 0.6,0.6 0 0 1 16.2,14.6 L 16.2,18.4 A 0.6,0.6 0 0 1 15.6,19 L 8.4,19 A 0.6,0.6 0 0 1 7.8,18.4 L 7.8,14.6 A 0.6,0.6 0 0 1 8.4,14 Z" />
 
 </vector>
