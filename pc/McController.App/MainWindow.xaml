@@ -6,11 +6,20 @@
     xmlns:views="using:McController.App.Views"
     Title="MC Controller">
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="48"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <!-- Invisible focus sink. The window-level PointerPressed handler
+             focuses this when the user clicks an empty area of any page,
+             which yanks focus away from whatever TextBox/NumberBox they
+             were editing. IsTabStop=False keeps it out of Tab navigation. -->
+        <Button x:Name="FocusSink"
+                Width="0" Height="0" Opacity="0"
+                IsTabStop="False"
+                HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
         <!-- Custom title bar. Sits in row 0; the OS-rendered caption buttons
              (min / max / close) draw over the right edge automatically when

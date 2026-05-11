@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Graphics;
@@ -29,16 +30,20 @@ public sealed partial class MainWindow : Window
         }
         catch { /* fall back to default icon */ }
 
-        // Mica backdrop — Win11+ requirement; silently fails on Win10 and we
-        // fall back to the standard solid surface, which still looks fine.
-        try
-        {
-            SystemBackdrop = new MicaBackdrop
-            {
-                Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base,
-            };
-        }
+        // Desktop Acrylic blurs the *live* content behind the window
+        // (other apps + wallpaper) rather than wallpaper-only the way
+        // MicaBackdrop does. Falls through silently on systems that
+        // don't support it (Win10), leaving the standard solid surface.
+        try { SystemBackdrop = new DesktopAcrylicBackdrop(); }
         catch { }
+
+        // Click-anywhere-to-defocus. Use AddHandler with handledEventsToo
+        // so we still see PointerPressed even when inner inputs handled
+        // it; the IsInsideInput check then decides whether to pull focus.
+        RootGrid.AddHandler(
+            UIElement.PointerPressedEvent,
+            new PointerEventHandler(OnRootPointerPressed),
+            handledEventsToo: true);
 
         try
         {
@@ -60,6 +65,39 @@ public sealed partial class MainWindow : Window
 
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+    /// <summary>
+    /// Pull focus to the invisible FocusSink button when the user clicks
+    /// somewhere that isn't a text-input control. Without this, focus
+    /// (and the keyboard caret) stays trapped in a NumberBox / TextBox
+    /// until the user explicitly tabs out — Win11 Settings dismisses it
+    /// the moment you click empty space, this matches that.
+    /// </summary>
+    private void OnRootPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject src && !IsInsideTextInput(src))
+        {
+            FocusSink.Focus(FocusState.Pointer);
+        }
+    }
+
+    private static bool IsInsideTextInput(DependencyObject? element)
+    {
+        while (element != null)
+        {
+            switch (element)
+            {
+                case TextBox:
+                case NumberBox:
+                case PasswordBox:
+                case RichEditBox:
+                case AutoSuggestBox:
+                    return true;
+            }
+            element = VisualTreeHelper.GetParent(element);
+        }
+        return false;
+    }
 
     private void Nav_Loaded(object sender, RoutedEventArgs e)
     {
