@@ -27,7 +27,7 @@ public partial class App : Application
                 : System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Assets", "app.ico");
             outPath = System.IO.Path.GetFullPath(outPath);
             IconBaker.BakeGrassBlockToIco(outPath);
-            MessageBox.Show($"已生成 {outPath}", "Icon baked");
+            Console.WriteLine($"Icon baked to {outPath}");
             Shutdown();
             return;
         }

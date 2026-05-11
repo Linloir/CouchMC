@@ -1,8 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#2E7D32</color>
-    <color name="primary_dark">#1B5E20</color>
-    <color name="accent">#FFC107</color>
-    <color name="bg_dark">#212121</color>
-    <color name="hud_bg">#80000000</color>
+    <!--
+        Material 3 color tokens — light scheme.
+        Brand: a refined deep slate blue, chosen to read as "instrument /
+        tool" rather than "playful app". Very low saturation, fairly cool.
+        Surfaces are near-white with subtle elevation tints.
+    -->
+    <color name="md_primary">#2C4356</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#CFE0F3</color>
+    <color name="md_on_primary_container">#001E33</color>
+
+    <color name="md_secondary">#4F5C68</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#D6E2EE</color>
+    <color name="md_on_secondary_container">#0A1A26</color>
+
+    <color name="md_tertiary">#5B5868</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#E2DFEF</color>
+    <color name="md_on_tertiary_container">#181624</color>
+
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
+
+    <color name="md_background">#FBFCFE</color>
+    <color name="md_on_background">#181C1F</color>
+    <color name="md_surface">#FBFCFE</color>
+    <color name="md_on_surface">#181C1F</color>
+    <color name="md_surface_variant">#E0E3E7</color>
+    <color name="md_on_surface_variant">#43474B</color>
+
+    <color name="md_outline">#73777C</color>
+    <color name="md_outline_variant">#C3C7CC</color>
+
+    <!-- Elevated surface tints (M3 surface-at-elevation-N system) -->
+    <color name="md_surface_container_lowest">#FFFFFF</color>
+    <color name="md_surface_container_low">#F4F6F9</color>
+    <color name="md_surface_container">#EEF1F4</color>
+    <color name="md_surface_container_high">#E8EBEE</color>
+    <color name="md_surface_container_highest">#E2E5E8</color>
+
+    <!-- Controller in-game HUD: stays dark over MC background regardless of theme -->
+    <color name="controller_hud_bg">#80000000</color>
+    <color name="controller_hud_text">#FFFFFFFF</color>
+
+    <!-- Status indicators -->
+    <color name="status_online">#2E7D32</color>
+    <color name="status_offline">#8B8E92</color>
+    <color name="status_busy">#E68A00</color>
 </resources>

@@ -8,65 +8,11 @@
         Width/Height in NavigationViewItem.Icon (see MainWindow.xaml).
     -->
 
-    <!-- App icon: Minecraft grass block (isometric, three faces).
-         Top = grass green, left = lighter dirt brown, right = darker shadow.
-         A thin "tuft" band along the top of the side faces hints at the
-         grass overhanging the dirt the way the real MC texture does. -->
-    <DrawingImage x:Key="GrassBlockIcon">
-        <DrawingImage.Drawing>
-            <DrawingGroup>
-                <!-- Top face (grass) -->
-                <GeometryDrawing Brush="#62B73A">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M16,4 L29,10.5 L16,17 L3,10.5 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Left face (dirt, mid brown) -->
-                <GeometryDrawing Brush="#8B5A2E">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M3,10.5 L16,17 L16,28 L3,21.5 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Right face (dirt shadow, darker brown) -->
-                <GeometryDrawing Brush="#5E3D1F">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M16,17 L29,10.5 L29,21.5 L16,28 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Grass overhang strip on left face top edge -->
-                <GeometryDrawing Brush="#3F8E25">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M3,10.5 L16,17 L16,19.5 L3,13 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Grass overhang strip on right face top edge (darker) -->
-                <GeometryDrawing Brush="#2D6519">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M16,17 L29,10.5 L29,13 L16,19.5 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Tiny pixel-art texture hint on top face -->
-                <GeometryDrawing Brush="#4F9A2C">
-                    <GeometryDrawing.Geometry>
-                        <PathGeometry Figures="M12,9.5 L15,11 L13,12 L10,10.5 Z M19,12 L22,13.5 L20,14.5 L17,13 Z"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-                <!-- Outline -->
-                <GeometryDrawing>
-                    <GeometryDrawing.Pen>
-                        <Pen Brush="#2A1B0E" Thickness="0.6"/>
-                    </GeometryDrawing.Pen>
-                    <GeometryDrawing.Geometry>
-                        <GeometryGroup>
-                            <PathGeometry Figures="M16,4 L29,10.5 L29,21.5 L16,28 L3,21.5 L3,10.5 Z"/>
-                            <PathGeometry Figures="M3,10.5 L16,17 L29,10.5"/>
-                            <PathGeometry Figures="M16,17 L16,28"/>
-                        </GeometryGroup>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
-            </DrawingGroup>
-        </DrawingImage.Drawing>
-    </DrawingImage>
+    <!-- App icon: rendered procedurally in IconBaker.cs (pixel-art isometric
+         grass block) and baked to Assets/app.ico. Both the FluentWindow.Icon
+         and TitleBar.Icon load it via the pack URI, so this resource
+         dictionary no longer holds a DrawingImage for it. Sidebar entries
+         use built-in ui:SymbolIcon glyphs (see MainWindow.xaml). -->
 
     <!-- 移动控制器 (gamepad, gradient blue) -->
     <DrawingImage x:Key="ControllerIcon">

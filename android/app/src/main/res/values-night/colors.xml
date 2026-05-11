@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Material 3 color tokens — dark scheme. Brand mirrors light theme:
+        same slate hue, but the primary becomes the lighter "container"
+        variant so it reads correctly on dark surfaces. Surfaces are a
+        neutral near-black with the same subtle elevation tinting system.
+    -->
+    <color name="md_primary">#9FCBF0</color>
+    <color name="md_on_primary">#003352</color>
+    <color name="md_primary_container">#1E435E</color>
+    <color name="md_on_primary_container">#CFE0F3</color>
+
+    <color name="md_secondary">#B9C6D3</color>
+    <color name="md_on_secondary">#243039</color>
+    <color name="md_secondary_container">#3A4651</color>
+    <color name="md_on_secondary_container">#D6E2EE</color>
+
+    <color name="md_tertiary">#C6C1D4</color>
+    <color name="md_on_tertiary">#2D2C3A</color>
+    <color name="md_tertiary_container">#444151</color>
+    <color name="md_on_tertiary_container">#E2DFEF</color>
+
+    <color name="md_error">#FFB4AB</color>
+    <color name="md_on_error">#690005</color>
+    <color name="md_error_container">#93000A</color>
+    <color name="md_on_error_container">#FFDAD6</color>
+
+    <color name="md_background">#101316</color>
+    <color name="md_on_background">#E2E3E6</color>
+    <color name="md_surface">#101316</color>
+    <color name="md_on_surface">#E2E3E6</color>
+    <color name="md_surface_variant">#43474B</color>
+    <color name="md_on_surface_variant">#C3C7CC</color>
+
+    <color name="md_outline">#8D9197</color>
+    <color name="md_outline_variant">#43474B</color>
+
+    <color name="md_surface_container_lowest">#0A0E11</color>
+    <color name="md_surface_container_low">#181C20</color>
+    <color name="md_surface_container">#1C2024</color>
+    <color name="md_surface_container_high">#262A2E</color>
+    <color name="md_surface_container_highest">#313539</color>
+
+    <color name="controller_hud_bg">#80000000</color>
+    <color name="controller_hud_text">#FFFFFFFF</color>
+
+    <color name="status_online">#7BD789</color>
+    <color name="status_offline">#9BA0A4</color>
+    <color name="status_busy">#FFB762</color>
+</resources>
