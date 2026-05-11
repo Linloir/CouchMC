@@ -37,4 +37,21 @@
         <item name="android:layout_marginHorizontal">20dp</item>
         <item name="android:background">?attr/colorOutlineVariant</item>
     </style>
+
+    <!--
+        Shape overlay that forces a fully-rounded ("pill / circle") corner
+        on a button by setting cornerSize to 50 % of the side. Used as
+        app:shapeAppearanceOverlay on the profile icon-buttons.
+
+        The Material 3 IconButton.Filled style already sets cornerSize to
+        a small fixed dp value via the shape system. Setting
+        app:cornerRadius or even app:shapeAppearance on the layout proved
+        unreliable — the IconButton's own cornerSize still won in some
+        states. shapeAppearanceOverlay is applied last and decisively
+        replaces the cornerSize.
+    -->
+    <style name="ShapeAppearance.McController.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
