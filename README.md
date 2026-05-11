@@ -47,8 +47,7 @@ mc_controller/
 ├── pc/          .NET 8 solution: Core library + WinUI 3 shell + xUnit tests
 ├── android/     Android Kotlin client
 ├── installer/   Inno Setup script for the Windows installer
-├── docs/        Wire spec, design rationale, porting plan
-└── tools/       Helper scripts
+└── docs/        Wire spec, design rationale, porting plan
 ```
 
 ## Prerequisites
@@ -67,16 +66,16 @@ mc_controller/
 ```powershell
 # 1. Build + run PC server
 & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
-    E:\dev\personal\mc_controller\pc\McController.App\McController.App.csproj `
+    pc\McController.App\McController.App.csproj `
     -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
-Start-Process E:\dev\personal\mc_controller\pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
+Start-Process pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
 
 # 2. With phone on USB (debugging enabled), the PC auto-fires adb reverse.
 #    No manual step needed — but if you want to verify:
 adb reverse --list                  # expect "tcp:34555 tcp:34555" per device
 
 # 3. Build + install + launch the Android app
-cd E:\dev\personal\mc_controller\android
+cd android
 gradle :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.mccontroller/.ui.ConnectActivity

@@ -33,8 +33,7 @@ mc_controller/
 │   ├── settings.gradle.kts
 │   └── app/src/main/...
 ├── installer/                       Inno Setup script for Windows distribution
-├── docs/                            spec + design + workflow
-└── tools/                           helper scripts
+└── docs/                            spec + design + workflow
 ```
 
 ## Key technical facts
@@ -83,25 +82,25 @@ mc_controller/
 
 ```powershell
 # Core library + tests (plain dotnet, fast)
-dotnet build  E:\dev\personal\mc_controller\pc\McController.Core\McController.Core.csproj
-dotnet test   E:\dev\personal\mc_controller\pc\McController.Core.Tests\McController.Core.Tests.csproj
+dotnet build  pc\McController.Core\McController.Core.csproj
+dotnet test   pc\McController.Core.Tests\McController.Core.Tests.csproj
 
 # WinUI 3 app — uses VS Build Tools' MSBuild (Windows App SDK targets)
 & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
-    E:\dev\personal\mc_controller\pc\McController.App\McController.App.csproj `
+    pc\McController.App\McController.App.csproj `
     -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
 
 # Run the app
-Start-Process E:\dev\personal\mc_controller\pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
+Start-Process pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
 
 # SendInput self-test (Core has a CLI entry behind `--selftest`; wired through App's Program.Main)
 & <app-exe> --selftest
 
 # Installer (after a Release publish)
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" E:\dev\personal\mc_controller\installer\McController.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\McController.iss
 
 # Android
-cd E:\dev\personal\mc_controller\android
+cd android
 gradle :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb reverse tcp:34555 tcp:34555                                          # USB mode

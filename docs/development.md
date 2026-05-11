@@ -47,7 +47,7 @@ mc_controller/
 ├── pc/
 │   ├── McController.sln
 │   ├── McController.Core/          protocol + input + diag + config (.NET 8)
-│   ├── McController.Core.Tests/    xUnit, 40+ tests
+│   ├── McController.Core.Tests/    xUnit, 53 tests
 │   └── McController.App/           WinUI 3 desktop shell (Windows-only)
 ├── installer/
 │   ├── McController.iss            Inno Setup script
@@ -59,7 +59,6 @@ mc_controller/
 │   ├── gradle/libs.versions.toml   version catalog
 │   ├── local.properties            (gitignored, machine-specific)
 │   └── app/...
-└── tools/                          helper scripts
 ```
 
 ## 3. Build / run
@@ -68,10 +67,10 @@ mc_controller/
 
 ```powershell
 # Core library
-dotnet build E:\dev\personal\mc_controller\pc\McController.Core\McController.Core.csproj -c Debug
+dotnet build pc\McController.Core\McController.Core.csproj -c Debug
 
 # Tests
-dotnet test  E:\dev\personal\mc_controller\pc\McController.Core.Tests\McController.Core.Tests.csproj  # expect 40+/40+ pass
+dotnet test  pc\McController.Core.Tests\McController.Core.Tests.csproj  # expect 53/53 pass
 ```
 
 ### PC App (WinUI 3 — use MSBuild, not `dotnet build`)
@@ -84,11 +83,11 @@ Stop-Process -Name McController.App -Force -ErrorAction SilentlyContinue
 
 # Build (Debug, x64)
 & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
-    E:\dev\personal\mc_controller\pc\McController.App\McController.App.csproj `
+    pc\McController.App\McController.App.csproj `
     -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
 
 # Run
-Start-Process E:\dev\personal\mc_controller\pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
+Start-Process pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
 
 # SendInput self-test (smoke-checks the OS injection path against MC)
 & "<above exe path>" --selftest
@@ -112,11 +111,11 @@ See [installer/README.md](../installer/README.md). The summary:
 ```powershell
 # 1. Release publish
 & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
-    E:\dev\personal\mc_controller\pc\McController.App\McController.App.csproj `
+    pc\McController.App\McController.App.csproj `
     -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 -t:Rebuild
 
 # 2. Compile installer
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" E:\dev\personal\mc_controller\installer\McController.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\McController.iss
 
 # → installer\out\McController-Setup-<version>.exe
 ```
@@ -125,7 +124,7 @@ See [installer/README.md](../installer/README.md). The summary:
 
 ```powershell
 # Build (use the system gradle; no wrapper jar in repo)
-cd E:\dev\personal\mc_controller\android
+cd android
 gradle :app:assembleDebug --console=plain
 
 # Output APK
@@ -153,7 +152,10 @@ adb reverse --list                  # expect "UsbFfs tcp:34555 tcp:34555"
 ```
 This forwards `127.0.0.1:34555` on the phone to `127.0.0.1:34555` on the PC over USB. The Android app's "Connect (USB / 127.0.0.1)" button uses this. Re-run after every USB disconnect.
 
-(Step 12 will automate this on PC server launch; not yet wired.)
+In practice you don't need to run this by hand any more — the PC app's
+`AdbDiscovery` service polls `adb devices` every 3 s and fires `adb reverse`
+per detected device automatically. The manual command is still useful for
+diagnostics.
 
 ## 4. Day-to-day loop
 
@@ -163,18 +165,18 @@ A typical incremental iteration:
 # 1. Edit code in your IDE / VS Code
 
 # 2. Core-only change (codec, mapper, curve, etc.)?
-dotnet build E:\dev\personal\mc_controller\pc\McController.Core\McController.Core.csproj
+dotnet build pc\McController.Core\McController.Core.csproj
 # … the App project will rebuild against the fresh Core DLL on its next launch.
 
 # 3. PC App / UI change?
 Stop-Process -Name McController.App -Force -ErrorAction SilentlyContinue
 & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
-    E:\dev\personal\mc_controller\pc\McController.App\McController.App.csproj `
+    pc\McController.App\McController.App.csproj `
     -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
-Start-Process E:\dev\personal\mc_controller\pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
+Start-Process pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\McController.App.exe
 
 # 4. Android side change?
-cd E:\dev\personal\mc_controller\android
+cd android
 gradle :app:assembleDebug --console=plain
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am force-stop com.mccontroller
@@ -238,7 +240,7 @@ If neither connects: check the server banner output for the actual port + bound 
 ## 8. Tests
 
 ```powershell
-dotnet test E:\dev\personal\mc_controller\pc\McController.Core.Tests\McController.Core.Tests.csproj
+dotnet test pc\McController.Core.Tests\McController.Core.Tests.csproj
 ```
 
 Covers:
