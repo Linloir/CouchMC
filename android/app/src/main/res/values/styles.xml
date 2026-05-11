@@ -38,22 +38,4 @@
         <item name="android:background">?attr/colorOutlineVariant</item>
     </style>
 
-    <!--
-        Wrapping styles that force the M3 icon-button variants to render
-        as actual circles. The Material 1.11 IconButton.Filled style sets
-        cornerSize to a small fixed dp value (≈8 dp), which beats both
-        app:cornerRadius and app:shapeAppearanceOverlay set on the layout
-        element. Extending the variant and overriding cornerSize at the
-        style level is the only reliable way — the child style's
-        attribute wins against its parent's same-named attribute.
-    -->
-    <style name="Widget.McController.IconButton.Circle.Filled"
-        parent="Widget.Material3.Button.IconButton.Filled">
-        <item name="cornerSize">50%</item>
-    </style>
-
-    <style name="Widget.McController.IconButton.Circle.Tonal"
-        parent="Widget.Material3.Button.IconButton.Filled.Tonal">
-        <item name="cornerSize">50%</item>
-    </style>
 </resources>
