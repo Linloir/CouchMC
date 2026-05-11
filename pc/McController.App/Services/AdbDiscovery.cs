@@ -24,6 +24,13 @@ public sealed class AdbDiscovery : IDisposable
     {
         /// <summary>Single-line "serial · state" subtitle for SettingsCard binding.</summary>
         public string Subtitle => $"{Serial} · {State}";
+
+        /// <summary>
+        /// Localized "App installed" tag bound from the device row template.
+        /// Looking it up here keeps the DataTemplate static — no per-row
+        /// code needed.
+        /// </summary>
+        public string AppInstalledLabel => Util.L.Get("discovery.usb.appInstalled", "已安装 App");
     }
 
     public event Action<IReadOnlyList<Device>>? OnUpdate;

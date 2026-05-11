@@ -53,19 +53,19 @@
                         SelectionChanged="Nav_SelectionChanged">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="移动控制器"
+                <NavigationViewItem x:Name="NavRoot" Content="移动控制器"
                                     IsExpanded="True"
                                     SelectsOnInvoked="False">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7FC;"/>
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem Content="设备发现" Tag="discovery">
+                        <NavigationViewItem x:Name="NavDiscovery" Content="设备发现" Tag="discovery">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;"/>
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem Content="设置" Tag="settings">
+                        <NavigationViewItem x:Name="NavSettings" Content="设置" Tag="settings">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;"/>
                             </NavigationViewItem.Icon>
@@ -73,6 +73,19 @@
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavGlobal" Content="全局设置" Tag="global">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE9E9;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavAbout" Content="关于" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE946;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
 
             <Frame x:Name="ContentFrame"/>
         </NavigationView>

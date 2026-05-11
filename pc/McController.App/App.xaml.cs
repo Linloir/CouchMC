@@ -30,7 +30,12 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine($"[App] Unhandled: {args.Exception}");
             try
             {
-                System.IO.File.AppendAllText("mc-controller-errors.log",
+                var dir = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "McController");
+                System.IO.Directory.CreateDirectory(dir);
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(dir, "errors.log"),
                     $"[{DateTime.Now:O}] {args.Exception}\n\n");
             }
             catch { }

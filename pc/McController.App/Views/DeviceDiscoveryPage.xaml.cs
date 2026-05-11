@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 using McController.App.Services;
+using McController.App.Util;
 using McController.Core.Net;
 
 namespace McController.App.Views;
@@ -32,14 +33,36 @@ public sealed partial class DeviceDiscoveryPage : Page
         InitializeComponent();
         _adb = new AdbDiscovery(DispatcherQueue, _host.Config.Port);
         _adb.OnUpdate += OnAdbUpdate;
+        ApplyTranslations();
 
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
     }
 
+    private void ApplyTranslations()
+    {
+        HeaderTitle.Text    = L.Get("discovery.title", HeaderTitle.Text);
+        HeaderSubtitle.Text = L.Get("discovery.subtitle", HeaderSubtitle.Text);
+
+        SectionStatus.Text  = L.Get("discovery.status.section", SectionStatus.Text);
+        StatusCard.Header   = L.Get("discovery.status.header", StatusCard.Header?.ToString() ?? "");
+
+        SectionUsb.Text     = L.Get("discovery.usb.section", SectionUsb.Text);
+        UsbHint.Text        = L.Get("discovery.usb.auto", UsbHint.Text);
+        UsbEmptyText.Text   = L.Get("discovery.usb.empty", UsbEmptyText.Text);
+
+        SectionLan.Text     = L.Get("discovery.lan.section", SectionLan.Text);
+        LanCard.Header      = L.Get("discovery.lan.header", LanCard.Header?.ToString() ?? "");
+        LanCard.Description = L.Get("discovery.lan.desc", LanCard.Description?.ToString() ?? "");
+
+        SectionNet.Text     = L.Get("discovery.net.section", SectionNet.Text);
+        NetCard.Header      = L.Get("discovery.net.header", NetCard.Header?.ToString() ?? "");
+        NetCard.Description = L.Get("discovery.net.desc", NetCard.Description?.ToString() ?? "");
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        StatusCard.Description = $"等待连接... · TCP/UDP {_host.Config.Port}";
+        StatusCard.Description = $"{L.Get("discovery.status.waiting", "等待连接...")} · TCP/UDP {_host.Config.Port}";
         IpList.ItemsSource = _host.LocalIPv4s;
         SubscribeConnectionEvents();
         RefreshConnectionDisplay();
@@ -68,8 +91,11 @@ public sealed partial class DeviceDiscoveryPage : Page
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            StatusCard.Description = $"已连接: {ep}";
-            SetPill("已连接", Color.FromArgb(255, 0x1A, 0x6E, 0x58), Color.FromArgb(255, 0x34, 0xD8, 0xB8));
+            StatusCard.Description = string.Format(
+                L.Get("discovery.status.connected", "已连接: {0}"), ep);
+            SetPill(L.Get("discovery.pill.connected", "已连接"),
+                    Color.FromArgb(255, 0x1A, 0x6E, 0x58),
+                    Color.FromArgb(255, 0x34, 0xD8, 0xB8));
         });
     }
 
@@ -80,8 +106,11 @@ public sealed partial class DeviceDiscoveryPage : Page
 
     private void RefreshConnectionDisplay()
     {
-        StatusCard.Description = $"等待连接... · TCP/UDP {_host.Config.Port}";
-        SetPill("未连接", Color.FromArgb(255, 0x3A, 0x3A, 0x3A), Color.FromArgb(255, 0xBB, 0xBB, 0xBB));
+        StatusCard.Description =
+            $"{L.Get("discovery.status.waiting", "等待连接...")} · TCP/UDP {_host.Config.Port}";
+        SetPill(L.Get("discovery.pill.disconnected", "未连接"),
+                Color.FromArgb(255, 0x3A, 0x3A, 0x3A),
+                Color.FromArgb(255, 0xBB, 0xBB, 0xBB));
     }
 
     private void SetPill(string text, Color bg, Color fg)

@@ -6,13 +6,8 @@
     xmlns:tk="using:CommunityToolkit.WinUI.Controls"
     xmlns:ctrl="using:McController.App.Controls">
 
-    <!-- 3-column Grid centers the content column. Side columns share
-         remaining viewport space equally; middle has a high star weight
-         + MaxWidth so it always fills (up to the cap) regardless of
-         children's natural widths. Earlier attempts using StackPanel
-         HA=Center or ScrollViewer.HorizontalContentAlignment sized the
-         column to its widest child, which made cards collapse on pages
-         with short text. -->
+    <!-- 3-column Grid centers the content column; star weights + MaxWidth
+         keep cards filling the available width regardless of text length. -->
     <ScrollViewer x:Name="Scroller"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
@@ -25,12 +20,12 @@
             </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
 
-            <TextBlock Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
-            <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
+            <TextBlock x:Name="HeaderTitle"    Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
+            <TextBlock x:Name="HeaderSubtitle" Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
 
             <!-- ===== 服务 ===== -->
-            <TextBlock Text="服务" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,8"/>
-            <tk:SettingsCard Header="服务端口" Description="服务正在监听...">
+            <TextBlock x:Name="SectionService" Text="服务" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,8"/>
+            <tk:SettingsCard x:Name="CardPort" Header="服务端口" Description="服务正在监听...">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE839;"/>
                 </tk:SettingsCard.HeaderIcon>
@@ -42,8 +37,8 @@
             </tk:SettingsCard>
 
             <!-- ===== 配置方案 ===== -->
-            <TextBlock Text="配置方案" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
-            <tk:SettingsCard Header="当前方案" Description="切换不同的灵敏度、曲线与死区组合">
+            <TextBlock x:Name="SectionProfile" Text="配置方案" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
+            <tk:SettingsCard x:Name="CardProfileCurrent" Header="当前方案" Description="切换不同的灵敏度、曲线与死区组合">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74C;"/>
                 </tk:SettingsCard.HeaderIcon>
@@ -51,28 +46,29 @@
                           DisplayMemberPath="Name"
                           SelectionChanged="ProfileCombo_SelectionChanged"/>
             </tk:SettingsCard>
-            <tk:SettingsCard Header="方案名称" Description="仅作显示用">
+            <tk:SettingsCard x:Name="CardProfileName" Header="方案名称" Description="仅作显示用">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AC;"/>
                 </tk:SettingsCard.HeaderIcon>
                 <TextBox x:Name="ProfileNameBox" Width="280"
                          TextChanged="ProfileNameBox_TextChanged"/>
             </tk:SettingsCard>
-            <tk:SettingsCard Header="方案管理" Description="新建、复制、删除或恢复当前方案">
+            <tk:SettingsCard x:Name="CardProfileManage" Header="方案管理" Description="新建、复制、删除或恢复当前方案">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8FD;"/>
                 </tk:SettingsCard.HeaderIcon>
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="新建" Click="NewProfile_Click" MinWidth="84"/>
-                    <Button Content="复制" Click="DuplicateProfile_Click" MinWidth="84"/>
-                    <Button Content="恢复默认" Click="RestoreDefaults_Click" MinWidth="84"/>
-                    <Button Content="删除" Click="DeleteProfile_Click" MinWidth="84"/>
+                    <Button x:Name="BtnNewProfile"      Content="新建"      Click="NewProfile_Click" MinWidth="84"/>
+                    <Button x:Name="BtnDuplicateProfile" Content="复制"     Click="DuplicateProfile_Click" MinWidth="84"/>
+                    <Button x:Name="BtnRestoreDefaults" Content="恢复默认"  Click="RestoreDefaults_Click" MinWidth="84"/>
+                    <Button x:Name="BtnDeleteProfile"   Content="删除"      Click="DeleteProfile_Click" MinWidth="84"/>
                 </StackPanel>
             </tk:SettingsCard>
 
             <!-- ===== 视角 ===== -->
-            <TextBlock Text="视角" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
-            <tk:SettingsCard Header="灵敏度"
+            <TextBlock x:Name="SectionCamera" Text="视角" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
+            <tk:SettingsCard x:Name="CardSensitivity"
+                             Header="灵敏度"
                              Description="鼠标移动的整体放大倍率（建议先关闭 Windows 的「提高指针精度」）">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE962;"/>
@@ -88,13 +84,14 @@
                 </StackPanel>
             </tk:SettingsCard>
 
-            <tk:SettingsExpander Header="曲线（高级）"
+            <tk:SettingsExpander x:Name="ExpanderCurve"
+                                 Header="曲线（高级）"
                                  Description="Linear 仅受灵敏度控制；Power 在此基础上叠加加速曲线">
                 <tk:SettingsExpander.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE9F5;"/>
                 </tk:SettingsExpander.HeaderIcon>
                 <tk:SettingsExpander.Items>
-                    <tk:SettingsCard Header="曲线类型">
+                    <tk:SettingsCard x:Name="CardCurveType" Header="曲线类型">
                         <StackPanel Orientation="Horizontal" Spacing="20">
                             <RadioButton x:Name="CurveLinear" Content="Linear（线性）"
                                          GroupName="curve" Checked="CurveType_Checked"/>
@@ -102,7 +99,7 @@
                                          GroupName="curve" Checked="CurveType_Checked"/>
                         </StackPanel>
                     </tk:SettingsCard>
-                    <tk:SettingsCard Header="加速强度">
+                    <tk:SettingsCard x:Name="CardAccelFactor" Header="加速强度">
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <Slider x:Name="AccelFactorSlider" Width="220"
                                     Minimum="0" Maximum="0.05" StepFrequency="0.001"
@@ -113,7 +110,7 @@
                                        ValueChanged="AccelFactorNumber_ValueChanged"/>
                         </StackPanel>
                     </tk:SettingsCard>
-                    <tk:SettingsCard Header="加速指数">
+                    <tk:SettingsCard x:Name="CardAccelExp" Header="加速指数">
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <Slider x:Name="AccelExpSlider" Width="220"
                                     Minimum="0.5" Maximum="2.5" StepFrequency="0.05"
@@ -124,7 +121,7 @@
                                        ValueChanged="AccelExpNumber_ValueChanged"/>
                         </StackPanel>
                     </tk:SettingsCard>
-                    <tk:SettingsCard Header="最大放大倍率">
+                    <tk:SettingsCard x:Name="CardMaxMul" Header="最大放大倍率">
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <Slider x:Name="MaxMulSlider" Width="220"
                                     Minimum="1" Maximum="5" StepFrequency="0.1"
@@ -135,7 +132,8 @@
                                        ValueChanged="MaxMulNumber_ValueChanged"/>
                         </StackPanel>
                     </tk:SettingsCard>
-                    <tk:SettingsCard Header="实时预览"
+                    <tk:SettingsCard x:Name="CardPreview"
+                                     Header="实时预览"
                                      ContentAlignment="Vertical"
                                      HorizontalContentAlignment="Stretch">
                         <StackPanel Spacing="10" Margin="0,0,0,16">
@@ -143,14 +141,14 @@
                             <StackPanel Orientation="Horizontal" Spacing="24">
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Rectangle Width="18" Height="2" Fill="#5B7FFF" VerticalAlignment="Center"/>
-                                    <TextBlock Text="当前曲线（灵敏度 × 加速）"
+                                    <TextBlock x:Name="LegendCurve" Text="当前曲线（灵敏度 × 加速）"
                                                Opacity="0.7" FontSize="12" VerticalAlignment="Center"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Rectangle Width="18" Height="2" Stroke="#88FFFFFF"
                                                StrokeDashArray="2,1" StrokeThickness="1"
                                                VerticalAlignment="Center"/>
-                                    <TextBlock Text="y = x 参考线（无放大基准）"
+                                    <TextBlock x:Name="LegendRef" Text="y = x 参考线（无放大基准）"
                                                Opacity="0.7" FontSize="12" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </StackPanel>
@@ -160,8 +158,8 @@
             </tk:SettingsExpander>
 
             <!-- ===== 移动 ===== -->
-            <TextBlock Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
-            <tk:SettingsCard Header="死区" Description="摇杆中心忽略的范围">
+            <TextBlock x:Name="SectionMovement" Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
+            <tk:SettingsCard x:Name="CardDeadZone" Header="死区" Description="摇杆中心忽略的范围">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="DeadZoneSlider" Width="220"
                             Minimum="0" Maximum="0.5" StepFrequency="0.01"
@@ -172,7 +170,7 @@
                                ValueChanged="DeadZoneNumber_ValueChanged"/>
                 </StackPanel>
             </tk:SettingsCard>
-            <tk:SettingsCard Header="进入阈值" Description="开始按下方向键的阈值">
+            <tk:SettingsCard x:Name="CardEnter" Header="进入阈值" Description="开始按下方向键的阈值">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="EnterSlider" Width="220"
                             Minimum="0" Maximum="0.6" StepFrequency="0.01"
@@ -183,7 +181,7 @@
                                ValueChanged="EnterNumber_ValueChanged"/>
                 </StackPanel>
             </tk:SettingsCard>
-            <tk:SettingsCard Header="退出阈值" Description="松开方向键的阈值（须小于进入阈值，提供滞回）">
+            <tk:SettingsCard x:Name="CardExit" Header="退出阈值" Description="松开方向键的阈值（须小于进入阈值，提供滞回）">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="ExitSlider" Width="220"
                             Minimum="0" Maximum="0.5" StepFrequency="0.01"
@@ -195,9 +193,7 @@
                 </StackPanel>
             </tk:SettingsCard>
 
-            <!-- Transient auto-save indicator. Sliders/inputs schedule a
-                 debounced save 500 ms after the last change; this label
-                 briefly shows "已保存" when the write hits disk. -->
+            <!-- Transient auto-save indicator. -->
             <TextBlock x:Name="SaveStatus" HorizontalAlignment="Right"
                        Margin="0,16,0,0" Opacity="0.6" FontSize="12"/>
 

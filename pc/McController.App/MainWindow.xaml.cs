@@ -16,7 +16,13 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        Title = "MC Controller";
+        Title = Util.L.Get("app.title", "MC Controller");
+
+        NavRoot.Content      = Util.L.Get("nav.root",      NavRoot.Content?.ToString() ?? "");
+        NavDiscovery.Content = Util.L.Get("nav.discovery", NavDiscovery.Content?.ToString() ?? "");
+        NavSettings.Content  = Util.L.Get("nav.settings",  NavSettings.Content?.ToString() ?? "");
+        NavGlobal.Content    = Util.L.Get("nav.global",    NavGlobal.Content?.ToString() ?? "");
+        NavAbout.Content     = Util.L.Get("nav.about",     NavAbout.Content?.ToString() ?? "");
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -130,7 +136,9 @@ public sealed partial class MainWindow : Window
         Type? target = (item.Tag as string) switch
         {
             "discovery" => typeof(Views.DeviceDiscoveryPage),
-            "settings" => typeof(Views.SettingsPage),
+            "settings"  => typeof(Views.SettingsPage),
+            "global"    => typeof(Views.GlobalSettingsPage),
+            "about"     => typeof(Views.AboutPage),
             _ => null,
         };
         if (target is null) return;

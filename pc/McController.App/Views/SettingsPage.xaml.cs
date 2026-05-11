@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Windows.Globalization.NumberFormatting;
 using McController.App.Services;
+using McController.App.Util;
 using McController.Core.Config;
 
 namespace McController.App.Views;
@@ -49,7 +50,58 @@ public sealed partial class SettingsPage : Page
         _saveStatusTimer.Tick += (_, _) => SaveStatus.Text = "";
 
         ConfigureNumberFormatters();
+        ApplyTranslations();
         Loaded += OnLoaded;
+    }
+
+    /// <summary>
+    /// Substitute the XAML's Chinese placeholder strings with the active
+    /// culture's translations. Run once at construct time — the XAML
+    /// defaults remain visible until L.Get runs, which avoids a flash if
+    /// the user is on the same culture (no-op replacement).
+    /// </summary>
+    private void ApplyTranslations()
+    {
+        HeaderTitle.Text       = L.Get("settings.title", HeaderTitle.Text);
+        HeaderSubtitle.Text    = L.Get("settings.subtitle", HeaderSubtitle.Text);
+
+        SectionService.Text    = L.Get("settings.service.section", SectionService.Text);
+        CardPort.Header        = L.Get("settings.service.port.header", CardPort.Header?.ToString() ?? "");
+
+        SectionProfile.Text    = L.Get("settings.profile.section", SectionProfile.Text);
+        CardProfileCurrent.Header     = L.Get("settings.profile.current.header", CardProfileCurrent.Header?.ToString() ?? "");
+        CardProfileCurrent.Description = L.Get("settings.profile.current.desc", CardProfileCurrent.Description?.ToString() ?? "");
+        CardProfileName.Header        = L.Get("settings.profile.name.header", CardProfileName.Header?.ToString() ?? "");
+        CardProfileName.Description   = L.Get("settings.profile.name.desc", CardProfileName.Description?.ToString() ?? "");
+        CardProfileManage.Header      = L.Get("settings.profile.manage.header", CardProfileManage.Header?.ToString() ?? "");
+        CardProfileManage.Description = L.Get("settings.profile.manage.desc", CardProfileManage.Description?.ToString() ?? "");
+        BtnNewProfile.Content        = L.Get("settings.profile.new",       BtnNewProfile.Content?.ToString() ?? "");
+        BtnDuplicateProfile.Content  = L.Get("settings.profile.duplicate", BtnDuplicateProfile.Content?.ToString() ?? "");
+        BtnRestoreDefaults.Content   = L.Get("settings.profile.restore",   BtnRestoreDefaults.Content?.ToString() ?? "");
+        BtnDeleteProfile.Content     = L.Get("settings.profile.delete",    BtnDeleteProfile.Content?.ToString() ?? "");
+
+        SectionCamera.Text     = L.Get("settings.camera.section", SectionCamera.Text);
+        CardSensitivity.Header        = L.Get("settings.camera.sensitivity.header", CardSensitivity.Header?.ToString() ?? "");
+        CardSensitivity.Description   = L.Get("settings.camera.sensitivity.desc",   CardSensitivity.Description?.ToString() ?? "");
+        ExpanderCurve.Header          = L.Get("settings.camera.curve.header",       ExpanderCurve.Header?.ToString() ?? "");
+        ExpanderCurve.Description     = L.Get("settings.camera.curve.desc",         ExpanderCurve.Description?.ToString() ?? "");
+        CardCurveType.Header          = L.Get("settings.camera.curve.type",         CardCurveType.Header?.ToString() ?? "");
+        CurveLinear.Content           = L.Get("settings.camera.curve.linear",       CurveLinear.Content?.ToString() ?? "");
+        CurvePower.Content            = L.Get("settings.camera.curve.power",        CurvePower.Content?.ToString() ?? "");
+        CardAccelFactor.Header        = L.Get("settings.camera.curve.factor",       CardAccelFactor.Header?.ToString() ?? "");
+        CardAccelExp.Header           = L.Get("settings.camera.curve.exp",          CardAccelExp.Header?.ToString() ?? "");
+        CardMaxMul.Header             = L.Get("settings.camera.curve.maxmul",       CardMaxMul.Header?.ToString() ?? "");
+        CardPreview.Header            = L.Get("settings.camera.curve.preview",      CardPreview.Header?.ToString() ?? "");
+        LegendCurve.Text              = L.Get("settings.camera.curve.legend.curve", LegendCurve.Text);
+        LegendRef.Text                = L.Get("settings.camera.curve.legend.ref",   LegendRef.Text);
+
+        SectionMovement.Text   = L.Get("settings.movement.section", SectionMovement.Text);
+        CardDeadZone.Header       = L.Get("settings.movement.deadzone.header", CardDeadZone.Header?.ToString() ?? "");
+        CardDeadZone.Description  = L.Get("settings.movement.deadzone.desc",   CardDeadZone.Description?.ToString() ?? "");
+        CardEnter.Header          = L.Get("settings.movement.enter.header",    CardEnter.Header?.ToString() ?? "");
+        CardEnter.Description     = L.Get("settings.movement.enter.desc",      CardEnter.Description?.ToString() ?? "");
+        CardExit.Header           = L.Get("settings.movement.exit.header",     CardExit.Header?.ToString() ?? "");
+        CardExit.Description      = L.Get("settings.movement.exit.desc",       CardExit.Description?.ToString() ?? "");
     }
 
     /// <summary>
@@ -69,11 +121,11 @@ public sealed partial class SettingsPage : Page
         try
         {
             _host.SaveConfig();
-            ShowStatus("已保存");
+            ShowStatus(L.Get("settings.save.saved", "已保存"));
         }
         catch (Exception ex)
         {
-            ShowStatus("保存失败: " + ex.Message);
+            ShowStatus(string.Format(L.Get("settings.save.failed", "保存失败: {0}"), ex.Message));
         }
     }
 
@@ -116,6 +168,7 @@ public sealed partial class SettingsPage : Page
     {
         _loading = true;
         PortBox.Value = _host.Config.Port;
+        CardPort.Description = L.Get("settings.service.port.listening", "服务正在监听...");
         ProfileCombo.ItemsSource = _profiles.Profiles;
         ProfileCombo.SelectedItem = _profiles.ActiveProfile;
         RefreshFromProfile(_profiles.ActiveProfile);
@@ -199,7 +252,8 @@ public sealed partial class SettingsPage : Page
 
     private void NewProfile_Click(object sender, RoutedEventArgs e)
     {
-        var p = _profiles.AddNew("新方案 " + (_profiles.Profiles.Count + 1));
+        var template = L.Get("settings.profile.newName", "新方案 {0}");
+        var p = _profiles.AddNew(string.Format(template, _profiles.Profiles.Count + 1));
         ProfileCombo.SelectedItem = p;
         ScheduleAutoSave();
     }
@@ -213,9 +267,10 @@ public sealed partial class SettingsPage : Page
 
     private async void RestoreDefaults_Click(object sender, RoutedEventArgs e)
     {
-        var ok = await ConfirmAsync(
-            $"将当前方案「{Active.Name}」的灵敏度、曲线与死区参数重置为默认值？",
-            "恢复默认设置");
+        var msg = string.Format(L.Get("settings.profile.restore.confirm",
+                                      "将当前方案「{0}」的灵敏度、曲线与死区参数重置为默认值？"),
+                                Active.Name);
+        var ok = await ConfirmAsync(msg, L.Get("settings.profile.restore.title", "恢复默认设置"));
         if (!ok) return;
         // Reset only the tunable parameters on the active profile. Keep the
         // profile's id and name (it's still "this" profile, just with
@@ -230,10 +285,11 @@ public sealed partial class SettingsPage : Page
     {
         if (_profiles.Profiles.Count <= 1)
         {
-            ShowStatus("至少保留一个方案");
+            ShowStatus(L.Get("settings.profile.atLeastOne", "至少保留一个方案"));
             return;
         }
-        var ok = await ConfirmAsync($"确定要删除「{Active.Name}」？", "删除配置方案");
+        var msg = string.Format(L.Get("settings.profile.delete.confirm", "确定要删除「{0}」？"), Active.Name);
+        var ok = await ConfirmAsync(msg, L.Get("settings.profile.delete.title", "删除配置方案"));
         if (!ok) return;
         _profiles.Delete(Active);
         ProfileCombo.SelectedItem = _profiles.ActiveProfile;
@@ -247,8 +303,8 @@ public sealed partial class SettingsPage : Page
         {
             Title = title,
             Content = message,
-            PrimaryButtonText = "确定",
-            CloseButtonText = "取消",
+            PrimaryButtonText = L.Get("settings.dialog.ok", "确定"),
+            CloseButtonText = L.Get("settings.dialog.cancel", "取消"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = XamlRoot,
         };

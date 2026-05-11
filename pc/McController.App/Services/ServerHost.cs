@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using McController.Core.Config;
@@ -43,10 +44,10 @@ public sealed class ServerHost : IDisposable
     private volatile bool _clientConnected;
     private bool _disposed;
 
-    public ServerHost(string configPath = "config.json")
+    public ServerHost(string? configPath = null)
     {
-        ConfigPath = configPath;
-        Config = ConfigStore.LoadOrDefault(configPath);
+        ConfigPath = configPath ?? ResolveDefaultConfigPath();
+        Config = ConfigStore.LoadOrDefault(ConfigPath);
         Stats = new ConnectionStats();
         WindowMonitor = new WindowStateMonitor();
         Injector = new Win32InputInjector();
@@ -210,6 +211,32 @@ public sealed class ServerHost : IDisposable
                 break;
         }
         Stats.IncrementLook();
+    }
+
+    /// <summary>
+    /// Canonical user-scope config location: %APPDATA%\McController\config.json.
+    /// Migrates a legacy config.json sitting next to the exe on first launch
+    /// so users who upgrade from a pre-install build don't lose their tuning.
+    /// </summary>
+    public static string ResolveDefaultConfigPath()
+    {
+        var dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "McController");
+        Directory.CreateDirectory(dir);
+        var target = Path.Combine(dir, "config.json");
+
+        if (!File.Exists(target))
+        {
+            // One-shot migration from the old working-directory location.
+            var legacy = Path.Combine(AppContext.BaseDirectory, "config.json");
+            if (File.Exists(legacy))
+            {
+                try { File.Move(legacy, target); }
+                catch { /* best-effort; if it fails we'll start with defaults */ }
+            }
+        }
+        return target;
     }
 
     private static IReadOnlyList<string> CollectLocalIPv4s()

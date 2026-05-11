@@ -4,6 +4,7 @@ using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using McController.App.Util;
 
 namespace McController.App.Services;
 
@@ -36,10 +37,10 @@ public sealed class TrayService : IDisposable
         // icon if the file is missing for any reason.
         var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
 
-        var openItem = new MenuFlyoutItem { Text = "打开面板" };
+        var openItem = new MenuFlyoutItem { Text = L.Get("tray.open", "打开面板") };
         openItem.Click += (_, _) => _showWindow();
 
-        var exitItem = new MenuFlyoutItem { Text = "退出服务" };
+        var exitItem = new MenuFlyoutItem { Text = L.Get("tray.exit", "退出服务") };
         exitItem.Click += (_, _) => _exitApp();
 
         var menu = new MenuFlyout();
@@ -49,7 +50,7 @@ public sealed class TrayService : IDisposable
 
         _icon = new TaskbarIcon
         {
-            ToolTipText = "MC Controller",
+            ToolTipText = L.Get("app.tooltip", "MC Controller"),
             ContextFlyout = menu,
             LeftClickCommand = new RelayCommand(_showWindow),
             DoubleClickCommand = new RelayCommand(_showWindow),
