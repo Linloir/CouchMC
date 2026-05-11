@@ -73,7 +73,7 @@
             <!-- ===== LAN section ===== -->
             <TextBlock Text="局域网设备" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="正在向局域网广播服务地址"
-                             Description="每秒向 UDP 34556 广播 ANNOUNCE 包，手机端连接界面会自动列出本机。等待手机端发现监听器实现。">
+                             Description="每秒向 UDP 34556 广播 ANNOUNCE 包，手机端连接界面会自动列出本机。">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE701;"/>
                 </tk:SettingsCard.HeaderIcon>
