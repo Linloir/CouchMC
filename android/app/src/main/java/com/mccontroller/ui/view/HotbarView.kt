@@ -103,11 +103,19 @@ class HotbarView @JvmOverloads constructor(
                     if (slot >= 0) {
                         pointerId = e.getPointerId(e.actionIndex)
                         pressedSlot = slot
-                        selectedSlot = slot
                         hasSwiped = false
                         relAccumPx = 0f
                         relLastX = e.getX(e.actionIndex)
-                        onSelect?.invoke(slot)
+                        // Precise: commit selection immediately for snappy tap.
+                        // Relative: defer — tap commits on UP, swipe advances
+                        // from the current selection (not the touch position),
+                        // long-press commits when the timer fires. This is what
+                        // makes Relative feel like a scroll wheel rather than a
+                        // position-based slot picker.
+                        if (swipeMode == com.mccontroller.core.HotbarSwipeMode.Precise) {
+                            selectedSlot = slot
+                            onSelect?.invoke(slot)
+                        }
                         scheduleLongPress()
                         invalidate()
                     }
@@ -124,6 +132,16 @@ class HotbarView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
                 if (e.getPointerId(e.actionIndex) == pointerId) {
+                    // Relative-mode tap: no swipe and no long-press fired, so
+                    // commit the touched slot now (it was deferred on DOWN).
+                    val isTap = !hasSwiped && !isDropping &&
+                        e.actionMasked != MotionEvent.ACTION_CANCEL
+                    if (isTap && pressedSlot >= 0 &&
+                        swipeMode == com.mccontroller.core.HotbarSwipeMode.Relative
+                    ) {
+                        selectedSlot = pressedSlot
+                        onSelect?.invoke(pressedSlot)
+                    }
                     pointerId = MotionEvent.INVALID_POINTER_ID
                     pressedSlot = -1
                     hasSwiped = false
@@ -195,6 +213,14 @@ class HotbarView @JvmOverloads constructor(
         val r = object : Runnable {
             override fun run() {
                 if (pressedSlot < 0) return
+                // Relative mode defers slot selection on DOWN, so the first
+                // fire commits it — guaranteeing the drop targets the pressed
+                // slot (and not whatever was selected before). The guard makes
+                // this a no-op in precise mode and on repeat fires.
+                if (selectedSlot != pressedSlot) {
+                    selectedSlot = pressedSlot
+                    onSelect?.invoke(pressedSlot)
+                }
                 if (!isDropping) {
                     isDropping = true
                     invalidate()
