@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Adaptive-icon foreground. 108dp canvas, content safely confined to
-    the 66×66 centre region so every system mask (circle, squircle,
-    rounded-square) reveals the whole motif.
+    Adaptive-icon foreground — classic Minecraft grass block in
+    isometric view. 108-dp canvas with all content inside the
+    central 66 × 66 safe zone so every adaptive-icon mask
+    (circle, squircle, rounded square) reveals the full block.
 
-    Motif: an abstract landscape phone with two thumb-zone dots — left
-    one larger (joystick), right one smaller (cursor pointer). Reads as
-    "phone as controller" without literal labels. White on the slate
-    background for a clean, low-saturation look.
+    Geometry (visible faces):
+      • TOP    — diamond, vertices (54,18) (84,33) (54,48) (24,33)
+      • LEFT   — rhombus, vertices (24,33) (54,48) (54,84) (24,69)
+      • RIGHT  — rhombus, vertices (54,48) (84,33) (84,69) (54,84)
+
+    Colours follow the classic MC grass-block palette:
+      • Top grass:    #7BAC4B
+      • Left dirt:    #8B6043   (in light)
+      • Right dirt:   #6E4A30   (in shade)
+      • Grass overhang strips at the top of each side face,
+        tinted to suggest light + shade respectively.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -15,29 +23,29 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Phone body outline (landscape, rounded corners) -->
+    <!-- TOP face (grass) -->
     <path
-        android:pathData="M 30,40 L 78,40 A 5,5 0 0 1 83,45 L 83,69 A 5,5 0 0 1 78,74 L 30,74 A 5,5 0 0 1 25,69 L 25,45 A 5,5 0 0 1 30,40 Z"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.5"
-        android:fillColor="#00000000" />
+        android:fillColor="#7BAC4B"
+        android:pathData="M 54,18 L 84,33 L 54,48 L 24,33 Z" />
 
-    <!-- Left thumb pad / joystick — larger filled circle -->
+    <!-- LEFT face — dirt -->
     <path
-        android:pathData="M 39,57 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"
-        android:fillColor="#FFFFFF" />
+        android:fillColor="#8B6043"
+        android:pathData="M 24,33 L 54,48 L 54,84 L 24,69 Z" />
 
-    <!-- Right thumb pad / look — smaller filled circle, deliberately offset -->
+    <!-- LEFT face — grass overhang strip (slightly brighter green) -->
     <path
-        android:pathData="M 71,54 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0"
-        android:fillColor="#FFFFFF" />
+        android:fillColor="#84B854"
+        android:pathData="M 24,33 L 54,48 L 54,54 L 24,39 Z" />
 
-    <!-- Slight motion trail under right dot — implies movement, ties to "look pad" -->
+    <!-- RIGHT face — dirt in shade -->
     <path
-        android:pathData="M 65,60 L 72,60"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.4"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:strokeAlpha="0.55" />
+        android:fillColor="#6E4A30"
+        android:pathData="M 54,48 L 84,33 L 84,69 L 54,84 Z" />
+
+    <!-- RIGHT face — grass overhang strip (darker green, in shade) -->
+    <path
+        android:fillColor="#5D8C3E"
+        android:pathData="M 54,48 L 84,33 L 84,39 L 54,54 Z" />
+
 </vector>
