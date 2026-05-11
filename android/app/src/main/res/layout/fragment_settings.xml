@@ -108,14 +108,22 @@
                                 tools:text="Default" />
 
                             <!--
-                                Three M3 icon buttons. Their shape is
-                                forced to a true circle by code in
-                                SettingsFragment (setAllCornerSizes
-                                with a 50 % RelativeCornerSize) — XML
-                                attributes alone could not override the
-                                IconButton parent style's cornerSize in
-                                Material 1.11, so we install the shape
-                                model programmatically.
+                                Three M3 icon buttons.
+
+                                The IconButton parent style inherits a
+                                48 dp minHeight from Widget.Material3
+                                .Button, which silently stretched the
+                                buttons taller than `layout_height` —
+                                they came out 44 dp wide × 48 dp tall.
+                                Setting minWidth/minHeight to 0 here
+                                lets the layout dimensions stick, so
+                                the buttons are an honest 44 × 44.
+
+                                The circular shape is then installed in
+                                SettingsFragment via setAllCornerSizes
+                                (RelativeCornerSize(0.5f)) — XML alone
+                                can't override the parent style's
+                                fixed-dp cornerSize in Material 1.11.
                             -->
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_new"
@@ -123,6 +131,8 @@
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="8dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
                                 android:insetTop="0dp"
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
@@ -138,6 +148,8 @@
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
                                 android:insetTop="0dp"
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
@@ -153,6 +165,8 @@
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
                                 android:insetTop="0dp"
                                 android:insetBottom="0dp"
                                 android:padding="0dp"

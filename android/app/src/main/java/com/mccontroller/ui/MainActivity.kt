@@ -1,6 +1,8 @@
 package com.mccontroller.ui
 
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -84,6 +86,22 @@ class MainActivity : AppCompatActivity() {
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updatePadding(bottom = bars.bottom)
             insets
+        }
+        // BottomNavigationView auto-installs a long-press tooltip on each
+        // item containing the item's title. Since `labelVisibilityMode`
+        // is `labeled`, the title is *already* visible directly under the
+        // icon — the tooltip is redundant. And the system positions it
+        // near the touch point rather than above the icon, which led to
+        // the tooltip floating up and to the side of where the user
+        // pressed. Walk the view tree once after layout and clear
+        // tooltipText so the long-press becomes a silent no-op.
+        binding.bottomNav.post { clearTooltipsRecursive(binding.bottomNav) }
+    }
+
+    private fun clearTooltipsRecursive(v: View) {
+        v.tooltipText = null
+        if (v is ViewGroup) {
+            for (i in 0 until v.childCount) clearTooltipsRecursive(v.getChildAt(i))
         }
     }
 
