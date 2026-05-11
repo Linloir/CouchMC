@@ -10,7 +10,7 @@
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
                   Padding="40,8,40,40">
-        <StackPanel MaxWidth="920" HorizontalAlignment="Center" Spacing="0">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Center" Spacing="0">
 
             <TextBlock Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
@@ -74,7 +74,8 @@
                 </StackPanel>
             </tk:SettingsCard>
 
-            <tk:SettingsExpander Header="曲线（高级）" Description="加速曲线、最大倍率与实时预览">
+            <tk:SettingsExpander Header="曲线（高级）"
+                                 Description="Linear 仅受灵敏度控制；Power 在此基础上叠加加速曲线">
                 <tk:SettingsExpander.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE9F5;"/>
                 </tk:SettingsExpander.HeaderIcon>
@@ -123,7 +124,23 @@
                     <tk:SettingsCard Header="实时预览"
                                      ContentAlignment="Vertical"
                                      HorizontalContentAlignment="Stretch">
-                        <ctrl:CurveCanvas x:Name="CurvePreview" Height="200"/>
+                        <StackPanel Spacing="10">
+                            <ctrl:CurveCanvas x:Name="CurvePreview" Height="200"/>
+                            <StackPanel Orientation="Horizontal" Spacing="24">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Rectangle Width="18" Height="2" Fill="#5B7FFF" VerticalAlignment="Center"/>
+                                    <TextBlock Text="当前曲线（灵敏度 × 加速）"
+                                               Opacity="0.7" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Rectangle Width="18" Height="2" Stroke="#88FFFFFF"
+                                               StrokeDashArray="2,1" StrokeThickness="1"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="y = x 参考线（无放大基准）"
+                                               Opacity="0.7" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
                     </tk:SettingsCard>
                 </tk:SettingsExpander.Items>
             </tk:SettingsExpander>

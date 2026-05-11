@@ -14,7 +14,7 @@
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
                   Padding="40,8,40,40">
-        <StackPanel MaxWidth="920" HorizontalAlignment="Center" Spacing="0">
+        <StackPanel MaxWidth="1200" HorizontalAlignment="Center" Spacing="0">
 
             <TextBlock Text="设备发现" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器"

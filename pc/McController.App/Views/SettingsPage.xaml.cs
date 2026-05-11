@@ -45,36 +45,38 @@ public sealed partial class SettingsPage : Page
     }
 
     /// <summary>
-    /// Without an explicit NumberFormatter, NumberBox shows machine-precision
-    /// doubles like 0.30000000000000004 which overflows the input. Set a
-    /// FractionDigits-clamped formatter per box so the displayed text matches
-    /// the slider's step granularity.
+    /// Without an explicit formatter, NumberBox spills machine-precision
+    /// doubles (0.30000000000000004) into the input. DecimalFormatter alone
+    /// isn't enough — FractionDigits is the *minimum* display digits, not
+    /// the max. Pair it with an IncrementNumberRounder so the displayed
+    /// text rounds to the slider's step granularity.
     /// </summary>
     private void ConfigureNumberFormatters()
     {
-        var fmt2 = NewFormatter(2);
-        var fmt3 = NewFormatter(3);
-        var fmtInt = NewFormatter(0);
-
-        PortBox.NumberFormatter = fmtInt;
-        SensitivityNumber.NumberFormatter = fmt2;
-        AccelFactorNumber.NumberFormatter = fmt3;
-        AccelExpNumber.NumberFormatter = fmt2;
-        MaxMulNumber.NumberFormatter = fmt2;
-        DeadZoneNumber.NumberFormatter = fmt2;
-        EnterNumber.NumberFormatter = fmt2;
-        ExitNumber.NumberFormatter = fmt2;
+        PortBox.NumberFormatter = NewFormatter(fractionDigits: 0, increment: 1);
+        SensitivityNumber.NumberFormatter = NewFormatter(2, 0.01);
+        AccelFactorNumber.NumberFormatter = NewFormatter(3, 0.001);
+        AccelExpNumber.NumberFormatter = NewFormatter(2, 0.01);
+        MaxMulNumber.NumberFormatter = NewFormatter(2, 0.1);
+        DeadZoneNumber.NumberFormatter = NewFormatter(2, 0.01);
+        EnterNumber.NumberFormatter = NewFormatter(2, 0.01);
+        ExitNumber.NumberFormatter = NewFormatter(2, 0.01);
     }
 
-    private static DecimalFormatter NewFormatter(int fractionDigits)
+    private static DecimalFormatter NewFormatter(int fractionDigits, double increment)
     {
-        var f = new DecimalFormatter
+        var rounder = new IncrementNumberRounder
+        {
+            Increment = increment,
+            RoundingAlgorithm = RoundingAlgorithm.RoundHalfAwayFromZero,
+        };
+        return new DecimalFormatter
         {
             IntegerDigits = 1,
             FractionDigits = fractionDigits,
             IsGrouped = false,
+            NumberRounder = rounder,
         };
-        return f;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -220,9 +222,32 @@ public sealed partial class SettingsPage : Page
     // ===== Curve type =====
     private void CurveType_Checked(object sender, RoutedEventArgs e)
     {
-        if (_loading) return;
+        if (_loading)
+        {
+            // _loading is true during RefreshFromProfile — still need to
+            // sync slider IsEnabled to the new value before bailing.
+            UpdatePowerControlsEnabled();
+            return;
+        }
         Active.Camera.CurveType = CurvePower.IsChecked == true ? CurveType.Power : CurveType.Linear;
+        UpdatePowerControlsEnabled();
         CurvePreview.SetCamera(Active.Camera);
+    }
+
+    /// <summary>
+    /// Linear curves have a single parameter (slope = UserSensitivity);
+    /// the accel sliders only matter in Power mode. Gray them out in
+    /// Linear so the user isn't tweaking dead knobs.
+    /// </summary>
+    private void UpdatePowerControlsEnabled()
+    {
+        bool power = CurvePower.IsChecked == true;
+        AccelFactorSlider.IsEnabled = power;
+        AccelFactorNumber.IsEnabled = power;
+        AccelExpSlider.IsEnabled = power;
+        AccelExpNumber.IsEnabled = power;
+        MaxMulSlider.IsEnabled = power;
+        MaxMulNumber.IsEnabled = power;
     }
 
     // ===== Accel factor =====
