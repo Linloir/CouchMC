@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Filled circular button background — M3 "Filled" icon-button look,
+    but as a plain RippleDrawable around an oval shape. Used by the
+    "new profile" chip in Settings.
+
+    Oval shapes ignore corner-radius math entirely (they're always a
+    perfect ellipse fitted to the view bounds), so a square view at
+    any dimension renders as an exact circle. The Material library's
+    cornerSize / shapeAppearance system in 1.11 couldn't be coerced
+    into doing this for an IconButton no matter what was set on the
+    layout — this drawable sidesteps the issue.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorOnPrimary">
+    <item android:id="@android:id/mask">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="?attr/colorPrimary" />
+        </shape>
+    </item>
+</ripple>

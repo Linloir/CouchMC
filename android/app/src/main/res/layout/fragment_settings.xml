@@ -108,71 +108,85 @@
                                 tools:text="Default" />
 
                             <!--
-                                Three M3 icon buttons. Size locked to
-                                48 dp × 48 dp because the parent style's
-                                48 dp minHeight is unavoidable: it gets
-                                re-applied by MaterialButtonHelper even
-                                if we set android:minHeight=0 in XML.
-                                Matching width to height = square = an
-                                actual circle once
-                                SettingsFragment.forceCircle installs a
-                                RelativeCornerSize(0.5f) on the view's
-                                shapeAppearanceModel. (50 % of the
-                                min(width,height), which is now equal to
-                                both, so corners = 24 dp radius.)
+                                After several rounds of fighting M3's
+                                Button.IconButton.* styling (it injects
+                                cornerSize via the shape system AND
+                                stretches dimensions via inherited
+                                minHeight, neither overridable from
+                                layout XML in Material 1.11), the
+                                profile chips were rewritten as plain
+                                FrameLayouts with an oval-shape ripple
+                                drawable for the fill. Oval shapes are
+                                always perfect ellipses fitted to the
+                                view bounds, so a 40 × 40 square view
+                                renders as an exact circle — no
+                                ShapeAppearanceModel gymnastics needed.
+
+                                Height now matches the dropdown's
+                                visual height (~40 dp), so the row
+                                reads as one cluster. ImageView inside
+                                is centred and tinted at bind-time-free
+                                via app:tint.
                             -->
-                            <com.google.android.material.button.MaterialButton
+                            <FrameLayout
                                 android:id="@+id/btn_profile_new"
-                                style="@style/Widget.Material3.Button.IconButton.Filled"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginStart="8dp"
-                                android:minWidth="0dp"
-                                android:minHeight="0dp"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                android:padding="0dp"
-                                android:contentDescription="@string/settings_new_profile"
-                                app:icon="@drawable/ic_add"
-                                app:iconSize="20dp"
-                                app:iconPadding="0dp"
-                                app:iconGravity="textStart" />
+                                android:background="@drawable/circle_btn_filled"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:contentDescription="@string/settings_new_profile">
 
-                            <com.google.android.material.button.MaterialButton
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_add"
+                                    android:importantForAccessibility="no"
+                                    app:tint="?attr/colorOnPrimary" />
+
+                            </FrameLayout>
+
+                            <FrameLayout
                                 android:id="@+id/btn_profile_rename"
-                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginStart="6dp"
-                                android:minWidth="0dp"
-                                android:minHeight="0dp"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                android:padding="0dp"
-                                android:contentDescription="@string/settings_rename_profile"
-                                app:icon="@drawable/ic_edit"
-                                app:iconSize="20dp"
-                                app:iconPadding="0dp"
-                                app:iconGravity="textStart" />
+                                android:background="@drawable/circle_btn_tonal"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:contentDescription="@string/settings_rename_profile">
 
-                            <com.google.android.material.button.MaterialButton
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_edit"
+                                    android:importantForAccessibility="no"
+                                    app:tint="?attr/colorOnSecondaryContainer" />
+
+                            </FrameLayout>
+
+                            <FrameLayout
                                 android:id="@+id/btn_profile_delete"
-                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginStart="6dp"
-                                android:minWidth="0dp"
-                                android:minHeight="0dp"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                android:padding="0dp"
-                                android:contentDescription="@string/settings_delete_profile"
-                                android:backgroundTint="?attr/colorErrorContainer"
-                                app:icon="@drawable/ic_delete"
-                                app:iconSize="20dp"
-                                app:iconPadding="0dp"
-                                app:iconGravity="textStart"
-                                app:iconTint="?attr/colorOnErrorContainer" />
+                                android:background="@drawable/circle_btn_tonal_error"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:contentDescription="@string/settings_delete_profile">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_delete"
+                                    android:importantForAccessibility="no"
+                                    app:tint="?attr/colorOnErrorContainer" />
+
+                            </FrameLayout>
 
                         </LinearLayout>
 

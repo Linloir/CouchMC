@@ -13,11 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.shape.RelativeCornerSize
-import com.google.android.material.shape.ShapeAppearanceModel
 import com.mccontroller.BuildConfig
 import com.mccontroller.R
 import com.mccontroller.core.AppSettings
@@ -59,15 +56,6 @@ class SettingsFragment : Fragment() {
         settingsStore = SettingsStore.get(requireContext())
         profileStore = ProfileStore(requireContext())
 
-        // M3 IconButton.Filled / Filled.Tonal in Material 1.11 paints
-        // its background with a fixed ~8 dp cornerSize that *cannot* be
-        // overridden via app:cornerRadius, app:shapeAppearance, or
-        // app:shapeAppearanceOverlay on the layout, nor via a child
-        // style. The only reliable route: install a shape model on the
-        // view programmatically. RelativeCornerSize(0.5f) is half the
-        // side length — a circle for a square view.
-        forceCircle(binding.btnProfileNew, binding.btnProfileRename, binding.btnProfileDelete)
-
         wireLayoutShortcuts()
         wireProfileSection()
         wireHotbar()
@@ -92,13 +80,6 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun forceCircle(vararg buttons: MaterialButton) {
-        val circle = ShapeAppearanceModel.builder()
-            .setAllCornerSizes(RelativeCornerSize(0.5f))
-            .build()
-        for (b in buttons) b.shapeAppearanceModel = circle
     }
 
     // ----------------------------------------------------------- insets
