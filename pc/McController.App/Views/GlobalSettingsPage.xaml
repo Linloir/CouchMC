@@ -29,6 +29,49 @@
                     </tk:SettingsCard.HeaderIcon>
                     <ToggleSwitch x:Name="StartupToggle" Toggled="StartupToggle_Toggled"/>
                 </tk:SettingsCard>
+
+                <TextBlock x:Name="AppearanceHeading" Text="外观" FontSize="14" FontWeight="SemiBold" Margin="0,24,0,8"/>
+
+                <tk:SettingsCard x:Name="TransparencyCard"
+                                 Header="启用透明效果"
+                                 Description="窗口背景使用 Acrylic 模糊；关闭后改为不透明纯色">
+                    <tk:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE890;"/>
+                    </tk:SettingsCard.HeaderIcon>
+                    <ToggleSwitch x:Name="TransparencyToggle" Toggled="TransparencyToggle_Toggled"/>
+                </tk:SettingsCard>
+
+                <tk:SettingsCard x:Name="ChromeOpacityCard"
+                                 Header="侧栏与标题栏不透明度"
+                                 Description="0% = 完全透明（纯 Acrylic）；100% = 完全遮盖壁纸">
+                    <tk:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A0;"/>
+                    </tk:SettingsCard.HeaderIcon>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Slider x:Name="ChromeOpacitySlider"
+                                Width="220"
+                                Minimum="0" Maximum="100"
+                                TickFrequency="10" TickPlacement="Outside"
+                                ValueChanged="ChromeOpacitySlider_ValueChanged"/>
+                        <TextBlock x:Name="ChromeOpacityValue" VerticalAlignment="Center" MinWidth="44"/>
+                    </StackPanel>
+                </tk:SettingsCard>
+
+                <tk:SettingsCard x:Name="ContentOpacityCard"
+                                 Header="内容区域不透明度"
+                                 Description="壁纸太鲜艳影响阅读时调高；想看到更多壁纸时调低">
+                    <tk:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A1;"/>
+                    </tk:SettingsCard.HeaderIcon>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Slider x:Name="ContentOpacitySlider"
+                                Width="220"
+                                Minimum="0" Maximum="100"
+                                TickFrequency="10" TickPlacement="Outside"
+                                ValueChanged="ContentOpacitySlider_ValueChanged"/>
+                        <TextBlock x:Name="ContentOpacityValue" VerticalAlignment="Center" MinWidth="44"/>
+                    </StackPanel>
+                </tk:SettingsCard>
             </StackPanel>
         </Grid>
     </ScrollViewer>

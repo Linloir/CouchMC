@@ -41,7 +41,11 @@
 
         <!-- NavigationView holds the sidebar + content Frame. WinUI 3's
              native NavigationView gives us the proper Win11 selection bar
-             animation and the built-in pane-toggle button at top-left. -->
+             animation and the built-in pane-toggle button at top-left.
+
+             The sidebar/content tint brushes are installed into Nav.Resources
+             from code-behind (see ApplyAppearance in MainWindow.xaml.cs) so
+             the user can adjust both from the Global Settings page. -->
         <NavigationView x:Name="Nav"
                         Grid.Row="1"
                         PaneDisplayMode="Left"

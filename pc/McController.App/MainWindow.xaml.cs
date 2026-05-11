@@ -7,12 +7,24 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Graphics;
+using Windows.UI;
 using WinRT.Interop;
+using McController.App.Services;
 
 namespace McController.App;
 
 public sealed partial class MainWindow : Window
 {
+    // Tint brushes layered over the SystemBackdrop:
+    //   _chromeBrush  → title bar (AppTitleBar) + sidebar pane background
+    //   _contentBrush → content frame area
+    // Both have their Opacity driven by AppearancePreferences so the user
+    // can dial bleed-through to taste from the global settings page. The
+    // brushes are reused for the lifetime of the window — changing Opacity
+    // on the same instance triggers a redraw without rebuilding the tree.
+    private readonly SolidColorBrush _chromeBrush;
+    private readonly SolidColorBrush _contentBrush;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -36,12 +48,28 @@ public sealed partial class MainWindow : Window
         }
         catch { /* fall back to default icon */ }
 
-        // Desktop Acrylic blurs the *live* content behind the window
-        // (other apps + wallpaper) rather than wallpaper-only the way
-        // MicaBackdrop does. Falls through silently on systems that
-        // don't support it (Win10), leaving the standard solid surface.
-        try { SystemBackdrop = new DesktopAcrylicBackdrop(); }
-        catch { }
+        // Theme-aware tint color. Dark/light pick mirrors the WinUI
+        // SolidBackgroundFillColorBase values; we use a single snapshot
+        // taken at window construction (theme-switch at runtime is rare
+        // for this app and a relaunch is acceptable).
+        var tintColor = Application.Current.RequestedTheme == ApplicationTheme.Dark
+            ? Color.FromArgb(0xFF, 0x20, 0x20, 0x20)
+            : Color.FromArgb(0xFF, 0xF3, 0xF3, 0xF3);
+        _chromeBrush  = new SolidColorBrush(tintColor) { Opacity = 0.0 };
+        _contentBrush = new SolidColorBrush(tintColor) { Opacity = 0.35 };
+
+        // Override the NavigationView pane + content tint resources with
+        // our managed brushes, and paint the title bar with the same
+        // chrome brush so the title bar / sidebar form a single visual
+        // band. Setting these before NavigationView's template applies
+        // means the first paint already uses them.
+        Nav.Resources["NavigationViewExpandedPaneBackground"] = _chromeBrush;
+        Nav.Resources["NavigationViewContentBackground"]      = _contentBrush;
+        AppTitleBar.Background = _chromeBrush;
+
+        ApplyAppearance(AppearancePreferences.Current);
+        AppearancePreferences.Changed += OnAppearanceChanged;
+        Closed += (_, _) => AppearancePreferences.Changed -= OnAppearanceChanged;
 
         // Click-anywhere-to-defocus. Use AddHandler with handledEventsToo
         // so we still see PointerPressed even when inner inputs handled
@@ -67,6 +95,36 @@ public sealed partial class MainWindow : Window
             });
         }
         catch { }
+    }
+
+    private void OnAppearanceChanged(AppearancePreferences.Settings s)
+    {
+        // Changed fires on whichever thread called Update(); marshal to UI.
+        DispatcherQueue.TryEnqueue(() => ApplyAppearance(s));
+    }
+
+    private void ApplyAppearance(AppearancePreferences.Settings s)
+    {
+        if (s.TransparencyEnabled)
+        {
+            // Acrylic active: the brush opacities act as tints over the
+            // live-blurred wallpaper, both adjustable from settings.
+            if (SystemBackdrop is not DesktopAcrylicBackdrop)
+            {
+                try { SystemBackdrop = new DesktopAcrylicBackdrop(); }
+                catch { }
+            }
+            _chromeBrush.Opacity  = s.ChromeOpacity;
+            _contentBrush.Opacity = s.ContentOpacity;
+        }
+        else
+        {
+            // Solid mode: drop the backdrop entirely and force both tints
+            // to fully opaque so the window paints with a flat theme color.
+            SystemBackdrop = null;
+            _chromeBrush.Opacity  = 1.0;
+            _contentBrush.Opacity = 1.0;
+        }
     }
 
     [DllImport("user32.dll")]

@@ -18,7 +18,7 @@
             <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
 
                 <TextBlock x:Name="HeaderTitle" Text="关于" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
-                <TextBlock x:Name="HeaderSubtitle" Text="一些信息和一封情书" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
+                <TextBlock x:Name="HeaderSubtitle" Text="应用信息" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
 
                 <!-- App "hero" header — icon + name + tagline -->
                 <tk:SettingsCard Margin="0,8,0,16">
@@ -50,15 +50,15 @@
                 </tk:SettingsCard>
 
                 <tk:SettingsCard x:Name="LoveCard"
-                                 Header="用爱发电"
+                                 Header="项目说明"
                                  ContentAlignment="Vertical"
                                  HorizontalContentAlignment="Stretch">
                     <tk:SettingsCard.HeaderIcon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEB52;" Foreground="#E0577B"/>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE946;"/>
                     </tk:SettingsCard.HeaderIcon>
                     <TextBlock x:Name="LoveBody"
                                Opacity="0.85" TextWrapping="Wrap" LineHeight="22"
-                               Text="Made with ❤. 如果它让你和好朋友在沙发上多玩一会儿 Minecraft，那就足够了。"/>
+                               Text="一个为自己写的工具，希望也能让你在沙发上更舒服地玩 Minecraft。"/>
                 </tk:SettingsCard>
 
             </StackPanel>

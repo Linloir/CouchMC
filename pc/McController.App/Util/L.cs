@@ -151,17 +151,24 @@ public static class L
         ["global.section.general"] = "通用",
         ["global.startup.header"] = "开机时启动",
         ["global.startup.desc"] = "登录 Windows 后在后台自动运行，托盘图标常驻待机",
+        ["global.section.appearance"] = "外观",
+        ["global.transparency.header"] = "启用透明效果",
+        ["global.transparency.desc"] = "窗口背景使用 Acrylic 模糊；关闭后改为不透明纯色",
+        ["global.chrome.header"] = "侧栏与标题栏不透明度",
+        ["global.chrome.desc"] = "0% = 完全透明（纯 Acrylic）；100% = 完全遮盖壁纸",
+        ["global.content.header"] = "内容区域不透明度",
+        ["global.content.desc"] = "壁纸太鲜艳影响阅读时调高；想看到更多壁纸时调低",
 
         // About
         ["about.title"] = "关于",
-        ["about.subtitle"] = "一些信息和一封情书",
+        ["about.subtitle"] = "应用信息",
         ["about.app.header"] = "MC Controller",
         ["about.app.tagline"] = "把手机变成 Java 版 Minecraft 的触屏控制器",
         ["about.version.header"] = "版本",
         ["about.author.header"] = "开发者",
         ["about.author.value"] = "Linloir",
-        ["about.love.header"] = "用爱发电",
-        ["about.love.body"] = "Made with ❤. 如果它让你和好朋友在沙发上多玩一会儿 Minecraft，那就足够了。",
+        ["about.love.header"] = "项目说明",
+        ["about.love.body"] = "一个为自己写的工具，希望也能让你在沙发上更舒服地玩 Minecraft。",
     };
 
     private static readonly Dictionary<string, string> EnUs = new()
@@ -250,15 +257,22 @@ public static class L
         ["global.section.general"] = "General",
         ["global.startup.header"] = "Run at Windows startup",
         ["global.startup.desc"] = "Quietly start in the background after you sign in; the tray icon stays available",
+        ["global.section.appearance"] = "Appearance",
+        ["global.transparency.header"] = "Enable transparency",
+        ["global.transparency.desc"] = "Use Acrylic blur for the window background; turn off for a solid color",
+        ["global.chrome.header"] = "Sidebar + title bar opacity",
+        ["global.chrome.desc"] = "0% = fully transparent (pure Acrylic); 100% = wallpaper fully hidden",
+        ["global.content.header"] = "Content area opacity",
+        ["global.content.desc"] = "Raise it when a vibrant wallpaper hurts readability; lower it to see more wallpaper",
 
         ["about.title"] = "About",
-        ["about.subtitle"] = "A few facts and a small love letter",
+        ["about.subtitle"] = "App info",
         ["about.app.header"] = "MC Controller",
         ["about.app.tagline"] = "Turn your phone into a touchscreen controller for Java Edition Minecraft",
         ["about.version.header"] = "Version",
         ["about.author.header"] = "Author",
         ["about.author.value"] = "Linloir",
-        ["about.love.header"] = "Made with love",
-        ["about.love.body"] = "Made with ❤. If this lets you and a friend hang out on the couch playing Minecraft for one extra evening, it was worth it.",
+        ["about.love.header"] = "Notes",
+        ["about.love.body"] = "Built for my own couch-gaming setup. Hope it makes your Minecraft sessions a bit more comfortable too.",
     };
 }
