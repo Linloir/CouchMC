@@ -66,6 +66,37 @@ class LookPadView @JvmOverloads constructor(
             }
         }
 
+    /**
+     * When false, in-game touches collapse to a pure camera-move gesture.
+     * No tap-to-LMB, no chained hold. (Setting in the Settings page.)
+     */
+    var inGameQuickClicks: Boolean = true
+        set(value) {
+            if (field != value) {
+                field = value
+                if (mode == ControllerMode.InGame) resetGestureState()
+            }
+        }
+
+    /**
+     * When false, UI-mode touches drive only the cursor. No tap, no
+     * double-tap, no slide-while-held. (Setting in the Settings page.)
+     */
+    var uiQuickClicks: Boolean = true
+        set(value) {
+            if (field != value) {
+                field = value
+                if (mode == ControllerMode.UiInteract) resetGestureState()
+            }
+        }
+
+    /** Whether the tap/hold FSM is active for the current mode. */
+    private fun quickClicksEnabledForMode(): Boolean = when (mode) {
+        ControllerMode.InGame -> inGameQuickClicks
+        ControllerMode.UiInteract -> uiQuickClicks
+        else -> false
+    }
+
     private enum class State {
         IDLE,
         PRIMED1,           // first DOWN; tap-or-drag candidate
@@ -157,6 +188,13 @@ class LookPadView @JvmOverloads constructor(
         primedX = x
         primedY = y
         slidDuringHold = false
+        // Quick clicks disabled → bypass the tap/hold FSM. PRIMED1 with
+        // slop-then-DRAG is the only path forward, so only camera /
+        // cursor deltas can fire.
+        if (!quickClicksEnabledForMode()) {
+            state = State.PRIMED1
+            return
+        }
         when (state) {
             State.IDLE -> {
                 state = State.PRIMED1
@@ -226,7 +264,10 @@ class LookPadView @JvmOverloads constructor(
     private fun handleUp() {
         when (state) {
             State.PRIMED1 -> {
-                if (mode == ControllerMode.InGame) {
+                if (!quickClicksEnabledForMode()) {
+                    // Quick clicks off → no tap event, return to IDLE.
+                    state = State.IDLE
+                } else if (mode == ControllerMode.InGame) {
                     onPrimaryTap?.invoke()
                     state = State.AFTER_TAP
                     handler.postDelayed(afterTapTimeoutRunnable, IN_GAME_CHAIN_WINDOW_MS)

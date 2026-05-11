@@ -76,9 +76,7 @@ class HomeActivity : AppCompatActivity() {
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_settings -> {
-                    // Settings activity lands in Phase 2; placeholder for now.
-                    Snackbar.make(binding.root, R.string.home_open_settings, Snackbar.LENGTH_SHORT)
-                        .show()
+                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false

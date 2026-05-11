@@ -13,11 +13,13 @@ import android.view.View
 import com.mccontroller.core.ConnectionMode
 import com.mccontroller.core.ConnectionState
 import com.mccontroller.core.ControllerMode
+import com.mccontroller.core.AppSettings
 import com.mccontroller.core.ControllerSession
 import com.mccontroller.core.HostStore
 import com.mccontroller.core.LayoutApplier
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ProfileStore
+import com.mccontroller.core.SettingsStore
 import com.mccontroller.databinding.ActivityControllerBinding
 import com.mccontroller.input.LookAccumulator
 import com.mccontroller.net.Protocol
@@ -107,6 +109,14 @@ class ControllerActivity : AppCompatActivity() {
             }
         }
 
+        // App settings — hotbar swipe mode, gesture toggles, volume key
+        // bindings. Re-applied whenever the user changes them in Settings.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SettingsStore.get(applicationContext).settings.collect { applyAppSettings(it) }
+            }
+        }
+
         // Joystick wiring: view → CONFLATED channel → single-coroutine sender.
         binding.joystick.onPositionChanged = { x, y ->
             joystickChannel.trySend(x to y)
@@ -186,35 +196,32 @@ class ControllerActivity : AppCompatActivity() {
     // changing media volume.
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event != null && event.repeatCount > 0) {
-            // Auto-repeat — first DOWN already sent; just consume.
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) return true
-            return super.onKeyDown(keyCode, event)
+        if (!isVolumeKey(keyCode)) return super.onKeyDown(keyCode, event)
+        if (event != null && event.repeatCount > 0) return true   // first DOWN already sent
+        bindingForVolumeKey(keyCode)?.let { id ->
+            lifecycleScope.launch { session.sendButton(id.toByte(), true) }
         }
-        return when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, true) }
-                true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, true) }
-                true
-            }
-            else -> super.onKeyDown(keyCode, event)
-        }
+        return true   // consume even if unbound — don't change media volume
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!isVolumeKey(keyCode)) return super.onKeyUp(keyCode, event)
+        bindingForVolumeKey(keyCode)?.let { id ->
+            lifecycleScope.launch { session.sendButton(id.toByte(), false) }
+        }
+        return true
+    }
+
+    private fun isVolumeKey(keyCode: Int): Boolean =
+        keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+
+    /** Resolves the current binding for a volume key. Null means unbound. */
+    private fun bindingForVolumeKey(keyCode: Int): Int? {
+        val s = SettingsStore.get(applicationContext).current
         return when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, false) }
-                true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, false) }
-                true
-            }
-            else -> super.onKeyUp(keyCode, event)
+            KeyEvent.KEYCODE_VOLUME_UP -> s.volumeUpBinding
+            KeyEvent.KEYCODE_VOLUME_DOWN -> s.volumeDownBinding
+            else -> null
         }
     }
 
@@ -338,7 +345,20 @@ class ControllerActivity : AppCompatActivity() {
     private fun applyProfileLayout() {
         LayoutApplier.applyAll(inGameWidgetMap(), activeProfile.inGame)
         LayoutApplier.applyAll(uiModeWidgetMap(), activeProfile.uiMode)
-        binding.hotbar.swipeMode = activeProfile.hotbarSwipeMode
+        // hotbarSwipeMode + L/R margin overrides + gesture toggles come from
+        // AppSettings now — see applyAppSettings() collector.
+    }
+
+    /**
+     * Pushes the latest [AppSettings] values into the widgets that read
+     * them: hotbar swipe mode, lookpad quick-click toggles. Edge offsets
+     * are applied through a separate margin override; volume bindings
+     * are read on demand in [bindingForVolumeKey].
+     */
+    private fun applyAppSettings(s: AppSettings) {
+        binding.hotbar.swipeMode = s.hotbarSwipeMode
+        binding.lookPad.inGameQuickClicks = s.inGameQuickClicks
+        binding.lookPad.uiQuickClicks = s.uiQuickClicks
     }
 
     private fun updateLayerVisibility(mode: ControllerMode) {

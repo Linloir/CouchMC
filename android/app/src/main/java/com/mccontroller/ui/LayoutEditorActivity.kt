@@ -49,6 +49,12 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
 
     private val workingProfiles = mutableListOf<LayoutProfile>()
     private var activeIdx = 0
+    /**
+     * Initial mode the editor opens to. Defaults to InGame, but the caller
+     * (SettingsActivity) can pass [EXTRA_MODE] to deep-link straight into
+     * either tab. Phase 3 will collapse the in-activity tab control and
+     * make the activity strictly per-mode.
+     */
     private var currentEditMode: EditMode = EditMode.InGame
 
     private var selectedId: String? = null
@@ -76,6 +82,14 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         val (loaded, activeName) = store.loadAll()
         workingProfiles.addAll(loaded)
         activeIdx = workingProfiles.indexOfFirst { it.name == activeName }.coerceAtLeast(0)
+
+        // SettingsActivity launches with EXTRA_MODE = MODE_IN_GAME / MODE_UI
+        // to land directly on a tab; legacy direct launch (no extra) leaves
+        // the default in-game tab selected.
+        currentEditMode = when (intent.getStringExtra(EXTRA_MODE)) {
+            MODE_UI -> EditMode.UiInteract
+            else -> EditMode.InGame
+        }
 
         setupSpinner()
         setupModeTabs()
@@ -515,4 +529,13 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
     private fun allWidgetMap(): Map<String, View> = inGameWidgetMap() + uiModeWidgetMap()
 
     private fun inGameViews(): List<View> = inGameWidgetMap().values.toList()
+
+    companion object {
+        /** Optional Intent extra: pre-selects which mode tab to land on. */
+        const val EXTRA_MODE = "mode"
+        /** Value for [EXTRA_MODE] — open the in-game layout. */
+        const val MODE_IN_GAME = "in_game"
+        /** Value for [EXTRA_MODE] — open the UI-mode layout. */
+        const val MODE_UI = "ui"
+    }
 }

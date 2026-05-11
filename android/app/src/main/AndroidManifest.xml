@@ -57,5 +57,11 @@
             android:label="@string/editor_title"
             android:theme="@style/Theme.McController.Fullscreen" />
 
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title"
+            android:parentActivityName=".ui.HomeActivity" />
+
     </application>
 </manifest>
