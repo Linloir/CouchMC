@@ -1,55 +1,26 @@
 using System;
-using System.Windows;
-using System.Windows.Threading;
+using Microsoft.UI.Xaml;
 
 namespace McController.App;
 
+/// <summary>
+/// WinUI 3 entry point. Owns the singleton <see cref="Services.ServerHost"/>
+/// for the lifetime of the app — the host is created in OnLaunched and
+/// disposed when the main window closes.
+/// </summary>
 public partial class App : Application
 {
     public static Services.ServerHost Host { get; private set; } = null!;
+    public static Window MainAppWindow { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
+    public App()
     {
-        if (e.Args.Length > 0 && string.Equals(e.Args[0], "--selftest", StringComparison.OrdinalIgnoreCase))
+        InitializeComponent();
+
+        UnhandledException += (_, args) =>
         {
-            Core.Diag.SelfTest.Run();
-            Shutdown();
-            return;
-        }
-
-        if (e.Args.Length > 0 && string.Equals(e.Args[0], "--generate-icon", StringComparison.OrdinalIgnoreCase))
-        {
-            // Rasterize the GrassBlockIcon DrawingImage to a multi-frame .ico
-            // for the executable's File Explorer / Start menu display.
-            // Run once after changes to the source vector; commit the output.
-            var outPath = e.Args.Length > 1
-                ? e.Args[1]
-                : System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Assets", "app.ico");
-            outPath = System.IO.Path.GetFullPath(outPath);
-            IconBaker.BakeGrassBlockToIco(outPath);
-            Console.WriteLine($"Icon baked to {outPath}");
-            Shutdown();
-            return;
-        }
-
-        // ApplicationThemeManager wires WPF-UI's dynamic theme resources
-        // (TextFillColorPrimaryBrush, CardBackgroundFillColorDefaultBrush,
-        // etc.) so the Pages — which use DynamicResource lookups for text
-        // and background — pick up the dark palette. Without this call
-        // some surfaces fall back to system defaults (black text on dark).
-        Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
-            Wpf.Ui.Appearance.ApplicationTheme.Dark,
-            Wpf.Ui.Controls.WindowBackdropType.Mica);
-
-        Host = new Services.ServerHost();
-        Host.Start();
-
-        DispatcherUnhandledException += (_, args) =>
-        {
-            // Show a dialog AND log to file so silent page-construction
-            // failures actually surface. The file is appended next to the
-            // running exe and the dialog is best-effort (won't survive if
-            // the UI thread itself is dead).
+            // Surface to debug + log so silent page-construction errors
+            // don't vanish (mirrors the WPF version's error.log behavior).
             System.Diagnostics.Debug.WriteLine($"[App] Unhandled: {args.Exception}");
             try
             {
@@ -57,21 +28,58 @@ public partial class App : Application
                     $"[{DateTime.Now:O}] {args.Exception}\n\n");
             }
             catch { }
-            try
-            {
-                MessageBox.Show(args.Exception.Message, "MC Controller — 未捕获异常",
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch { }
             args.Handled = true;
         };
-
-        base.OnStartup(e);
     }
 
-    protected override void OnExit(ExitEventArgs e)
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        try { Host?.Dispose(); } catch { }
-        base.OnExit(e);
+        // CLI flags reach Main; this OnLaunched only runs for normal launch.
+        Host = new Services.ServerHost();
+        Host.Start();
+
+        MainAppWindow = new MainWindow();
+        MainAppWindow.Closed += (_, _) =>
+        {
+            try { Host.Dispose(); } catch { }
+        };
+        MainAppWindow.Activate();
+    }
+}
+
+/// <summary>
+/// Program entry point for unpackaged WinUI 3. The Application.Start
+/// callback must construct the App on the dispatcher thread and not
+/// return until shutdown.
+/// </summary>
+public static class Program
+{
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        if (args.Length > 0 && string.Equals(args[0], "--selftest", StringComparison.OrdinalIgnoreCase))
+        {
+            Core.Diag.SelfTest.Run();
+            return;
+        }
+
+        if (args.Length > 0 && string.Equals(args[0], "--generate-icon", StringComparison.OrdinalIgnoreCase))
+        {
+            var outPath = args.Length > 1
+                ? args[1]
+                : System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Assets", "app.ico");
+            outPath = System.IO.Path.GetFullPath(outPath);
+            IconBaker.BakeGrassBlockToIco(outPath);
+            Console.WriteLine($"Icon baked to {outPath}");
+            return;
+        }
+
+        Microsoft.UI.Xaml.Application.Start(p =>
+        {
+            var ctx = new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
+            System.Threading.SynchronizationContext.SetSynchronizationContext(ctx);
+            _ = new App();
+        });
     }
 }

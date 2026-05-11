@@ -1,62 +1,71 @@
-<ui:FluentWindow x:Class="McController.App.MainWindow"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:views="clr-namespace:McController.App.Views"
-                 Title="MC Controller"
-                 Width="1100" Height="720"
-                 MinWidth="900" MinHeight="560"
-                 Icon="pack://application:,,,/Assets/app.ico"
-                 ExtendsContentIntoTitleBar="True"
-                 WindowBackdropType="Mica"
-                 WindowCornerPreference="Round"
-                 WindowStartupLocation="CenterScreen">
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="McController.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:McController.App.Views"
+    Title="MC Controller">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="48"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="MC Controller">
-            <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/Assets/app.ico"
-                              Width="20" Height="20"
-                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </ui:TitleBar.Icon>
-        </ui:TitleBar>
+        <!-- Custom title bar. Sits in row 0; the OS-rendered caption buttons
+             (min / max / close) draw over the right edge automatically when
+             ExtendsContentIntoTitleBar=true. SetTitleBar(AppTitleBar) marks
+             this Grid as the draggable region. -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Padding="16,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="TitleBarIcon" Width="20" Height="20"
+                   Source="ms-appx:///Assets/app.ico"
+                   VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Text="MC Controller"
+                       Margin="12,0,0,0" VerticalAlignment="Center"
+                       Style="{ThemeResource CaptionTextBlockStyle}"/>
+        </Grid>
 
-        <ui:NavigationView Grid.Row="1"
-                           x:Name="Nav"
-                           PaneDisplayMode="Left"
-                           OpenPaneLength="248"
-                           IsBackButtonVisible="Collapsed"
-                           IsPaneToggleVisible="True"
-                           Transition="FadeInWithSlide"
-                           TransitionDuration="220"
-                           Loaded="Nav_Loaded">
+        <!-- NavigationView holds the sidebar + content Frame. WinUI 3's
+             native NavigationView gives us the proper Win11 selection bar
+             animation and the built-in pane-toggle button at top-left. -->
+        <NavigationView x:Name="Nav"
+                        Grid.Row="1"
+                        PaneDisplayMode="Left"
+                        OpenPaneLength="248"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        IsPaneToggleButtonVisible="True"
+                        Loaded="Nav_Loaded"
+                        SelectionChanged="Nav_SelectionChanged">
 
-            <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem Content="移动控制器" IsExpanded="True">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="XboxController24" FontSize="18"/>
-                    </ui:NavigationViewItem.Icon>
-                    <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="设备发现"
-                                               TargetPageType="{x:Type views:DeviceDiscoveryPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="Phone24" FontSize="18"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                        <ui:NavigationViewItem Content="设置"
-                                               TargetPageType="{x:Type views:SettingsPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="Settings24" FontSize="18"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                    </ui:NavigationViewItem.MenuItems>
-                </ui:NavigationViewItem>
-            </ui:NavigationView.MenuItems>
-        </ui:NavigationView>
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="移动控制器"
+                                    IsExpanded="True"
+                                    SelectsOnInvoked="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7FC;"/>
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem Content="设备发现" Tag="discovery">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem Content="设置" Tag="settings">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame"/>
+        </NavigationView>
     </Grid>
-</ui:FluentWindow>
+</Window>

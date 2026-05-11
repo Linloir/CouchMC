@@ -1,8 +1,8 @@
 using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Windows.Foundation;
 using McController.Core.Config;
 
 namespace McController.App.Controls;
@@ -13,20 +13,11 @@ namespace McController.App.Controls;
 /// X axis: raw finger speed (pixels/frame, 0..MaxInput).
 /// Y axis: effective on-screen pixels after curve + user sensitivity.
 /// Dashed line is the y = x identity reference (no scaling), so the live
-/// curve always shows up as a distinct line above it whenever sensitivity
-/// or curve params change. (An earlier version used sensitivity*x as the
-/// reference, which made Linear mode look frozen — reference and curve
-/// were identical.)
-///
-/// Recomputes whenever <see cref="SetCamera"/> is called — cheap (samples
-/// ~80 points), no animation, just sets a Path's data.
+/// curve always shows up as a distinct line above it.
 /// </summary>
-public partial class CurveCanvas : UserControl
+public sealed partial class CurveCanvas : UserControl
 {
-    /// <summary>Max input speed shown on the X axis (px/frame, ≈ 200 = a fast swipe).</summary>
     public double MaxInput { get; set; } = 200;
-
-    /// <summary>Max output on Y axis; gets stretched if the curve exceeds it.</summary>
     public double MaxOutput { get; set; } = 600;
 
     private CameraConfig? _camera;
@@ -68,21 +59,19 @@ public partial class CurveCanvas : UserControl
         for (int i = 0; i <= 4; i++)
         {
             double x = PadL + w * i / 4;
-            g.Children.Add(new LineGeometry(new Point(x, PadT), new Point(x, PadT + h)));
+            g.Children.Add(new LineGeometry { StartPoint = new Point(x, PadT), EndPoint = new Point(x, PadT + h) });
             double y = PadT + h * i / 4;
-            g.Children.Add(new LineGeometry(new Point(PadL, y), new Point(PadL + w, y)));
+            g.Children.Add(new LineGeometry { StartPoint = new Point(PadL, y), EndPoint = new Point(PadL + w, y) });
         }
         return g;
     }
 
     private Geometry BuildIdentityReferenceGeometry(double w, double h, double displayMax)
     {
-        // y = x identity (slope 1.0). The live curve must always sit above
-        // this, so the user can see "raw finger speed → mouse pixels" gain.
         double xEnd = PadL + w;
         double yEnd = PadT + h - h * (MaxInput / displayMax);
         yEnd = Math.Max(PadT, yEnd);
-        return new LineGeometry(new Point(PadL, PadT + h), new Point(xEnd, yEnd));
+        return new LineGeometry { StartPoint = new Point(PadL, PadT + h), EndPoint = new Point(xEnd, yEnd) };
     }
 
     private Geometry BuildCurveGeometry(CameraConfig c, double w, double h, double displayMax)
@@ -95,12 +84,13 @@ public partial class CurveCanvas : UserControl
             double px = PadL + w * (raw / MaxInput);
             double py = PadT + h - h * (output / displayMax);
             py = Math.Max(PadT, py);
-            figure.Segments.Add(new LineSegment(new Point(px, py), true));
+            figure.Segments.Add(new LineSegment { Point = new Point(px, py) });
         }
-        return new PathGeometry(new[] { figure });
+        var geometry = new PathGeometry();
+        geometry.Figures.Add(figure);
+        return geometry;
     }
 
-    /// <summary>Pure function form of <see cref="Input.CameraCurve"/> output magnitude — no residual state.</summary>
     private static double SampleOutput(CameraConfig c, double rawSpeed)
     {
         double accel = 1.0;

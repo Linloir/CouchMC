@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 using McController.App.Services;
-using Wpf.Ui.Controls;
+using McController.Core.Net;
 
 namespace McController.App.Views;
 
@@ -16,17 +15,14 @@ namespace McController.App.Views;
 /// Device discovery view. Two sections:
 ///
 /// - **USB**: polls <c>adb devices</c> every ~3 s. Each phone shows its
-///   model + serial + state + "App installed" tag, on a hoverable row.
-///   The "USB 端口转发" button runs <c>adb reverse</c> and surfaces the
-///   result (success / no-adb / failure) via an inline <c>InfoBar</c>.
-/// - **LAN**: hooks the future UDP-broadcast discovery (Phase 2). For now
-///   the section just states it's listening — phone-side advertising lands
-///   in a follow-up commit.
+///   model + serial + state + "App installed" tag, on a ListView row
+///   with WinUI 3's built-in hover/selection visuals.
+/// - **LAN**: hooks the future UDP-broadcast discovery (Phase 2).
 ///
 /// "当前连接" pill mirrors the live <see cref="Core.Diag.ConnectionStats"/>
-/// state so the user can tell at a glance whether a phone is actually paired.
+/// state so the user can tell at a glance whether a phone is paired.
 /// </summary>
-public partial class DeviceDiscoveryPage : Page
+public sealed partial class DeviceDiscoveryPage : Page
 {
     private readonly ServerHost _host = App.Host;
     private readonly AdbDiscovery _adb;
@@ -34,7 +30,7 @@ public partial class DeviceDiscoveryPage : Page
     public DeviceDiscoveryPage()
     {
         InitializeComponent();
-        _adb = new AdbDiscovery(Dispatcher);
+        _adb = new AdbDiscovery(DispatcherQueue);
         _adb.OnUpdate += OnAdbUpdate;
 
         Loaded += OnLoaded;
@@ -43,7 +39,7 @@ public partial class DeviceDiscoveryPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        ListeningOnText.Text = $"TCP/UDP 34555 · 服务端口: {_host.Config.Port}";
+        StatusCard.Description = $"等待连接... · TCP/UDP {_host.Config.Port}";
         IpList.ItemsSource = _host.LocalIPv4s;
         SubscribeConnectionEvents();
         RefreshConnectionDisplay();
@@ -56,15 +52,6 @@ public partial class DeviceDiscoveryPage : Page
         _adb.Stop();
     }
 
-    private void Scroller_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (e.Handled) return;
-        var sv = (ScrollViewer)sender;
-        sv.ScrollToVerticalOffset(sv.VerticalOffset - e.Delta);
-        e.Handled = true;
-    }
-
-    // ===== Live connection display =====
     private void SubscribeConnectionEvents()
     {
         _host.Tcp.OnClientConnected += OnClientConnected;
@@ -79,29 +66,29 @@ public partial class DeviceDiscoveryPage : Page
 
     private void OnClientConnected(IPEndPoint ep)
     {
-        Dispatcher.BeginInvoke(() =>
+        DispatcherQueue.TryEnqueue(() =>
         {
-            CurrentConnectionText.Text = $"已连接: {ep}";
-            SetPill("已连接", "#1A6E58", "#34D8B8");
+            StatusCard.Description = $"已连接: {ep}";
+            SetPill("已连接", Color.FromArgb(255, 0x1A, 0x6E, 0x58), Color.FromArgb(255, 0x34, 0xD8, 0xB8));
         });
     }
 
     private void OnClientDisconnected()
     {
-        Dispatcher.BeginInvoke(RefreshConnectionDisplay);
+        DispatcherQueue.TryEnqueue(RefreshConnectionDisplay);
     }
 
     private void RefreshConnectionDisplay()
     {
-        CurrentConnectionText.Text = "等待连接...";
-        SetPill("未连接", "#3A3A3A", "#BBB");
+        StatusCard.Description = $"等待连接... · TCP/UDP {_host.Config.Port}";
+        SetPill("未连接", Color.FromArgb(255, 0x3A, 0x3A, 0x3A), Color.FromArgb(255, 0xBB, 0xBB, 0xBB));
     }
 
-    private void SetPill(string text, string bgHex, string fgHex)
+    private void SetPill(string text, Color bg, Color fg)
     {
         StatusPillText.Text = text;
-        StatusPill.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(bgHex));
-        StatusPillText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(fgHex));
+        StatusPill.Background = new SolidColorBrush(bg);
+        StatusPillText.Foreground = new SolidColorBrush(fg);
     }
 
     // ===== ADB list =====

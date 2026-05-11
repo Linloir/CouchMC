@@ -1,45 +1,43 @@
 using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Threading;
+using System.Threading.Tasks;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using McController.App.Services;
 using McController.Core.Config;
 
 namespace McController.App.Views;
 
 /// <summary>
-/// Hand-wired settings page: every slider's ValueChanged writes back to the
-/// active profile inside the live <see cref="ServerConfig"/>, and the curve
-/// preview redraws on every camera tweak. No MVVM binding — the underlying
-/// config objects are POCO without INotifyPropertyChanged, and the runtime
-/// path (CameraCurve, JoystickToWasdMapper) reads the fields directly on
-/// every packet, so live-edit just works.
+/// Hand-wired settings page (WinUI 3). Each slider's ValueChanged writes
+/// back to the active profile inside the live <see cref="ServerConfig"/>,
+/// and the curve preview redraws on every camera tweak. POCO config —
+/// no INotifyPropertyChanged; the runtime (CameraCurve / JoystickToWasdMapper)
+/// reads fields directly on every packet, so live-edit just works.
 ///
-/// Each slider has a sibling <c>ui:NumberBox</c> for typed-in values. The
-/// two are kept in sync via the <see cref="_loading"/> guard so editing
-/// one doesn't loop-fire the other's ValueChanged.
+/// Each slider has a sibling <see cref="NumberBox"/> for typed-in values.
+/// The two stay synced via the <see cref="_loading"/> re-entrancy guard
+/// so editing one doesn't loop-fire the other.
 /// </summary>
-public partial class SettingsPage : Page
+public sealed partial class SettingsPage : Page
 {
     private readonly ServerHost _host = App.Host;
     private readonly ProfileManager _profiles;
-    // Start in loading state — InitializeComponent() parses the XAML and
-    // setting Slider.Minimum/Maximum coerces Value, which fires ValueChanged
-    // BEFORE the constructor body runs. The handlers all bail when this is
-    // true, so the synthetic initial events don't crash on uninitialized
-    // state or loop between slider <-> numberbox writes.
+    // Start in loading state so handlers fired by XAML coercion of
+    // Slider.Value (when Minimum/Maximum are set) early-out cleanly.
     private bool _loading = true;
-    private readonly DispatcherTimer _saveStatusTimer;
+    private readonly DispatcherQueueTimer _saveStatusTimer;
 
     public SettingsPage()
     {
         _profiles = new ProfileManager(_host);
         InitializeComponent();
 
-        _saveStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _saveStatusTimer.Tick += (_, _) => { SaveStatus.Text = ""; _saveStatusTimer.Stop(); };
+        _saveStatusTimer = DispatcherQueue.CreateTimer();
+        _saveStatusTimer.Interval = TimeSpan.FromSeconds(2);
+        _saveStatusTimer.IsRepeating = false;
+        _saveStatusTimer.Tick += (_, _) => SaveStatus.Text = "";
 
         Loaded += OnLoaded;
     }
@@ -48,8 +46,6 @@ public partial class SettingsPage : Page
     {
         _loading = true;
         PortBox.Value = _host.Config.Port;
-        PortStatusText.Text = $"服务正在监听 {_host.Config.Port}（修改后重启程序生效）";
-
         ProfileCombo.ItemsSource = _profiles.Profiles;
         ProfileCombo.SelectedItem = _profiles.ActiveProfile;
         RefreshFromProfile(_profiles.ActiveProfile);
@@ -90,26 +86,13 @@ public partial class SettingsPage : Page
 
     private ControllerProfile Active => _profiles.ActiveProfile;
 
-    // ===== Scroll body wheel forwarding =====
-    // Sliders + NumberBoxes inside a ScrollViewer eat the mouse wheel by
-    // default; forwarding it at the viewer level keeps the page scrollable
-    // even when the cursor hovers over a control.
-    private void Scroller_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (e.Handled) return;
-        var sv = (ScrollViewer)sender;
-        sv.ScrollToVerticalOffset(sv.VerticalOffset - e.Delta);
-        e.Handled = true;
-    }
-
     // ===== Port =====
-    private void PortBox_ValueChanged(object sender, RoutedEventArgs e)
+    private void PortBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         if (_loading) return;
-        if (PortBox.Value is double v && v >= 1024 && v <= 65535)
+        if (!double.IsNaN(args.NewValue) && args.NewValue >= 1024 && args.NewValue <= 65535)
         {
-            _host.Config.Port = (int)v;
-            PortStatusText.Text = $"将在下次启动时使用 {(int)v}";
+            _host.Config.Port = (int)args.NewValue;
         }
     }
 
@@ -131,8 +114,11 @@ public partial class SettingsPage : Page
         _loading = true;
         try
         {
+            // Refresh combo display since the bound object's name changed
+            // and the ComboBox doesn't observe the field.
             var current = ProfileCombo.SelectedItem;
-            ProfileCombo.Items.Refresh();
+            ProfileCombo.ItemsSource = null;
+            ProfileCombo.ItemsSource = _profiles.Profiles;
             ProfileCombo.SelectedItem = current;
         }
         finally { _loading = false; }
@@ -150,42 +136,49 @@ public partial class SettingsPage : Page
         ProfileCombo.SelectedItem = p;
     }
 
-    private void DeleteProfile_Click(object sender, RoutedEventArgs e)
+    private async void DeleteProfile_Click(object sender, RoutedEventArgs e)
     {
         if (_profiles.Profiles.Count <= 1)
         {
             ShowStatus("至少保留一个方案");
             return;
         }
-        var result = MessageBox.Show($"确定要删除「{Active.Name}」？", "删除配置方案",
-                                     MessageBoxButton.OKCancel, MessageBoxImage.Question);
-        if (result != MessageBoxResult.OK) return;
+        var ok = await ConfirmAsync($"确定要删除「{Active.Name}」？", "删除配置方案");
+        if (!ok) return;
         _profiles.Delete(Active);
         ProfileCombo.SelectedItem = _profiles.ActiveProfile;
         RefreshFromProfile(_profiles.ActiveProfile);
     }
 
-    // ===== Sensitivity (slider <-> numberbox) =====
-    private void SensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private async Task<bool> ConfirmAsync(string message, string title)
     {
-        if (_loading) return;
-        SetCameraSensitivity(e.NewValue);
-        SyncNumberFromSlider(SensitivityNumber, e.NewValue);
-    }
-
-    private void SensitivityNumber_ValueChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        if (SensitivityNumber.Value is double v)
+        var dialog = new ContentDialog
         {
-            SetCameraSensitivity(v);
-            SyncSliderFromNumber(SensitivitySlider, v);
-        }
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "确定",
+            CloseButtonText = "取消",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+        };
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
-    private void SetCameraSensitivity(double v)
+    // ===== Sensitivity =====
+    private void SensitivitySlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
-        Active.Camera.UserSensitivity = (float)v;
+        if (_loading) return;
+        Active.Camera.UserSensitivity = (float)e.NewValue;
+        Sync(SensitivityNumber, e.NewValue);
+        CurvePreview.SetCamera(Active.Camera);
+    }
+
+    private void SensitivityNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Camera.UserSensitivity = (float)args.NewValue;
+        Sync(SensitivitySlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
@@ -198,112 +191,110 @@ public partial class SettingsPage : Page
     }
 
     // ===== Accel factor =====
-    private void AccelFactorSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void AccelFactorSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Camera.AccelFactor = (float)e.NewValue;
-        SyncNumberFromSlider(AccelFactorNumber, e.NewValue);
+        Sync(AccelFactorNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
-    private void AccelFactorNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void AccelFactorNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || AccelFactorNumber.Value is not double v) return;
-        Active.Camera.AccelFactor = (float)v;
-        SyncSliderFromNumber(AccelFactorSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Camera.AccelFactor = (float)args.NewValue;
+        Sync(AccelFactorSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
     // ===== Accel exp =====
-    private void AccelExpSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void AccelExpSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Camera.AccelExp = (float)e.NewValue;
-        SyncNumberFromSlider(AccelExpNumber, e.NewValue);
+        Sync(AccelExpNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
-    private void AccelExpNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void AccelExpNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || AccelExpNumber.Value is not double v) return;
-        Active.Camera.AccelExp = (float)v;
-        SyncSliderFromNumber(AccelExpSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Camera.AccelExp = (float)args.NewValue;
+        Sync(AccelExpSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
     // ===== Max multiplier =====
-    private void MaxMulSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void MaxMulSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Camera.MaxAccelMultiplier = (float)e.NewValue;
-        SyncNumberFromSlider(MaxMulNumber, e.NewValue);
+        Sync(MaxMulNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
-    private void MaxMulNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void MaxMulNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || MaxMulNumber.Value is not double v) return;
-        Active.Camera.MaxAccelMultiplier = (float)v;
-        SyncSliderFromNumber(MaxMulSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Camera.MaxAccelMultiplier = (float)args.NewValue;
+        Sync(MaxMulSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
     }
 
-    // ===== Movement (dead zone / enter / exit) =====
-    private void DeadZoneSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    // ===== Movement =====
+    private void DeadZoneSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Movement.DeadZone = (float)e.NewValue;
-        SyncNumberFromSlider(DeadZoneNumber, e.NewValue);
+        Sync(DeadZoneNumber, e.NewValue);
     }
 
-    private void DeadZoneNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void DeadZoneNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || DeadZoneNumber.Value is not double v) return;
-        Active.Movement.DeadZone = (float)v;
-        SyncSliderFromNumber(DeadZoneSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Movement.DeadZone = (float)args.NewValue;
+        Sync(DeadZoneSlider, args.NewValue);
     }
 
-    private void EnterSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void EnterSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Movement.EnterThreshold = (float)e.NewValue;
-        SyncNumberFromSlider(EnterNumber, e.NewValue);
+        Sync(EnterNumber, e.NewValue);
     }
 
-    private void EnterNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void EnterNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || EnterNumber.Value is not double v) return;
-        Active.Movement.EnterThreshold = (float)v;
-        SyncSliderFromNumber(EnterSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Movement.EnterThreshold = (float)args.NewValue;
+        Sync(EnterSlider, args.NewValue);
     }
 
-    private void ExitSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void ExitSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
         Active.Movement.ExitThreshold = (float)e.NewValue;
-        SyncNumberFromSlider(ExitNumber, e.NewValue);
+        Sync(ExitNumber, e.NewValue);
     }
 
-    private void ExitNumber_ValueChanged(object sender, RoutedEventArgs e)
+    private void ExitNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (_loading || ExitNumber.Value is not double v) return;
-        Active.Movement.ExitThreshold = (float)v;
-        SyncSliderFromNumber(ExitSlider, v);
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        Active.Movement.ExitThreshold = (float)args.NewValue;
+        Sync(ExitSlider, args.NewValue);
     }
 
-    // ===== Slider <-> NumberBox sync helpers =====
-    private void SyncNumberFromSlider(Wpf.Ui.Controls.NumberBox box, double v)
-    {
-        _loading = true;
-        try { box.Value = v; }
-        finally { _loading = false; }
-    }
-
-    private void SyncSliderFromNumber(Slider slider, double v)
+    // ===== Slider <-> NumberBox sync =====
+    private void Sync(NumberBox box, double v)
     {
         _loading = true;
-        try { slider.Value = v; }
-        finally { _loading = false; }
+        try { box.Value = v; } finally { _loading = false; }
+    }
+
+    private void Sync(Slider slider, double v)
+    {
+        _loading = true;
+        try { slider.Value = v; } finally { _loading = false; }
     }
 
     // ===== Save =====

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
+using Microsoft.UI.Dispatching;
 
 namespace McController.App.Services;
 
@@ -26,12 +26,12 @@ public sealed class AdbDiscovery : IDisposable
 
     public int PollIntervalMs { get; set; } = 3000;
 
-    private readonly Dispatcher _ui;
+    private readonly DispatcherQueue _ui;
     private readonly Dictionary<string, string> _modelCache = new();
     private readonly Dictionary<string, bool> _appCache = new();
     private CancellationTokenSource? _cts;
 
-    public AdbDiscovery(Dispatcher ui)
+    public AdbDiscovery(DispatcherQueue ui)
     {
         _ui = ui;
     }
@@ -58,12 +58,12 @@ public sealed class AdbDiscovery : IDisposable
             try
             {
                 var devices = await Probe(ct);
-                _ = _ui.BeginInvoke(() => OnUpdate?.Invoke(devices));
+                _ui.TryEnqueue(() => OnUpdate?.Invoke(devices));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[Adb] poll failed: {ex.Message}");
-                _ = _ui.BeginInvoke(() => OnUpdate?.Invoke(Array.Empty<Device>()));
+                _ui.TryEnqueue(() => OnUpdate?.Invoke(Array.Empty<Device>()));
             }
             try { await Task.Delay(PollIntervalMs, ct); } catch (TaskCanceledException) { return; }
         }
@@ -78,7 +78,7 @@ public sealed class AdbDiscovery : IDisposable
             var trimmed = line.Trim();
             if (string.IsNullOrEmpty(trimmed)) continue;
             if (trimmed.StartsWith("List of devices")) continue;
-            if (trimmed.StartsWith("*")) continue;  // adb daemon startup lines
+            if (trimmed.StartsWith("*")) continue;
             var parts = trimmed.Split('\t', 2);
             if (parts.Length < 2) parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length < 2) continue;
@@ -128,7 +128,6 @@ public sealed class AdbDiscovery : IDisposable
         try { proc.Start(); }
         catch (System.ComponentModel.Win32Exception)
         {
-            // adb not on PATH — surface an empty result rather than crashing.
             return string.Empty;
         }
         var stdoutTask = proc.StandardOutput.ReadToEndAsync(ct);
