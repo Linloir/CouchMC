@@ -1,14 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Sprint: double-chevron pointing right — universally reads as "fast forward / run". -->
+<!--
+    Sprint — side-view running figure with three motion lines trailing
+    behind. Same stick-style as jump/sneak (filled head + filled
+    angled torso + stroked limbs) but in a running stride:
+      - front arm bent + reaching forward
+      - back arm bent + swung backward
+      - front leg striding forward and down (foot about to land)
+      - back leg pushed off behind
+    Three horizontal motion lines on the left side of the icon, with
+    varying alpha, simulate wind / speed.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+
+    <!-- Motion lines behind the runner (drawn first so the figure overlaps them) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 4.5,5 L 7.5,5 L 13.5,12 L 7.5,19 L 4.5,19 L 10.5,12 Z" />
+        android:fillAlpha="0.30"
+        android:pathData="M 1,7.6 L 5.6,7.6 L 5.6,8.8 L 1,8.8 Z" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 11,5 L 14,5 L 20,12 L 14,19 L 11,19 L 17,12 Z" />
+        android:fillAlpha="0.55"
+        android:pathData="M 0.6,11.4 L 5.2,11.4 L 5.2,12.7 L 0.6,12.7 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.30"
+        android:pathData="M 1.4,15.2 L 5,15.2 L 5,16.4 L 1.4,16.4 Z" />
+
+    <!-- Head -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 16,3.8 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
+
+    <!-- Torso (forward-leaning) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 14.9,6 L 17.1,6.3 L 15.1,12.4 L 12.9,12.2 Z" />
+
+    <!-- Front arm bent forward (forearm angling down) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 16.5,7.4 L 19.5,8.6 L 17.4,11.8" />
+
+    <!-- Back arm bent backward (forearm angling up) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 14,7.6 L 10.6,6 L 8.4,8.8" />
+
+    <!-- Front leg striding forward + down (foot about to land) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 15,12.6 L 18.5,16 L 19.5,20" />
+
+    <!-- Back leg pushed off behind -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 13,12.6 L 9,15.4 L 11.6,19.4" />
+
+    <!-- Ground line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.45"
+        android:pathData="M 4,21.4 L 21,21.4 L 21,22.8 L 4,22.8 Z" />
+
 </vector>

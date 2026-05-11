@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Close / escape — bold X. -->
+<!--
+    Esc — Android's familiar back-arrow glyph (left-pointing arrow
+    with a horizontal stem). Bold filled silhouette so the visual
+    weight matches the other button icons (which are mostly filled).
+    Padding inside the 24-dp viewport tuned to match jump / sneak /
+    swap so all the icons read at the same display size when placed
+    on the button surface.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
@@ -7,5 +14,5 @@
     android:viewportHeight="24">
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 18.3,5.71 L 12,12 L 18.3,18.29 L 16.89,19.7 L 10.6,13.41 L 4.31,19.7 L 2.9,18.29 L 9.19,12 L 2.9,5.71 L 4.31,4.3 L 10.6,10.59 L 16.89,4.3 Z" />
+        android:pathData="M 20,10.5 L 8.7,10.5 L 13.3,5.9 L 11.4,4 L 3.4,12 L 11.4,20 L 13.3,18.1 L 8.7,13.5 L 20,13.5 Z" />
 </vector>
