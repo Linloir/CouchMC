@@ -30,23 +30,24 @@
                            OpenPaneLength="248"
                            IsBackButtonVisible="Collapsed"
                            IsPaneToggleVisible="True"
-                           Loaded="Nav_Loaded"
-                           SelectionChanged="Nav_SelectionChanged">
+                           Loaded="Nav_Loaded">
 
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="移动控制器" IsExpanded="True">
                     <ui:NavigationViewItem.Icon>
-                        <ui:ImageIcon Source="{StaticResource ControllerIcon}" Width="20" Height="20"/>
+                        <ui:SymbolIcon Symbol="XboxController24" FontSize="18"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="设备发现" Tag="discovery">
+                        <ui:NavigationViewItem Content="设备发现"
+                                               TargetPageType="{x:Type views:DeviceDiscoveryPage}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:ImageIcon Source="{StaticResource DevicesIcon}" Width="20" Height="20"/>
+                                <ui:SymbolIcon Symbol="Phone24" FontSize="18"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <ui:NavigationViewItem Content="设置" Tag="settings">
+                        <ui:NavigationViewItem Content="设置"
+                                               TargetPageType="{x:Type views:SettingsPage}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:ImageIcon Source="{StaticResource SettingsIcon}" Width="20" Height="20"/>
+                                <ui:SymbolIcon Symbol="Settings24" FontSize="18"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
