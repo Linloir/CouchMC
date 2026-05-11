@@ -17,7 +17,7 @@
         <Grid HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="200*" MaxWidth="1300"/>
+                <ColumnDefinition Width="200*" MaxWidth="1100"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
