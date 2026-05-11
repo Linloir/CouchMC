@@ -6,17 +6,24 @@
     xmlns:tk="using:CommunityToolkit.WinUI.Controls"
     xmlns:ctrl="using:McController.App.Controls">
 
-    <!-- ScrollViewer.HorizontalContentAlignment is what actually centers
-         the content area. The inner StackPanel stays Stretch + MaxWidth so
-         cards always fill the available width up to 1600 — using Center on
-         the StackPanel itself sizes it to its widest child instead, which
-         made cards collapse on pages with short text. -->
+    <!-- 3-column Grid centers the content column. Side columns share
+         remaining viewport space equally; middle has a high star weight
+         + MaxWidth so it always fills (up to the cap) regardless of
+         children's natural widths. Earlier attempts using StackPanel
+         HA=Center or ScrollViewer.HorizontalContentAlignment sized the
+         column to its widest child, which made cards collapse on pages
+         with short text. -->
     <ScrollViewer x:Name="Scroller"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
-                  HorizontalContentAlignment="Center"
                   Padding="40,8,40,40">
-        <StackPanel HorizontalAlignment="Stretch" MaxWidth="1600" Spacing="0">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="200*" MaxWidth="1300"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
 
             <TextBlock Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
@@ -35,7 +42,7 @@
             </tk:SettingsCard>
 
             <!-- ===== 配置方案 ===== -->
-            <TextBlock Text="配置方案" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="配置方案" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="当前方案" Description="切换不同的灵敏度、曲线与死区组合">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74C;"/>
@@ -63,7 +70,7 @@
             </tk:SettingsCard>
 
             <!-- ===== 视角 ===== -->
-            <TextBlock Text="视角" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="视角" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="灵敏度"
                              Description="鼠标移动的整体放大倍率（建议先关闭 Windows 的「提高指针精度」）">
                 <tk:SettingsCard.HeaderIcon>
@@ -152,7 +159,7 @@
             </tk:SettingsExpander>
 
             <!-- ===== 移动 ===== -->
-            <TextBlock Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="死区" Description="摇杆中心忽略的范围">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="DeadZoneSlider" Width="220"
@@ -201,5 +208,6 @@
             </StackPanel>
 
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

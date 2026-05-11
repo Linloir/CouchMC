@@ -13,9 +13,14 @@
     <ScrollViewer x:Name="Scroller"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
-                  HorizontalContentAlignment="Center"
                   Padding="40,8,40,40">
-        <StackPanel HorizontalAlignment="Stretch" MaxWidth="1600" Spacing="0">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="200*" MaxWidth="1300"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
 
             <TextBlock Text="设备发现" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器"
@@ -36,7 +41,7 @@
             </tk:SettingsCard>
 
             <!-- ===== USB section ===== -->
-            <TextBlock Text="USB 设备" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="USB 设备" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
 
             <tk:SettingsCard Header="本机连接的安卓设备"
                              Description="点击「USB 端口转发」后手机即可通过 127.0.0.1 连接（每次拔插需重新执行）">
@@ -102,7 +107,7 @@
                        Opacity="0.55" FontSize="12" Margin="0,8,0,0"/>
 
             <!-- ===== LAN section ===== -->
-            <TextBlock Text="局域网设备" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="局域网设备" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="正在监听 34556 端口上的设备广播"
                              Description="Phase 2 — 手机端广播尚未实现，列表暂时为空">
                 <tk:SettingsCard.HeaderIcon>
@@ -111,7 +116,7 @@
             </tk:SettingsCard>
 
             <!-- ===== Network ===== -->
-            <TextBlock Text="本机网络" FontSize="14" FontWeight="SemiBold" Margin="0,28,0,8"/>
+            <TextBlock Text="本机网络" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,8"/>
             <tk:SettingsCard Header="本机 IP 地址"
                              Description="在手机端输入其中一个作为服务端地址（WiFi 模式）"
                              ContentAlignment="Vertical"
@@ -130,5 +135,6 @@
             </tk:SettingsCard>
 
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>
