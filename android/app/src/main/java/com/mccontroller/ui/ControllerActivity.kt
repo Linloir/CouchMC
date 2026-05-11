@@ -14,6 +14,7 @@ import com.mccontroller.core.ConnectionMode
 import com.mccontroller.core.ConnectionState
 import com.mccontroller.core.ControllerMode
 import com.mccontroller.core.ControllerSession
+import com.mccontroller.core.HostStore
 import com.mccontroller.core.LayoutApplier
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ProfileStore
@@ -78,12 +79,16 @@ class ControllerActivity : AppCompatActivity() {
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
 
-        val ip = intent.getStringExtra(ConnectActivity.EXTRA_IP) ?: ""
-        val port = intent.getIntExtra(ConnectActivity.EXTRA_PORT, Protocol.DEFAULT_PORT)
-        val usbMode = intent.getBooleanExtra(ConnectActivity.EXTRA_USB_MODE, false)
+        val ip = intent.getStringExtra(EXTRA_IP) ?: ""
+        val port = intent.getIntExtra(EXTRA_PORT, Protocol.DEFAULT_PORT)
+        val usbMode = intent.getBooleanExtra(EXTRA_USB_MODE, false)
+        val savedHostId = intent.getStringExtra(EXTRA_SAVED_HOST_ID)
 
         // HUD + layer-visibility + lookpad mode: re-render on state, RTT,
-        // or mode change.
+        // or mode change. Also bumps the saved-host "last connected" stamp
+        // the first time we reach Connected this session, so the home list
+        // sorts recents to the top next time.
+        var markedConnected = false
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(session.state, session.rttMs, session.mode) { s, r, m -> Triple(s, r, m) }
@@ -91,6 +96,13 @@ class ControllerActivity : AppCompatActivity() {
                         updateHud(state, rtt, mode)
                         updateLayerVisibility(mode)
                         binding.lookPad.mode = mode
+                        if (!markedConnected &&
+                            state is ConnectionState.Connected &&
+                            savedHostId != null
+                        ) {
+                            markedConnected = true
+                            HostStore.get(applicationContext).markConnected(savedHostId)
+                        }
                     }
             }
         }
@@ -360,5 +372,20 @@ class ControllerActivity : AppCompatActivity() {
             is ConnectionState.Failed -> "● Failed: ${state.reason}"
             is ConnectionState.Disconnected -> "● Disconnected"
         }
+    }
+
+    companion object {
+        /** Target IP. Required. */
+        const val EXTRA_IP = "ip"
+        /** Target TCP port. Defaults to 34555 if absent. */
+        const val EXTRA_PORT = "port"
+        /** True if connecting via adb-reverse on 127.0.0.1 (no UDP). */
+        const val EXTRA_USB_MODE = "usbMode"
+        /**
+         * Optional [com.mccontroller.core.SavedHost.id]. When present and
+         * the connection succeeds, [com.mccontroller.core.HostStore.markConnected]
+         * is called so this host bubbles to the top of the home list next time.
+         */
+        const val EXTRA_SAVED_HOST_ID = "savedHostId"
     }
 }

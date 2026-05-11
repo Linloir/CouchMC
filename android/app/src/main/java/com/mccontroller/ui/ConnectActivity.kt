@@ -83,17 +83,14 @@ class ConnectActivity : AppCompatActivity() {
 
     private fun launchController(ip: String, port: Int, isUsbMode: Boolean) {
         val intent = Intent(this, ControllerActivity::class.java).apply {
-            putExtra(EXTRA_IP, ip)
-            putExtra(EXTRA_PORT, port)
-            putExtra(EXTRA_USB_MODE, isUsbMode)
+            putExtra(ControllerActivity.EXTRA_IP, ip)
+            putExtra(ControllerActivity.EXTRA_PORT, port)
+            putExtra(ControllerActivity.EXTRA_USB_MODE, isUsbMode)
         }
         startActivity(intent)
     }
 
     companion object {
-        const val EXTRA_IP = "ip"
-        const val EXTRA_PORT = "port"
-        const val EXTRA_USB_MODE = "usbMode"
         private const val PREFS = "connect"
         private const val KEY_LAST_IP = "last_ip"
     }

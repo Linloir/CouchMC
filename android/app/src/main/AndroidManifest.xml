@@ -4,6 +4,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--
+        CHANGE_WIFI_MULTICAST_STATE is what lets DiscoveryClient acquire a
+        MulticastLock. Without it some manufacturers' WiFi power-save
+        drops broadcast UDP and we'd never see discovery packets.
+    -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -16,14 +23,24 @@
         tools:targetApi="34">
 
         <activity
-            android:name=".ui.ConnectActivity"
+            android:name=".ui.HomeActivity"
             android:exported="true"
-            android:label="@string/connect_title">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+            Legacy entry. Kept registered (not LAUNCHER) so it still
+            compiles while we wind down references; removed once
+            SettingsActivity lands in Phase 2.
+        -->
+        <activity
+            android:name=".ui.ConnectActivity"
+            android:exported="false"
+            android:label="@string/connect_title" />
 
         <activity
             android:name=".ui.ControllerActivity"
