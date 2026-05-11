@@ -72,4 +72,30 @@
     <None Include="Assets\icons\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      Bundled Android Debug Bridge: ship adb.exe + its two required DLLs +
+      the upstream NOTICE.txt + this folder's README under Tools\Adb\ in the
+      publish output. AdbDiscovery resolves the bundled adb at runtime via
+      AppContext.BaseDirectory; if any file is missing it falls back to
+      "adb" on PATH (so dev installs that already have the SDK still work).
+      The installer (Inno Setup) picks this up via its recursesubdirs flag.
+    -->
+    <Content Include="Tools\Adb\adb.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\Adb\AdbWinApi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\Adb\AdbWinUsbApi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\Adb\NOTICE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\Adb\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

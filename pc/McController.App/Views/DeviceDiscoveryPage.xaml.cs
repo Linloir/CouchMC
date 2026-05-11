@@ -47,9 +47,9 @@ public sealed partial class DeviceDiscoveryPage : Page
         SectionStatus.Text  = L.Get("discovery.status.section", SectionStatus.Text);
         StatusCard.Header   = L.Get("discovery.status.header", StatusCard.Header?.ToString() ?? "");
 
-        SectionUsb.Text     = L.Get("discovery.usb.section", SectionUsb.Text);
-        UsbHint.Text        = L.Get("discovery.usb.auto", UsbHint.Text);
-        UsbEmptyText.Text   = L.Get("discovery.usb.empty", UsbEmptyText.Text);
+        SectionUsb.Text         = L.Get("discovery.usb.section", SectionUsb.Text);
+        UsbEmptyCard.Header      = L.Get("discovery.usb.empty.header", UsbEmptyCard.Header?.ToString() ?? "");
+        UsbEmptyCard.Description = L.Get("discovery.usb.empty.desc",   UsbEmptyCard.Description?.ToString() ?? "");
 
         SectionLan.Text     = L.Get("discovery.lan.section", SectionLan.Text);
         LanCard.Header      = L.Get("discovery.lan.header", LanCard.Header?.ToString() ?? "");
@@ -124,7 +124,7 @@ public sealed partial class DeviceDiscoveryPage : Page
     private void OnAdbUpdate(IReadOnlyList<AdbDiscovery.Device> devices)
     {
         UsbDeviceList.ItemsSource = devices;
-        UsbEmptyText.Visibility = devices.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        UsbEmptyCard.Visibility = devices.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
 }
