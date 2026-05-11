@@ -52,6 +52,58 @@ public static class IconBaker
         foreach (var bytes in pngFrames) bw.Write(bytes);
     }
 
+    /// <summary>
+    /// Renders the same grass-block art as <see cref="BakeGrassBlockToIco"/>
+    /// into Android adaptive-icon foreground PNGs at every standard density
+    /// bucket. Drops the files into <c>{androidResDir}/mipmap-{density}/
+    /// ic_launcher_foreground.png</c>. The canvas is 108 dp per Android's
+    /// adaptive-icon spec, with the block centered inside the 72 dp safe
+    /// zone so every mask shape (circle, squircle, rounded square) reveals
+    /// the full block. Background is transparent — the adaptive-icon XML
+    /// provides the white chip.
+    /// </summary>
+    public static void BakeGrassBlockToAndroidIcon(string androidResDir)
+    {
+        // Android density buckets. 1 dp == 1 / 1.5 / 2 / 3 / 4 px respectively.
+        // Adaptive-icon spec: foreground drawable is 108 × 108 dp.
+        var buckets = new (string suffix, int canvasPx)[]
+        {
+            ("mdpi",    108),
+            ("hdpi",    162),
+            ("xhdpi",   216),
+            ("xxhdpi",  324),
+            ("xxxhdpi", 432),
+        };
+        foreach (var (suffix, canvasPx) in buckets)
+        {
+            var dir = Path.Combine(androidResDir, $"mipmap-{suffix}");
+            Directory.CreateDirectory(dir);
+
+            using var bmp = new Bitmap(canvasPx, canvasPx, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = PixelOffsetMode.None;
+                // Sizing rationale: the cube's bounding box is 2·scale
+                // tall, so scale = canvasPx · 0.22 → cube ≈ 44 % of the
+                // canvas (≈ 48 dp inside a 108 dp chip). That comfortably
+                // fits inside the 72 dp adaptive-icon safe zone with a
+                // ~12 dp margin on every side, gives the chip room to
+                // breathe, and matches the "icon centred inside a white
+                // tile" feel of stock OS app icons. Centred on the canvas
+                // exactly — the upward bias used by the PC .ico path is
+                // wrong here because the cube isn't filling the canvas
+                // edge-to-edge, so a bias just reads as "icon offset".
+                double cx = canvasPx / 2.0;
+                double cy = canvasPx / 2.0;
+                double scale = canvasPx * 0.22;
+                DrawGrassBlockAt(g, cx, cy, scale);
+            }
+            bmp.Save(Path.Combine(dir, "ic_launcher_foreground.png"), ImageFormat.Png);
+        }
+    }
+
     private static byte[] RenderToPng(int size)
     {
         using var bmp = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -59,7 +111,7 @@ public static class IconBaker
         g.SmoothingMode = SmoothingMode.None;
         g.InterpolationMode = InterpolationMode.NearestNeighbor;
         g.PixelOffsetMode = PixelOffsetMode.None;
-        DrawGrassBlock(g, size);
+        DrawGrassBlock(g, size, size, size);
         using var ms = new MemoryStream();
         bmp.Save(ms, ImageFormat.Png);
         return ms.ToArray();
@@ -71,15 +123,36 @@ public static class IconBaker
     private const double Sin30 = 0.5;
     private const int Grid = 16;
 
-    private static void DrawGrassBlock(Graphics g, int size)
+    /// <summary>
+    /// Convenience wrapper used by the PC .ico render path. Picks the
+    /// scale + (slightly-upward) centering that fits a tight square
+    /// canvas. The Android path bypasses this and calls
+    /// <see cref="DrawGrassBlockAt"/> directly with its own parameters.
+    /// </summary>
+    private static void DrawGrassBlock(Graphics g, int canvasW, int canvasH, int visualSize)
     {
-        // Center the visual mass of the cube. An isometric cube reads
+        // Centre the visual mass of the cube. An isometric cube reads
         // bottom-heavy because the bottom-front vertex is the widest visible
-        // point — a small upward bias balances it on the canvas centerline.
-        double cx = size / 2.0;
-        double cy = size / 2.0 - size * 0.025;
-        double scale = size * 0.42;
+        // point — a small upward bias balances it on the tight canvas. The
+        // bias is only appropriate when the cube is filling its canvas (as
+        // it does for the PC .ico); for Android the cube lives inside a
+        // safe-zone with breathing room and should be optically centred,
+        // which is why the Android renderer calls DrawGrassBlockAt with
+        // cy = canvas/2 instead.
+        double cx = canvasW / 2.0;
+        double cy = canvasH / 2.0 - visualSize * 0.025;
+        double scale = visualSize * 0.42;
+        DrawGrassBlockAt(g, cx, cy, scale);
+    }
 
+    /// <summary>
+    /// Renders the isometric grass block centred at (<paramref name="cx"/>,
+    /// <paramref name="cy"/>) with vertical half-extent
+    /// <paramref name="scale"/>. The block's bounding box is
+    /// <c>2·scale</c> tall and <c>2·Cos30·scale ≈ 1.73·scale</c> wide.
+    /// </summary>
+    private static void DrawGrassBlockAt(Graphics g, double cx, double cy, double scale)
+    {
         PointF P(double x, double y, double z) =>
             new((float)(cx + (x - y) * Cos30 * scale),
                 (float)(cy + ((x + y) * Sin30 - z) * scale));

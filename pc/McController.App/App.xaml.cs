@@ -131,6 +131,22 @@ public static class Program
             return;
         }
 
+        if (args.Length > 0 && string.Equals(args[0], "--generate-android-icon", StringComparison.OrdinalIgnoreCase))
+        {
+            // Defaults to the Android module's res dir relative to the
+            // bin output: ../../../../../android/app/src/main/res.
+            var outDir = args.Length > 1
+                ? args[1]
+                : System.IO.Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "android", "app", "src", "main", "res");
+            outDir = System.IO.Path.GetFullPath(outDir);
+            IconBaker.BakeGrassBlockToAndroidIcon(outDir);
+            Console.WriteLine($"Android adaptive-icon foreground PNGs written under {outDir}");
+            return;
+        }
+
         Microsoft.UI.Xaml.Application.Start(p =>
         {
             var ctx = new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
