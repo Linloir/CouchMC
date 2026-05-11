@@ -4,7 +4,7 @@
     look). Used by the rename chip in Settings.
 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorOnSecondaryContainer">
+    android:color="@color/btn_ripple_tonal">
     <item android:id="@android:id/mask">
         <shape android:shape="oval">
             <solid android:color="@android:color/white" />

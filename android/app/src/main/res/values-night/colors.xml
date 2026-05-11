@@ -49,6 +49,14 @@
     <color name="status_offline">#9BA0A4</color>
     <color name="status_busy">#FFB762</color>
 
+    <!--
+        Dark-mode ripple colours — same alphas, flipped tones because
+        the on-* tokens flipped when the scheme inverted.
+    -->
+    <color name="btn_ripple_filled">#2900325A</color>
+    <color name="btn_ripple_tonal">#1FD6E2EE</color>
+    <color name="btn_ripple_tonal_error">#1FFFDAD6</color>
+
     <!-- Legacy aliases (overlay-style, intentionally always dark). -->
     <color name="bg_dark">#212121</color>
     <color name="hud_bg">#80000000</color>

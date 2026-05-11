@@ -18,6 +18,14 @@ object Protocol {
         const val BUTTON: Byte = 0x20
         const val PING: Byte = 0xF0.toByte()
         const val PONG: Byte = 0xF1.toByte()
+        const val PROBE: Byte = 0xFE.toByte()       // C->S, session-less reachability check
+        const val PROBE_ACK: Byte = 0xFF.toByte()   // S->C, response to PROBE
+    }
+
+    object ProbeStatus {
+        const val ALIVE: Byte = 0x00
+        const val BUSY: Byte = 0x01
+        const val PROTOCOL_INCOMPATIBLE: Byte = 0x02
     }
 
     object HelloAckStatus {

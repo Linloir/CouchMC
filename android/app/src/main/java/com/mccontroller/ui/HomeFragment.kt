@@ -183,6 +183,13 @@ class HomeFragment : Fragment() {
                     }
                     startActivity(intent)
                 }
+                ConnectivityProbe.Result.Busy -> {
+                    // Server is alive but already has a client. Real HELLO
+                    // would just be rejected, so don't bother launching the
+                    // controller — surface the reason in the modal instead.
+                    viewModel.connectingKey.value = null
+                    dialog.showFailure(getString(R.string.home_host_status_busy))
+                }
                 is ConnectivityProbe.Result.Failed -> {
                     viewModel.connectingKey.value = null
                     dialog.showFailure(result.reason)
@@ -336,7 +343,13 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                         sys.port,
                         timeoutMs = USB_PROBE_TIMEOUT_MS,
                     )
-                    systemUsbReachable.value = result is ConnectivityProbe.Result.Ok
+                    // Treat both Ok and Busy as "reachable" — the card just
+                    // shows green Available either way for now. Failed
+                    // (timeout / refused / incompatible) → gray Offline.
+                    systemUsbReachable.value = when (result) {
+                        ConnectivityProbe.Result.Ok, ConnectivityProbe.Result.Busy -> true
+                        is ConnectivityProbe.Result.Failed -> false
+                    }
                 }
                 delay(USB_PROBE_INTERVAL_MS)
             }

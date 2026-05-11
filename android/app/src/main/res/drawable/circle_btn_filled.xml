@@ -12,7 +12,7 @@
     layout — this drawable sidesteps the issue.
 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorOnPrimary">
+    android:color="@color/btn_ripple_filled">
     <item android:id="@android:id/mask">
         <shape android:shape="oval">
             <solid android:color="@android:color/white" />

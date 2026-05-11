@@ -53,6 +53,21 @@
     <color name="status_busy">#E68A00</color>
 
     <!--
+        Press-state ripple colours for the profile chips. M3 spec says
+        a "pressed state layer" is the relevant on-container colour at
+        ~12 % alpha (or onPrimary at ~16 % for filled). At the default
+        RippleDrawable alpha (full) the ripple looked muddy — these
+        pre-mul-alpha hexes hit the spec subtlety.
+
+        Hex breakdown:
+          0x1F ≈ 12.2 % alpha
+          0x29 ≈ 16.1 % alpha
+    -->
+    <color name="btn_ripple_filled">#29FFFFFF</color>
+    <color name="btn_ripple_tonal">#1F0A1A26</color>
+    <color name="btn_ripple_tonal_error">#1F410002</color>
+
+    <!--
         Legacy color aliases — still referenced by activity_controller.xml
         and activity_layout_editor.xml. Both are intentionally always-dark
         (overlay-style) so they don't pivot with the theme. Will be inlined

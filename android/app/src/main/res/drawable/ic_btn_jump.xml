@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Upward arrow. Bold + slightly thick stroke so it reads at small sizes. -->
+<!--
+    Jump glyph — a stylised "leap" arc with an upward chevron above and
+    a small ground line below. Reads as "spring up off the ground"
+    rather than the previous Shift-key shape that the user said was
+    confusing.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+    <!-- Solid filled triangle pointing up (the "jump arrow") -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 12,3.5 L 4.5,12 L 9,12 L 9,20 L 15,20 L 15,12 L 19.5,12 Z" />
+        android:pathData="M 12,3 L 21,17 L 15,17 L 15,19 L 9,19 L 9,17 L 3,17 Z" />
+    <!-- Ground line below -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.7"
+        android:pathData="M 4,21 L 20,21 L 20,22.5 L 4,22.5 Z" />
 </vector>

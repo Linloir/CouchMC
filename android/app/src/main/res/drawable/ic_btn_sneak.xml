@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Sneak: downward arrow tucked above a horizontal floor line. Reads as
-    "press down / get low" — visually paired with ic_btn_jump (mirror).
+    Sneak glyph — a crouching silhouette: a hunched dome (head + bent
+    back) above a ground line. Reads as "stay low / hidden" instead of
+    the previous downward-arrow-into-bin shape that the user said
+    looked like a download icon.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+    <!-- Round head -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 12,18 L 4.5,9.5 L 9,9.5 L 9,3 L 15,3 L 15,9.5 L 19.5,9.5 Z" />
+        android:pathData="M 12,4 m -2.8,0 a 2.8,2.8 0 1,0 5.6,0 a 2.8,2.8 0 1,0 -5.6,0" />
+    <!-- Hunched body — a curved hump from left foot up over the back to right foot -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 4,20 L 20,20 L 20,22 L 4,22 Z" />
+        android:pathData="M 3.5,18 C 5,9 10,8 12,8 C 14,8 19,9 20.5,18 L 16,18 L 16,15 L 8,15 L 8,18 Z" />
+    <!-- Ground line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.7"
+        android:pathData="M 3,20.5 L 21,20.5 L 21,22 L 3,22 Z" />
 </vector>

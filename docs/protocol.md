@@ -51,6 +51,8 @@ In **USB mode** (the Android client connects via `127.0.0.1` after the host runs
 | `0x20` | `BUTTON` | `u8 buttonId, u8 down` (0 = up, 1 = down) | C→S | edge-triggered |
 | `0xF0` | `PING` | `u32 seqNum` | C→S | 1 Hz |
 | `0xF1` | `PONG` | `u32 seqNum` (echoes the PING seqNum) | S→C | immediate |
+| `0xFE` | `PROBE` | (no payload) | C→S | per reachability check |
+| `0xFF` | `PROBE_ACK` | `u8 status` | S→C | response to PROBE |
 
 ### STATE_CHANGE semantics
 
@@ -73,6 +75,60 @@ so the client can render the correct initial UI.
 ### HELLO_ACK udpPort
 - Non-zero — server has a UDP listener bound; client should open UDP and send LOOK_DELTA there
 - Zero — server does not accept UDP (or this is USB mode); client should send `LOOK_DELTA_TCP` over TCP instead
+
+### PROBE / PROBE_ACK (session-less reachability check)
+
+The Android home screen periodically tests whether the USB loopback
+server is alive so the host card can show a real Available / Offline
+status. A naive "open a socket and close it" probe makes the server's
+status indicator flicker (it sees a brief client connect + disconnect),
+and triggers the full TCP accept → HELLO timeout codepath on the server
+side. PROBE / PROBE_ACK is the dedicated cheap alternative.
+
+**Wire format:**
+
+```
+PROBE      : len=1, type=0xFE                          # 3 bytes total: 00 01 FE
+PROBE_ACK  : len=2, type=0xFF, payload=u8 status        # 4 bytes total: 00 02 FF <status>
+```
+
+**PROBE_ACK status codes:**
+
+| Value | Name | Meaning |
+|---|---|---|
+| `0x00` | `ALIVE` | Server is ready to accept a real client (no active session). |
+| `0x01` | `BUSY`  | Server is alive but already has a client. A new HELLO would currently be rejected with HELLO_ACK status=2. |
+| `0x02` | `PROTOCOL_INCOMPATIBLE` | Server's protocol version doesn't match. Reserved for future use. |
+
+**Server semantics:**
+
+- On every accepted TCP connection, read the first frame.
+- If the type is `PROBE` (`0xFE`):
+  1. Respond with `PROBE_ACK` carrying the appropriate status.
+  2. Close the socket from the server side.
+  3. **Do NOT fire the "client connected" / "client disconnected" events**
+     — probes are intentionally invisible to any UI that displays a
+     connection count or LED. Don't log them as failed sessions either.
+- If the type is `HELLO` (`0x01`): normal lifecycle (existing behaviour).
+- Any other first frame: error close.
+
+Probes can be answered while a real client session is active — that's
+the point of the `BUSY` status. Servers should make sure the accept
+loop runs concurrently with the active-client read loop so probes are
+answered promptly.
+
+**Client semantics:**
+
+- Open TCP socket to `ip:port`.
+- Send a single PROBE frame.
+- Read the PROBE_ACK frame (timeout ~1.5 s).
+- Close the socket.
+- Interpret status:
+  - `0x00` (ALIVE) → reachable + available
+  - `0x01` (BUSY)  → reachable + in use
+  - `0x02` (INCOMPATIBLE) → reachable but unusable
+  - no ACK / timeout / refused → offline
+
 
 ### JOYSTICK fixed-point encoding
 - Wire value is `actual × 10000` clamped to `[-10000, 10000]`
