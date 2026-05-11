@@ -14,6 +14,7 @@
     <string name="home_host_status_idle">Available</string>
     <string name="home_host_status_busy">In use</string>
     <string name="home_host_status_offline">Offline</string>
+    <string name="home_host_status_usb">USB</string>
     <string name="home_host_mc_foreground">Minecraft is running</string>
     <string name="home_host_mc_background">Minecraft not detected</string>
     <string name="home_connecting">Connecting to %1$s…</string>

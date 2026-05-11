@@ -72,7 +72,7 @@ class HomeFragment : Fragment() {
 
         adapter = HostListAdapter(
             onHostClick = ::onHostClick,
-            onHostLongPress = ::onHostOverflow,
+            onHostMenu = ::onHostOverflow,
             isHostConnecting = { viewModel.connectingKey.value == it.key },
         )
         binding.list.adapter = adapter

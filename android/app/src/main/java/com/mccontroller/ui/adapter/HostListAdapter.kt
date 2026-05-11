@@ -4,8 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -14,29 +14,31 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.color.MaterialColors
 import com.mccontroller.R
 import com.mccontroller.core.DiscoveredHost
 import com.mccontroller.core.HostListItem
-import com.mccontroller.core.SavedHost
 
 /**
- * Multi-view-type adapter for the home screen. Sections:
+ * Multi-view-type adapter for the home screen. Section types:
  *
- *   • [HostListItem.Header] — section title (Saved / On this network)
+ *   • [HostListItem.Header] — section title
  *   • [HostListItem.Empty]  — placeholder when a section has 0 rows
  *   • [HostListItem.Saved] / [HostListItem.Discovered] — host card
  *
- * Card visual matches the iOS-leaning design the user picked from a
- * reference screenshot: big bold title, descriptor subtitle, meta line
- * with clock glyph, and a 3-column tinted-icon stats footer
- * (Address / Port / Minecraft).
+ * Card visual is four rows:
+ *   1. Name + trailing overflow icon (M3 secondary-action surface).
+ *   2. IP · port description.
+ *   3. Status row: coloured dot + matching-coloured word.
+ *   4. Last-connected line (or "Not connected yet").
  *
- * Long-press a card → context menu (rename / change-port / forget),
- * since there's no persistent overflow icon to clutter the surface.
+ * Tapping the overflow opens a [android.widget.PopupMenu] with the
+ * applicable actions (rename / change port / forget). System-USB hosts
+ * omit "Forget" since they're permanently provided by [HostStore].
  */
 class HostListAdapter(
     private val onHostClick: (HostListItem) -> Unit,
-    private val onHostLongPress: (HostListItem, View) -> Unit,
+    private val onHostMenu: (HostListItem, View) -> Unit,
     private val isHostConnecting: (HostListItem) -> Boolean,
 ) : ListAdapter<HostListItem, RecyclerView.ViewHolder>(DIFF) {
 
@@ -80,74 +82,65 @@ class HostListAdapter(
     private inner class HostViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val card: MaterialCardView = view as MaterialCardView
         private val name: TextView = view.findViewById(R.id.host_name)
-        private val subtitle: TextView = view.findViewById(R.id.host_subtitle)
-        private val meta: TextView = view.findViewById(R.id.host_meta)
-        private val statusPill: LinearLayout = view.findViewById(R.id.host_status_pill)
-        private val statusIcon: ImageView = view.findViewById(R.id.host_status_icon)
+        private val description: TextView = view.findViewById(R.id.host_description)
+        private val statusDot: ImageView = view.findViewById(R.id.host_status_dot)
         private val statusLabel: TextView = view.findViewById(R.id.host_status_label)
-        private val statAddressValue: TextView = view.findViewById(R.id.stat_address_value)
-        private val statPortValue: TextView = view.findViewById(R.id.stat_port_value)
-        private val statMcValue: TextView = view.findViewById(R.id.stat_mc_value)
+        private val lastConnected: TextView = view.findViewById(R.id.host_last_connected)
+        private val overflow: ImageButton = view.findViewById(R.id.host_overflow)
         private val progress: ProgressBar = view.findViewById(R.id.host_progress)
 
         fun bindSaved(item: HostListItem.Saved) {
             val saved = item.saved
             val ctx = card.context
             name.text = saved.name
-            subtitle.setText(
-                if (saved.isSystem) R.string.home_descriptor_usb
-                else R.string.home_descriptor_saved,
-            )
-            meta.text = metaTextFor(item.live, saved.lastConnectedAt, ctx)
-            applyStatus(item.live)
-            applyStats(saved.ip, saved.port, item.live, ctx)
+            description.text = "${saved.ip} · ${saved.port}"
+            applyStatus(item.live, isSystem = saved.isSystem, ctx)
+            lastConnected.text = lastConnectedText(saved.lastConnectedAt, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
-            card.setOnLongClickListener {
-                onHostLongPress(item, card); true
-            }
+            overflow.visibility = View.VISIBLE
+            overflow.setOnClickListener { onHostMenu(item, it) }
         }
 
         fun bindDiscovered(item: HostListItem.Discovered) {
             val ctx = card.context
             name.text = item.name
-            subtitle.setText(R.string.home_descriptor_discovered)
-            meta.text = metaTextFor(item.discovered, null, ctx)
-            applyStatus(item.discovered)
-            applyStats(item.ip, item.port, item.discovered, ctx)
+            description.text = "${item.ip} · ${item.port}"
+            applyStatus(item.discovered, isSystem = false, ctx)
+            lastConnected.text = lastConnectedText(null, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
-            // Long-press still works to "save" the discovered host (handled
-            // in the fragment's onHostLongPress for Discovered items, if
-            // we expose that later). For now, no menu — just click.
-            card.setOnLongClickListener(null)
+            // Discovered-but-not-saved hosts don't have an overflow menu —
+            // the only useful action would be "save", which a future
+            // iteration can wire in. Tapping the card connects directly.
+            overflow.visibility = View.GONE
+            overflow.setOnClickListener(null)
         }
 
-        // ---- helpers ----
-
-        private fun applyStatus(live: DiscoveredHost?) {
-            val ctx = card.context
-            val (label, color, bg) = when {
-                live == null -> Triple(R.string.home_host_status_offline, R.color.status_offline, R.drawable.status_pill_bg_offline)
-                live.busy -> Triple(R.string.home_host_status_busy, R.color.status_busy, R.drawable.status_pill_bg_busy)
-                else -> Triple(R.string.home_host_status_idle, R.color.status_online, R.drawable.status_pill_bg_online)
+        /**
+         * Paints the dot + word for a host's connection status.
+         *
+         *   • system USB → primary-coloured "USB" (always-shown shortcut)
+         *   • busy → amber "In use"
+         *   • live + not busy → green "Available"
+         *   • no live record → gray "Offline"
+         */
+        private fun applyStatus(live: DiscoveredHost?, isSystem: Boolean, ctx: Context) {
+            val (labelRes, colour) = when {
+                isSystem -> R.string.home_host_status_usb to
+                    MaterialColors.getColor(card, com.google.android.material.R.attr.colorPrimary)
+                live == null -> R.string.home_host_status_offline to
+                    ContextCompat.getColor(ctx, R.color.status_offline)
+                live.busy -> R.string.home_host_status_busy to
+                    ContextCompat.getColor(ctx, R.color.status_busy)
+                else -> R.string.home_host_status_idle to
+                    ContextCompat.getColor(ctx, R.color.status_online)
             }
-            statusPill.setBackgroundResource(bg)
-            statusLabel.setText(label)
-            val colour = ContextCompat.getColor(ctx, color)
+            statusLabel.setText(labelRes)
             statusLabel.setTextColor(colour)
-            ImageViewCompat.setImageTintList(statusIcon, android.content.res.ColorStateList.valueOf(colour))
-        }
-
-        private fun applyStats(ip: String, port: Int, live: DiscoveredHost?, ctx: Context) {
-            statAddressValue.text = ip
-            statPortValue.text = port.toString()
-            statMcValue.setText(
-                when {
-                    live == null -> R.string.home_stat_mc_unknown
-                    live.mcInForeground -> R.string.home_stat_mc_running
-                    else -> R.string.home_stat_mc_idle
-                },
+            ImageViewCompat.setImageTintList(
+                statusDot,
+                android.content.res.ColorStateList.valueOf(colour),
             )
         }
     }
@@ -162,18 +155,12 @@ class HostListAdapter(
             override fun areContentsTheSame(a: HostListItem, b: HostListItem) = a == b
         }
 
-        private fun metaTextFor(
-            live: DiscoveredHost?,
-            lastConnectedAt: Long?,
-            ctx: Context,
-        ): String = when {
-            live != null -> ctx.getString(R.string.home_meta_seen_just_now)
-            lastConnectedAt != null -> ctx.getString(
+        private fun lastConnectedText(lastConnectedAt: Long?, ctx: Context): String =
+            if (lastConnectedAt == null) ctx.getString(R.string.home_meta_never_used)
+            else ctx.getString(
                 R.string.home_meta_last_used,
                 formatRelativeTime(ctx, lastConnectedAt),
             )
-            else -> ctx.getString(R.string.home_meta_never_used)
-        }
 
         private fun formatRelativeTime(ctx: Context, then: Long): String {
             val delta = (System.currentTimeMillis() - then).coerceAtLeast(0L)

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Host card — iOS-style. Solid white surface, no border, soft drop
-    shadow, 22 dp rounded corners. Each card has:
+    Host card v3. Clean four-row composition:
+      1. Title + trailing overflow icon button (M3 standard secondary
+         action surface). Tapping the icon opens a PopupMenu with
+         rename / change port / forget.
+      2. Description (IP · port), gray.
+      3. Status row — small coloured dot on the left, status word in the
+         matching colour next to it. No pill background; the dot + text
+         carry the colour signal cleanly.
+      4. Last-connected line — relative time, or "Not connected yet"
+         if there's no history.
 
-      • Title row: large bold host name + status pill (top-right).
-      • Descriptor subtitle (gray): a host-type label ("USB loopback",
-        "Saved host", "Found on local network").
-      • Meta line: small clock glyph + "Last used X ago" (or
-        "Never connected" if there's no lastConnectedAt).
-      • Stat footer: three little columns — Address / Port / Minecraft —
-        each with a tinted glyph header + bold value. Per-stat tint is
-        applied at bind time.
-
-    Cards expand-to-fit; tall and breathy. No avatar swatch — the
-    statuses + icons carry the colour now.
+    Card chrome: solid surface, 22 dp corners, 3 dp drop shadow, no
+    border. Horizontal padding matches the title's typographic weight
+    (22 dp) — feels roomy without ballooning the card height.
 -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -28,7 +28,7 @@
     android:focusable="true"
     app:cardBackgroundColor="?attr/colorSurface"
     app:cardCornerRadius="22dp"
-    app:cardElevation="4dp"
+    app:cardElevation="3dp"
     app:strokeWidth="0dp"
     style="@style/Widget.Material3.CardView.Elevated">
 
@@ -37,14 +37,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="22dp"
-        android:paddingVertical="22dp">
+        android:paddingTop="18dp"
+        android:paddingBottom="20dp">
 
-        <!-- Row 1: title + status pill -->
+        <!-- Row 1 — title + trailing overflow -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="top"
+            android:gravity="center_vertical"
             android:baselineAligned="false">
 
             <TextView
@@ -55,232 +56,74 @@
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="?attr/colorOnSurface"
                 android:textStyle="bold"
-                android:textSize="26sp"
+                android:textSize="24sp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="openclaw" />
+                tools:text="JonDesk" />
 
-            <LinearLayout
-                android:id="@+id/host_status_pill"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:background="@drawable/status_pill_bg_online">
-
-                <ImageView
-                    android:id="@+id/host_status_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="13dp"
-                    android:src="@drawable/ic_status_check"
-                    app:tint="@color/status_online"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    android:id="@+id/host_status_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:textAppearance="?attr/textAppearanceLabelMedium"
-                    android:textColor="@color/status_online"
-                    android:textStyle="bold"
-                    tools:text="Available" />
-            </LinearLayout>
+            <ImageButton
+                android:id="@+id/host_overflow"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="-8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert"
+                app:tint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
-        <!-- Row 2: descriptor subtitle -->
+        <!-- Row 2 — description (IP · port) -->
         <TextView
-            android:id="@+id/host_subtitle"
+            android:id="@+id/host_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:maxLines="2"
-            tools:text="Local loopback over adb" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="192.168.0.101 · 34555" />
 
-        <!-- Row 3: meta line (clock + last-used) -->
+        <!-- Row 3 — status: coloured dot + matching-coloured word -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
             <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_meta_clock"
-                app:tint="?attr/colorOnSurfaceVariant"
+                android:id="@+id/host_status_dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/ic_status_dot"
+                app:tint="@color/status_online"
                 android:contentDescription="@null" />
 
             <TextView
-                android:id="@+id/host_meta"
+                android:id="@+id/host_status_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                tools:text="Last used 2 hr ago" />
+                android:layout_marginStart="8dp"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/status_online"
+                android:textStyle="bold"
+                tools:text="Available" />
 
         </LinearLayout>
 
-        <!-- Row 4: 3-col stats footer -->
-        <LinearLayout
+        <!-- Row 4 — last-connected -->
+        <TextView
+            android:id="@+id/host_last_connected"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
-
-            <!-- Stat: Address -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/stat_address_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_stat_address"
-                        app:tint="#3F87F0"
-                        android:contentDescription="@null" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/home_stat_address"
-                        android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/stat_address_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    android:textSize="15sp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    tools:text="192.168.0.101" />
-
-            </LinearLayout>
-
-            <!-- Stat: Port -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/stat_port_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_stat_port"
-                        app:tint="#FF9A2A"
-                        android:contentDescription="@null" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/home_stat_port"
-                        android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/stat_port_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    android:textSize="15sp"
-                    tools:text="34555" />
-
-            </LinearLayout>
-
-            <!-- Stat: Minecraft -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/stat_mc_icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_stat_mc"
-                        app:tint="#34A852"
-                        android:contentDescription="@null" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/home_stat_minecraft"
-                        android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/stat_mc_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    android:textSize="15sp"
-                    tools:text="Running" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="Last connected 2 hr ago" />
 
     </LinearLayout>
-
-    <!--
-        Rename / port / forget are exposed via long-press now (iOS-style
-        context menu) so the card surface stays clean. No persistent
-        overflow chevron crowding the title row.
-    -->
 
     <ProgressBar
         android:id="@+id/host_progress"
