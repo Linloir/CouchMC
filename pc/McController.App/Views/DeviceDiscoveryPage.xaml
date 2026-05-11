@@ -1,0 +1,126 @@
+<Page x:Class="McController.App.Views.DeviceDiscoveryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="设备发现"
+      Background="Transparent">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="36,16,36,36" MaxWidth="900" HorizontalAlignment="Stretch">
+
+            <TextBlock Text="设备发现" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,16"/>
+            <TextBlock Text="发现可用的 USB 与局域网设备并选作控制器" Opacity="0.6" Margin="0,0,0,20"/>
+
+            <!-- ===== 当前连接 ===== -->
+            <ui:Card Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="当前连接" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="CurrentConnectionText" Opacity="0.7" FontSize="13" Margin="0,4,0,0"
+                                   Text="等待连接..."/>
+                        <TextBlock x:Name="ListeningOnText" Opacity="0.5" FontSize="12" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Border Grid.Column="1"
+                            x:Name="StatusPill"
+                            CornerRadius="12" Padding="10,4,10,4"
+                            Background="#444"
+                            VerticalAlignment="Center">
+                        <TextBlock x:Name="StatusPillText" Text="未连接" FontSize="12"
+                                   Foreground="#DDD"/>
+                    </Border>
+                </Grid>
+            </ui:Card>
+
+            <!-- ===== USB 设备 ===== -->
+            <ui:Card Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="USB 设备" FontWeight="SemiBold"/>
+                            <TextBlock Text="通过 adb reverse 转发本机端口的安卓设备" Opacity="0.6" FontSize="12" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <ui:Button Grid.Column="1"
+                                   Content="adb reverse"
+                                   Icon="{ui:SymbolIcon Symbol=ArrowSync24}"
+                                   Click="AdbReverse_Click"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <ItemsControl x:Name="UsbDeviceList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#22FFFFFF" BorderThickness="0,1,0,0" Padding="0,12,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="36" Height="36" CornerRadius="6"
+                                                Background="#252A36" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Phone24" FontSize="20"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Model}" FontWeight="SemiBold"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                <TextBlock Text="{Binding Serial}" Opacity="0.55" FontSize="12"/>
+                                                <TextBlock Text="·" Opacity="0.4" FontSize="12" Margin="6,0,6,0"/>
+                                                <TextBlock Text="{Binding State}" Opacity="0.55" FontSize="12"/>
+                                                <TextBlock Text="·" Opacity="0.4" FontSize="12" Margin="6,0,6,0"
+                                                           Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                <TextBlock Text="已安装 App" Foreground="#34D8B8" FontSize="12"
+                                                           Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="UsbEmptyText"
+                               Text="未检测到 USB 设备 · 请用数据线连接手机并开启 USB 调试"
+                               Opacity="0.5" FontSize="12" Margin="0,8,0,0"/>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- ===== 局域网设备 ===== -->
+            <ui:Card Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="局域网设备" FontWeight="SemiBold"/>
+                    <TextBlock Text="正在监听 34556 端口上的设备广播。" Opacity="0.6" FontSize="12" Margin="0,4,0,8"/>
+                    <TextBlock x:Name="LanStatusText"
+                               Text="（Phase 2 — 手机端广播尚未实现，列表暂时为空）"
+                               Opacity="0.5" FontSize="12"/>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- ===== 网络信息 ===== -->
+            <ui:Card Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="本机 IP 地址" FontWeight="SemiBold"/>
+                    <TextBlock Text="在手机端输入其中一个作为服务端地址" Opacity="0.6" FontSize="12" Margin="0,4,0,8"/>
+                    <ItemsControl x:Name="IpList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" FontFamily="Consolas" Opacity="0.85" Margin="0,2,0,2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ui:Card>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="monG" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D8B8"/>
+      <stop offset="1" stop-color="#1E9E84"/>
+    </linearGradient>
+    <linearGradient id="phG" x1="22" y1="10" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5B7FFF"/>
+      <stop offset="1" stop-color="#2A55D8"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="6" width="19" height="14" rx="2" fill="url(#monG)"/>
+  <rect x="5" y="8" width="15" height="10" rx="0.5" fill="#ffffff" opacity="0.18"/>
+  <rect x="10" y="20" width="5" height="3" fill="url(#monG)"/>
+  <rect x="6" y="22.5" width="13" height="1.6" rx="0.8" fill="url(#monG)"/>
+  <rect x="21" y="10" width="8" height="17" rx="2" fill="url(#phG)"/>
+  <rect x="22" y="12" width="6" height="11" fill="#ffffff" opacity="0.92"/>
+  <circle cx="25" cy="25.2" r="0.8" fill="#ffffff" opacity="0.92"/>
+</svg>

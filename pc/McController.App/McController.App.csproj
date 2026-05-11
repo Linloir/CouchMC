@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>McController.App</RootNamespace>
+    <AssemblyName>McController.App</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon></ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\McController.Core\McController.Core.csproj" />
+  </ItemGroup>
+
+  <!-- SVGs in Assets/icons are design references kept for sketching iterations;
+       WPF doesn't render SVG natively, so the actual sidebar icons live in
+       Themes/AppIcons.xaml as DrawingImage resources. Skip the build copy. -->
+  <ItemGroup>
+    <None Include="Assets\**\*" />
+  </ItemGroup>
+
+</Project>
