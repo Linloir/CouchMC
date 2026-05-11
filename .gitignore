@@ -76,3 +76,4 @@ Desktop.ini
 config.json
 *.pfx
 *.snk
+release-artifacts/
