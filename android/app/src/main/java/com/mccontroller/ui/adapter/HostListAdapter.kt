@@ -1,15 +1,18 @@
 package com.mccontroller.ui.adapter
 
 import android.content.Context
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,21 +23,18 @@ import com.mccontroller.core.DiscoveredHost
 import com.mccontroller.core.HostListItem
 
 /**
- * Multi-view-type adapter for the home screen. Section types:
+ * Multi-view-type adapter for the home screen.
  *
- *   • [HostListItem.Header] — section title
- *   • [HostListItem.Empty]  — placeholder when a section has 0 rows
- *   • [HostListItem.Saved] / [HostListItem.Discovered] — host card
+ * Card composition is three rows:
+ *   1. Name + trailing overflow icon button.
+ *   2. Single-line "ip · port · ● status" — the status segment is a
+ *      [SpannableString] suffix that's colour-spanned + bold so the
+ *      dot + word stand out without needing a dedicated row.
+ *   3. Last-connected, or "Not connected yet".
  *
- * Card visual is four rows:
- *   1. Name + trailing overflow icon (M3 secondary-action surface).
- *   2. IP · port description.
- *   3. Status row: coloured dot + matching-coloured word.
- *   4. Last-connected line (or "Not connected yet").
- *
- * Tapping the overflow opens a [android.widget.PopupMenu] with the
- * applicable actions (rename / change port / forget). System-USB hosts
- * omit "Forget" since they're permanently provided by [HostStore].
+ * Tapping the overflow icon opens a [android.widget.PopupMenu] with
+ * rename / change-port / forget (forget hidden for the system USB
+ * entry).
  */
 class HostListAdapter(
     private val onHostClick: (HostListItem) -> Unit,
@@ -83,8 +83,6 @@ class HostListAdapter(
         private val card: MaterialCardView = view as MaterialCardView
         private val name: TextView = view.findViewById(R.id.host_name)
         private val description: TextView = view.findViewById(R.id.host_description)
-        private val statusDot: ImageView = view.findViewById(R.id.host_status_dot)
-        private val statusLabel: TextView = view.findViewById(R.id.host_status_label)
         private val lastConnected: TextView = view.findViewById(R.id.host_last_connected)
         private val overflow: ImageButton = view.findViewById(R.id.host_overflow)
         private val progress: ProgressBar = view.findViewById(R.id.host_progress)
@@ -93,8 +91,7 @@ class HostListAdapter(
             val saved = item.saved
             val ctx = card.context
             name.text = saved.name
-            description.text = "${saved.ip} · ${saved.port}"
-            applyStatus(item.live, isSystem = saved.isSystem, ctx)
+            description.text = buildDescriptionSpannable(saved.ip, saved.port, item.live, saved.isSystem, ctx)
             lastConnected.text = lastConnectedText(saved.lastConnectedAt, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
@@ -105,30 +102,57 @@ class HostListAdapter(
         fun bindDiscovered(item: HostListItem.Discovered) {
             val ctx = card.context
             name.text = item.name
-            description.text = "${item.ip} · ${item.port}"
-            applyStatus(item.discovered, isSystem = false, ctx)
+            description.text = buildDescriptionSpannable(item.ip, item.port, item.discovered, isSystem = false, ctx)
             lastConnected.text = lastConnectedText(null, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
-            // Discovered-but-not-saved hosts don't have an overflow menu —
-            // the only useful action would be "save", which a future
-            // iteration can wire in. Tapping the card connects directly.
+            // Discovered-but-not-saved hosts don't expose a menu yet.
             overflow.visibility = View.GONE
             overflow.setOnClickListener(null)
         }
 
         /**
-         * Paints the dot + word for a host's connection status.
+         * Produces the inline description, e.g.
          *
-         *   • system USB → primary-coloured "USB" (always-shown shortcut)
-         *   • busy → amber "In use"
-         *   • live + not busy → green "Available"
-         *   • no live record → gray "Offline"
+         *     192.168.0.101 · 34555 · ● Available
+         *
+         * The status portion (bullet + word) is colour-spanned + bold so
+         * it carries the visual emphasis the previous standalone status
+         * row had, but without taking its own line.
          */
-        private fun applyStatus(live: DiscoveredHost?, isSystem: Boolean, ctx: Context) {
-            val (labelRes, colour) = when {
+        private fun buildDescriptionSpannable(
+            ip: String,
+            port: Int,
+            live: DiscoveredHost?,
+            isSystem: Boolean,
+            ctx: Context,
+        ): CharSequence {
+            val (labelRes, colour) = resolveStatus(live, isSystem, card)
+            val statusWord = ctx.getString(labelRes)
+            val prefix = "$ip · $port · "
+            val suffix = "● $statusWord"
+            val full = SpannableString(prefix + suffix)
+            val start = prefix.length
+            val end = full.length
+            full.setSpan(ForegroundColorSpan(colour), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            full.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            return full
+        }
+
+        /**
+         * Pair of (label string-res, resolved colour int). System USB
+         * hosts get the theme primary (which adapts to dark mode); the
+         * other three states pull from the static palette in colors.xml.
+         */
+        private fun resolveStatus(
+            live: DiscoveredHost?,
+            isSystem: Boolean,
+            view: View,
+        ): Pair<Int, Int> {
+            val ctx = view.context
+            return when {
                 isSystem -> R.string.home_host_status_usb to
-                    MaterialColors.getColor(card, com.google.android.material.R.attr.colorPrimary)
+                    MaterialColors.getColor(view, com.google.android.material.R.attr.colorPrimary)
                 live == null -> R.string.home_host_status_offline to
                     ContextCompat.getColor(ctx, R.color.status_offline)
                 live.busy -> R.string.home_host_status_busy to
@@ -136,12 +160,6 @@ class HostListAdapter(
                 else -> R.string.home_host_status_idle to
                     ContextCompat.getColor(ctx, R.color.status_online)
             }
-            statusLabel.setText(labelRes)
-            statusLabel.setTextColor(colour)
-            ImageViewCompat.setImageTintList(
-                statusDot,
-                android.content.res.ColorStateList.valueOf(colour),
-            )
         }
     }
 
