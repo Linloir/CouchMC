@@ -6,16 +6,17 @@
     xmlns:tk="using:CommunityToolkit.WinUI.Controls"
     xmlns:ctrl="using:McController.App.Controls">
 
+    <!-- ScrollViewer.HorizontalContentAlignment is what actually centers
+         the content area. The inner StackPanel stays Stretch + MaxWidth so
+         cards always fill the available width up to 1600 — using Center on
+         the StackPanel itself sizes it to its widest child instead, which
+         made cards collapse on pages with short text. -->
     <ScrollViewer x:Name="Scroller"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
+                  HorizontalContentAlignment="Center"
                   Padding="40,8,40,40">
-        <Grid HorizontalAlignment="Center" MaxWidth="1600">
-            <!-- The wrapping Grid is what carries MaxWidth: HorizontalAlignment
-                 on a StackPanel sizes it to its widest child instead, which
-                 made cards collapse on pages with short text. Inside, the
-                 StackPanel stretches to fill the Grid up to 1600. -->
-        <StackPanel HorizontalAlignment="Stretch" Spacing="0">
+        <StackPanel HorizontalAlignment="Stretch" MaxWidth="1600" Spacing="0">
 
             <TextBlock Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,16,0,2"/>
             <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
@@ -129,7 +130,7 @@
                     <tk:SettingsCard Header="实时预览"
                                      ContentAlignment="Vertical"
                                      HorizontalContentAlignment="Stretch">
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="10" Margin="0,0,0,8">
                             <ctrl:CurveCanvas x:Name="CurvePreview" Height="200"/>
                             <StackPanel Orientation="Horizontal" Spacing="24">
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
@@ -200,6 +201,5 @@
             </StackPanel>
 
         </StackPanel>
-        </Grid>
     </ScrollViewer>
 </Page>
