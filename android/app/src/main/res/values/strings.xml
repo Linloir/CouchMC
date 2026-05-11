@@ -17,8 +17,11 @@
     <string name="home_host_mc_foreground">Minecraft is running</string>
     <string name="home_host_mc_background">Minecraft not detected</string>
     <string name="home_connecting">Connecting to %1$s…</string>
+    <string name="home_connecting_label">Connecting…</string>
     <string name="home_connect_failed">Couldn\'t reach %1$s</string>
+    <string name="home_connect_failed_reason">Could not reach the host.\nReason: %1$s</string>
     <string name="home_disconnected">Disconnected</string>
+    <string name="dialog_close">Close</string>
     <string name="home_usb_label">USB-attached PC</string>
     <string name="home_usb_subtitle">Local loopback (127.0.0.1)</string>
     <string name="home_host_last_connected">last used %1$s</string>

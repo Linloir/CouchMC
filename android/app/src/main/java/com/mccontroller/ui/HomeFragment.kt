@@ -19,7 +19,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.mccontroller.R
 import com.mccontroller.core.HostListItem
 import com.mccontroller.core.HostRepository
@@ -32,6 +31,7 @@ import com.mccontroller.net.DiscoveryClient
 import com.mccontroller.net.Protocol
 import com.mccontroller.ui.adapter.HostListAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -158,16 +158,24 @@ class HomeFragment : Fragment() {
         if (viewModel.connectingKey.value != null) return
         viewModel.connectingKey.value = key
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val msg = getString(R.string.home_connecting, target.name)
-            val bar = Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE).also { it.show() }
+        val dialog = ConnectingDialog(
+            context = requireContext(),
+            hostName = target.name,
+            subtitle = "${target.ip} · ${target.port}",
+        )
 
+        // The probe job. Cancellable via the dialog's Cancel button.
+        lateinit var job: Job
+        job = viewLifecycleOwner.lifecycleScope.launch {
             val result = ConnectivityProbe.probe(target.ip, target.port)
-            bar.dismiss()
-            viewModel.connectingKey.value = null
+            // If user pressed Cancel while we were probing, the dialog is
+            // already gone and the connecting flag has been cleared.
+            if (!job.isActive) return@launch
 
             when (result) {
                 ConnectivityProbe.Result.Ok -> {
+                    viewModel.connectingKey.value = null
+                    dialog.dismiss()
                     val intent = Intent(requireContext(), ControllerActivity::class.java).apply {
                         putExtra(ControllerActivity.EXTRA_IP, target.ip)
                         putExtra(ControllerActivity.EXTRA_PORT, target.port)
@@ -177,14 +185,18 @@ class HomeFragment : Fragment() {
                     startActivity(intent)
                 }
                 is ConnectivityProbe.Result.Failed -> {
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.home_connect_failed, target.name),
-                        Snackbar.LENGTH_LONG,
-                    ).show()
+                    viewModel.connectingKey.value = null
+                    dialog.showFailure(result.reason)
                 }
             }
         }
+
+        dialog.onCancel = {
+            job.cancel()
+            viewModel.connectingKey.value = null
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     // -------------------------------------------------------------- dialogs
