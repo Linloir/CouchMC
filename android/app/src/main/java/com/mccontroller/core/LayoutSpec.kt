@@ -10,6 +10,19 @@ enum class Anchor {
 }
 
 /**
+ * How the hotbar interprets left/right swipes.
+ *
+ * - [Precise]: a swipe lands on whatever slot the finger is over at the
+ *   moment (original behavior). Drifting outside the strip clamps to the
+ *   nearest extreme slot.
+ * - [Relative]: scroll-wheel feel — direction matters, position doesn't.
+ *   Every ~32dp of horizontal travel cycles the selection one slot in
+ *   that direction, wrapping at slot 0 ↔ slot 8. Tap and long-press
+ *   behaviors are unaffected.
+ */
+enum class HotbarSwipeMode { Precise, Relative }
+
+/**
  * Per-widget layout: where it sits and how big it is.
  *
  * - `anchor` decides which screen edge(s) we measure from.
@@ -44,6 +57,7 @@ data class LayoutProfile(
     val name: String,
     val inGame: ModeLayout,
     val uiMode: ModeLayout,
+    val hotbarSwipeMode: HotbarSwipeMode = HotbarSwipeMode.Precise,
 )
 
 /**

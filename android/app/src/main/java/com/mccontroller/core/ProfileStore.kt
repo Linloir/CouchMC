@@ -78,6 +78,7 @@ class ProfileStore(context: Context) {
         put("name", p.name)
         put("in_game", modeLayoutToJson(p.inGame))
         put("ui_mode", modeLayoutToJson(p.uiMode))
+        put("hotbar_swipe_mode", p.hotbarSwipeMode.name)
     }
 
     private fun modeLayoutToJson(m: ModeLayout): JSONObject = JSONObject().apply {
@@ -103,6 +104,9 @@ class ProfileStore(context: Context) {
         name = obj.optString("name", "Unnamed"),
         inGame = parseModeLayout(obj.optJSONObject("in_game") ?: JSONObject(), DefaultLayouts.IN_GAME),
         uiMode = parseModeLayout(obj.optJSONObject("ui_mode") ?: JSONObject(), DefaultLayouts.UI_MODE),
+        hotbarSwipeMode = runCatching {
+            HotbarSwipeMode.valueOf(obj.optString("hotbar_swipe_mode", "Precise"))
+        }.getOrDefault(HotbarSwipeMode.Precise),
     )
 
     private fun parseModeLayout(obj: JSONObject, fallback: ModeLayout): ModeLayout {

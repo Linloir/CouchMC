@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.mccontroller.R
 import com.mccontroller.core.Anchor
 import com.mccontroller.core.DefaultLayouts
+import com.mccontroller.core.HotbarSwipeMode
 import com.mccontroller.core.LayoutApplier
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ModeLayout
@@ -295,6 +296,28 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
             val def = defaultSpec(id) ?: return@setOnClickListener
             updateSpec(id) { it.copy(widthDp = def.widthDp, heightDp = def.heightDp) }
         }
+        binding.btnHotbarModeToggle.setOnClickListener {
+            // Only meaningful when hotbar is selected (we gate visibility
+            // accordingly), but guard anyway.
+            if (selectedId != "hotbar") return@setOnClickListener
+            val current = workingProfiles[activeIdx].hotbarSwipeMode
+            val next = if (current == HotbarSwipeMode.Precise)
+                HotbarSwipeMode.Relative
+            else HotbarSwipeMode.Precise
+            workingProfiles[activeIdx] = workingProfiles[activeIdx].copy(hotbarSwipeMode = next)
+            binding.hotbar.swipeMode = next
+            updateHotbarModeButtonLabel()
+        }
+    }
+
+    private fun updateHotbarModeButtonLabel() {
+        val mode = workingProfiles[activeIdx].hotbarSwipeMode
+        binding.btnHotbarModeToggle.setText(
+            when (mode) {
+                HotbarSwipeMode.Precise -> R.string.editor_hotbar_mode_precise
+                HotbarSwipeMode.Relative -> R.string.editor_hotbar_mode_relative
+            }
+        )
     }
 
     private fun defaultSpec(id: String): WidgetSpec? =
@@ -317,6 +340,11 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         binding.btnResetPosition.visibility = if (id != null) View.VISIBLE else View.GONE
         binding.btnResetSize.visibility =
             if (id != null && id in DefaultLayouts.RESIZABLE_IDS) View.VISIBLE else View.GONE
+        // The hotbar-specific swipe-mode toggle is only meaningful when the
+        // hotbar itself is the selected widget.
+        binding.btnHotbarModeToggle.visibility =
+            if (id == "hotbar") View.VISIBLE else View.GONE
+        if (id == "hotbar") updateHotbarModeButtonLabel()
     }
 
     private fun makeSelectionDrawable(): Drawable = GradientDrawable().apply {
@@ -434,6 +462,7 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         val profile = workingProfiles[activeIdx]
         LayoutApplier.applyAll(inGameWidgetMap(), profile.inGame)
         LayoutApplier.applyAll(uiModeWidgetMap(), profile.uiMode)
+        binding.hotbar.swipeMode = profile.hotbarSwipeMode
     }
 
     private fun currentSpec(id: String): WidgetSpec? = when (currentEditMode) {

@@ -134,6 +134,12 @@ class ControllerActivity : AppCompatActivity() {
         binding.lookPad.onHoldEnd = {
             lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_LEFT, false) }
         }
+        binding.lookPad.onSecondaryHoldStart = {
+            lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, true) }
+        }
+        binding.lookPad.onSecondaryHoldEnd = {
+            lifecycleScope.launch { session.sendButton(Protocol.ButtonId.MOUSE_RIGHT, false) }
+        }
         lookAccumulator.start(lifecycleScope)
 
         wireButtons()
@@ -320,6 +326,7 @@ class ControllerActivity : AppCompatActivity() {
     private fun applyProfileLayout() {
         LayoutApplier.applyAll(inGameWidgetMap(), activeProfile.inGame)
         LayoutApplier.applyAll(uiModeWidgetMap(), activeProfile.uiMode)
+        binding.hotbar.swipeMode = activeProfile.hotbarSwipeMode
     }
 
     private fun updateLayerVisibility(mode: ControllerMode) {

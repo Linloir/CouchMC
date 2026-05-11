@@ -327,9 +327,22 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="34dp"
+                android:layout_marginEnd="4dp"
                 android:minWidth="0dp"
                 android:paddingHorizontal="10dp"
                 android:text="@string/editor_reset_size"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_hotbar_mode_toggle"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="10dp"
+                android:text="@string/editor_hotbar_mode_precise"
                 android:textSize="11sp"
                 android:visibility="gone"
                 tools:visibility="visible" />

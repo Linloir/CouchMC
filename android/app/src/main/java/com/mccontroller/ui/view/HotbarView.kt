@@ -47,6 +47,15 @@ class HotbarView @JvmOverloads constructor(
      */
     private var hasSwiped = false
 
+    /** Swipe interpretation — Precise (current behavior) or Relative. */
+    var swipeMode: com.mccontroller.core.HotbarSwipeMode =
+        com.mccontroller.core.HotbarSwipeMode.Precise
+
+    // Relative-mode accumulator: each ACTION_MOVE's horizontal delta adds
+    // to this; every SLOT_STEP_PX threshold step cycles the selection.
+    private var relAccumPx = 0f
+    private var relLastX = 0f
+
     private val handler = Handler(Looper.getMainLooper())
     private var dropPending: Runnable? = null
 
@@ -95,7 +104,9 @@ class HotbarView @JvmOverloads constructor(
                         pointerId = e.getPointerId(e.actionIndex)
                         pressedSlot = slot
                         selectedSlot = slot
-                        hasSwiped = false  // fresh gesture
+                        hasSwiped = false
+                        relAccumPx = 0f
+                        relLastX = e.getX(e.actionIndex)
                         onSelect?.invoke(slot)
                         scheduleLongPress()
                         invalidate()
@@ -103,22 +114,12 @@ class HotbarView @JvmOverloads constructor(
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                // If the finger crosses to another slot we treat it as a swipe.
-                // First swipe disables drop for this gesture (sticky); any
-                // pending or in-progress drop is also cancelled here.
                 val idx = e.findPointerIndex(pointerId)
-                if (idx >= 0) {
-                    val slot = slotAt(e.getX(idx))
-                    if (slot >= 0 && slot != pressedSlot) {
-                        hasSwiped = true
-                        cancelDropTimer()
-                        pressedSlot = slot
-                        selectedSlot = slot
-                        onSelect?.invoke(slot)
-                        invalidate()
-                        // Intentionally do NOT reschedule long-press: the
-                        // user is swiping, not pressing-and-holding.
-                    }
+                if (idx < 0) return true
+                if (swipeMode == com.mccontroller.core.HotbarSwipeMode.Relative) {
+                    handleRelativeMove(e.getX(idx))
+                } else {
+                    handlePreciseMove(e.getX(idx))
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
@@ -133,6 +134,49 @@ class HotbarView @JvmOverloads constructor(
             }
         }
         return true
+    }
+
+    private fun handlePreciseMove(curX: Float) {
+        // Position-based: select whichever slot the finger is over (or the
+        // nearest extreme if it's drifted outside the strip).
+        val slot = slotAt(curX)
+        if (slot >= 0 && slot != pressedSlot) {
+            hasSwiped = true
+            cancelDropTimer()
+            pressedSlot = slot
+            selectedSlot = slot
+            onSelect?.invoke(slot)
+            invalidate()
+        }
+    }
+
+    private fun handleRelativeMove(curX: Float) {
+        // Direction-based (scroll-wheel feel): accumulate horizontal travel;
+        // every SLOT_STEP_PX of movement cycles the selection one slot in
+        // that direction, wrapping at the ends.
+        val dx = curX - relLastX
+        relLastX = curX
+        relAccumPx += dx
+        var stepped = false
+        val stepPx = dp(SLOT_STEP_DP)
+        while (relAccumPx >= stepPx) {
+            selectedSlot = (selectedSlot + 1) % slotCount
+            onSelect?.invoke(selectedSlot)
+            relAccumPx -= stepPx
+            stepped = true
+        }
+        while (relAccumPx <= -stepPx) {
+            selectedSlot = (selectedSlot - 1 + slotCount) % slotCount
+            onSelect?.invoke(selectedSlot)
+            relAccumPx += stepPx
+            stepped = true
+        }
+        if (stepped) {
+            hasSwiped = true
+            cancelDropTimer()
+            pressedSlot = selectedSlot
+            invalidate()
+        }
     }
 
     private fun slotAt(x: Float): Int {
@@ -216,5 +260,9 @@ class HotbarView @JvmOverloads constructor(
     companion object {
         private const val LONG_PRESS_MS = 400L
         private const val DROP_PERIOD_MS = 200L
+        // Travel distance per slot step in Relative mode. Roughly matches the
+        // visible slot width (32dp), so it feels like the finger is "carrying"
+        // a virtual scroll wheel one notch per slot.
+        private const val SLOT_STEP_DP = 32f
     }
 }
