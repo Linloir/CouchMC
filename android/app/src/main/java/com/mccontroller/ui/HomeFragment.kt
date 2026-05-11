@@ -31,12 +31,15 @@ import com.mccontroller.net.ConnectivityProbe
 import com.mccontroller.net.DiscoveryClient
 import com.mccontroller.net.Protocol
 import com.mccontroller.ui.adapter.HostListAdapter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
@@ -305,21 +308,48 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val hostStore: HostStore = HostStore.get(app.applicationContext)
     private val discovery: DiscoveryClient =
         DiscoveryClient(app.applicationContext).also { it.start(viewModelScope) }
-    private val repository = HostRepository(hostStore, discovery)
+
+    /**
+     * Reachability of the system USB host (127.0.0.1:port). `null`
+     * means we haven't probed yet — the card shows the neutral "USB"
+     * status while we wait. After the first probe lands the value flips
+     * to `true` (Available, green) or `false` (Offline, gray). The
+     * probe re-runs every [USB_PROBE_INTERVAL_MS] so the card reflects
+     * adb-reverse coming/going.
+     */
+    private val systemUsbReachable: MutableStateFlow<Boolean?> = MutableStateFlow(null)
+
+    private val repository = HostRepository(hostStore, discovery, systemUsbReachable)
 
     val connectingKey: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    /**
-     * Eagerly-started state flow of the rendered list. `Eagerly` means
-     * collection begins as soon as the ViewModel is constructed, so by
-     * the time the fragment's collector subscribes, `.value` already
-     * holds the populated list (USB + saved + discovered).
-     */
     val items: StateFlow<List<HostListItem>> = repository.items
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                val sys = hostStore.hosts.value.firstOrNull { it.isSystem }
+                if (sys != null) {
+                    val result = ConnectivityProbe.probe(
+                        sys.ip,
+                        sys.port,
+                        timeoutMs = USB_PROBE_TIMEOUT_MS,
+                    )
+                    systemUsbReachable.value = result is ConnectivityProbe.Result.Ok
+                }
+                delay(USB_PROBE_INTERVAL_MS)
+            }
+        }
+    }
 
     override fun onCleared() {
         discovery.stop()
         super.onCleared()
+    }
+
+    companion object {
+        private const val USB_PROBE_INTERVAL_MS = 3_000L
+        private const val USB_PROBE_TIMEOUT_MS = 1_200L
     }
 }

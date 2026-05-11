@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.color.MaterialColors
 import com.mccontroller.R
 import com.mccontroller.core.DiscoveredHost
 import com.mccontroller.core.HostListItem
@@ -140,9 +139,14 @@ class HostListAdapter(
         }
 
         /**
-         * Pair of (label string-res, resolved colour int). System USB
-         * hosts get the theme primary (which adapts to dark mode); the
-         * other three states pull from the static palette in colors.xml.
+         * Pair of (label string-res, resolved colour int).
+         *
+         * The system USB host doesn't get any special casing here — its
+         * reachability is fed into the repository as a synthesised live
+         * record (see HostRepository.synthesiseSystemLive), so it lands
+         * here as either `live != null` (Available, green) or `live ==
+         * null` (Offline, gray). HomeViewModel pings 127.0.0.1 every
+         * three seconds to keep that flag honest.
          */
         private fun resolveStatus(
             live: DiscoveredHost?,
@@ -151,8 +155,6 @@ class HostListAdapter(
         ): Pair<Int, Int> {
             val ctx = view.context
             return when {
-                isSystem -> R.string.home_host_status_usb to
-                    MaterialColors.getColor(view, com.google.android.material.R.attr.colorPrimary)
                 live == null -> R.string.home_host_status_offline to
                     ContextCompat.getColor(ctx, R.color.status_offline)
                 live.busy -> R.string.home_host_status_busy to
