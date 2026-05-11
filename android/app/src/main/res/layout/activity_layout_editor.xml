@@ -179,13 +179,17 @@
             app:buttonMode="tap" />
     </com.mccontroller.ui.view.EditorCanvas>
 
-    <!-- ==== Top floating toolbar — title + reset + cancel + save ==== -->
+    <!--
+        Top floating toolbar — title + reset + cancel + save. Sits just
+        below the toggle pill (which hangs from the top edge of the
+        screen). The 26dp marginTop = pill height (22dp) + a 4dp gap.
+    -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/toolbar_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="26dp"
         app:cardBackgroundColor="#E61E1E1E"
         app:cardCornerRadius="20dp"
         app:cardElevation="6dp">
@@ -293,19 +297,32 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- ==== Toolbar collapse toggle ==== -->
-    <ImageButton
+    <!--
+        Toolbar collapse toggle — small trapezoidal pill at the top
+        centre with a chevron glyph that rotates 180° on each tap so
+        the user can see the direction it would expand / collapse in.
+        Always visible; sits just above where the top toolbar usually
+        hangs so when the toolbars are hidden it's the only chrome left.
+    -->
+    <FrameLayout
         android:id="@+id/btn_toggle_toolbars"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_width="64dp"
+        android:layout_height="22dp"
+        android:layout_gravity="top|center_horizontal"
         android:background="@drawable/editor_toggle_pill"
-        android:contentDescription="@null"
-        android:padding="8dp"
-        android:src="@android:drawable/ic_menu_view"
-        app:tint="#FFFFFFFF" />
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/toggle_chevron"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="#FFFFFFFF"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
 
     <!-- ==== Hint banner ==== -->
     <TextView

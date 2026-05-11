@@ -224,6 +224,10 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
     // ===== Toolbar collapse / expand =====
 
     private fun setupToolbarToggle() {
+        // Default state is "expanded" — chevron points up (rotation 180°),
+        // meaning "tap me to collapse upward". Each tap animates 180°
+        // around so the user sees the direction it would expand into.
+        binding.toggleChevron.rotation = 180f
         binding.btnToggleToolbars.setOnClickListener {
             toolbarsCollapsed = !toolbarsCollapsed
             animateToolbars()
@@ -231,11 +235,23 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
     }
 
     private fun animateToolbars() {
-        val topTarget = if (toolbarsCollapsed) -binding.toolbarTop.height.toFloat() else 0f
-        val bottomTarget = if (toolbarsCollapsed) binding.toolbarBottom.height.toFloat() else 0f
-        binding.toolbarTop.animate().translationY(topTarget).setDuration(180).start()
-        binding.toolbarBottom.animate().translationY(bottomTarget).setDuration(180).start()
-        binding.txtHint.animate().alpha(if (toolbarsCollapsed) 0f else 1f).setDuration(180).start()
+        // Use `bottom` (toolbar's bottom edge in parent coords) so that
+        // translating by -bottom puts the toolbar's whole rectangle —
+        // marginTop included — above the screen edge. Using height
+        // alone left a small strip visible.
+        val topTarget = if (toolbarsCollapsed) -binding.toolbarTop.bottom.toFloat() else 0f
+        val parentH = (binding.toolbarBottom.parent as android.view.View).height
+        val bottomTarget = if (toolbarsCollapsed)
+            (parentH - binding.toolbarBottom.top).toFloat()
+        else 0f
+        binding.toolbarTop.animate().translationY(topTarget).setDuration(220).start()
+        binding.toolbarBottom.animate().translationY(bottomTarget).setDuration(220).start()
+        binding.txtHint.animate().alpha(if (toolbarsCollapsed) 0f else 1f).setDuration(220).start()
+        // Chevron flips 180° each tap. Down (0°) when toolbars are
+        // hidden → "tap to bring them back". Up (180°) when toolbars
+        // are visible → "tap to put them away".
+        val chevronTarget = if (toolbarsCollapsed) 0f else 180f
+        binding.toggleChevron.animate().rotation(chevronTarget).setDuration(220).start()
     }
 
     // ===== Drag handling on each widget =====

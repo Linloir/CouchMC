@@ -47,7 +47,7 @@
             android:paddingHorizontal="16dp"
             android:paddingBottom="32dp">
 
-            <!-- ============================== LAYOUT ============================== -->
+            <!-- =========== LAYOUT (incl. profile management) =========== -->
             <TextView
                 style="@style/SettingsSectionLabel"
                 android:text="@string/settings_section_layout" />
@@ -67,25 +67,25 @@
                         android:id="@+id/row_layout_ui"
                         layout="@layout/view_settings_navigation" />
 
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    <View style="@style/SettingsDivider" />
 
-            <!-- =========================== PROFILE ============================== -->
-            <TextView
-                style="@style/SettingsSectionLabel"
-                android:text="@string/settings_section_profile" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/SettingsCard">
-
-                <LinearLayout style="@style/SettingsCardInner">
-
+                    <!--
+                        Profile management lives under Layout — these
+                        edits all affect the layout the editor opens.
+                        Active-profile picker on top, three icon-only
+                        Material 3 buttons (new / rename / delete) in
+                        a right-aligned row underneath. Text labels were
+                        truncating in CJK locales and felt cluttered;
+                        glyphs + contentDescription tooltips read
+                        better and group naturally.
+                    -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp">
+                        android:paddingTop="14dp"
+                        android:paddingBottom="10dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -94,59 +94,59 @@
                             android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="?attr/colorOnSurface" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_active_profile"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:gravity="start|center_vertical"
-                            android:textAllCaps="false"
-                            app:icon="@drawable/ic_chevron_right"
-                            app:iconGravity="end"
-                            app:iconPadding="8dp"
-                            tools:text="Default" />
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
 
-                    </LinearLayout>
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_active_profile"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="start|center_vertical"
+                                android:textAllCaps="false"
+                                app:icon="@drawable/ic_chevron_right"
+                                app:iconGravity="end"
+                                app:iconPadding="8dp"
+                                tools:text="Default" />
 
-                    <View style="@style/SettingsDivider" />
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_profile_new"
+                                style="@style/Widget.Material3.Button.IconButton.Filled"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="8dp"
+                                android:contentDescription="@string/settings_new_profile"
+                                app:icon="@drawable/ic_add"
+                                app:iconSize="20dp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp">
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_profile_rename"
+                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="6dp"
+                                android:contentDescription="@string/settings_rename_profile"
+                                app:icon="@drawable/ic_edit"
+                                app:iconSize="20dp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_profile_new"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/settings_new_profile"
-                            android:textAllCaps="false" />
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_profile_delete"
+                                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="6dp"
+                                android:contentDescription="@string/settings_delete_profile"
+                                android:backgroundTint="?attr/colorErrorContainer"
+                                app:icon="@drawable/ic_delete"
+                                app:iconSize="20dp"
+                                app:iconTint="?attr/colorOnErrorContainer" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_profile_rename"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/settings_rename_profile"
-                            android:textAllCaps="false" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_profile_delete"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/settings_delete_profile"
-                            android:textAllCaps="false"
-                            android:textColor="?attr/colorError" />
+                        </LinearLayout>
 
                     </LinearLayout>
 

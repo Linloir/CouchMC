@@ -10,10 +10,11 @@ import android.widget.PopupMenu
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
@@ -30,14 +31,11 @@ import com.mccontroller.net.ConnectivityProbe
 import com.mccontroller.net.DiscoveryClient
 import com.mccontroller.net.Protocol
 import com.mccontroller.ui.adapter.HostListAdapter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
@@ -74,7 +72,7 @@ class HomeFragment : Fragment() {
 
         adapter = HostListAdapter(
             onHostClick = ::onHostClick,
-            onHostOverflow = ::onHostOverflow,
+            onHostLongPress = ::onHostOverflow,
             isHostConnecting = { viewModel.connectingKey.value == it.key },
         )
         binding.list.adapter = adapter
@@ -87,8 +85,6 @@ class HomeFragment : Fragment() {
                 else -> false
             }
         }
-
-        viewModel.start(requireActivity().applicationContext)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -304,36 +300,32 @@ class HomeFragment : Fragment() {
 }
 
 /**
- * Survives config changes so the DiscoveryClient keeps running across
- * a dark-mode flip. Exposes the merged item stream + which host is
- * currently being probed.
+ * Survives config changes so the DiscoveryClient keeps running across a
+ * dark-mode flip. Everything is wired at construction time — no lazy
+ * `start()` step that could race the lifecycle collector. (We had that
+ * race before, and the home list arrived empty on cold start until the
+ * user tab-swapped, which re-triggered the collector.)
  */
-class HomeViewModel : ViewModel() {
+class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
-    lateinit var hostStore: HostStore
-        private set
-    private var discovery: DiscoveryClient? = null
+    val hostStore: HostStore = HostStore.get(app.applicationContext)
+    private val discovery: DiscoveryClient =
+        DiscoveryClient(app.applicationContext).also { it.start(viewModelScope) }
+    private val repository = HostRepository(hostStore, discovery)
 
     val connectingKey: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    private val readyFlag = MutableStateFlow(false)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val items: StateFlow<List<HostListItem>> =
-        readyFlag.flatMapLatest { ready ->
-            if (!ready) flow<List<HostListItem>> { emit(emptyList()) }
-            else HostRepository(hostStore, discovery!!).items
-        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    fun start(appContext: android.content.Context) {
-        if (readyFlag.value) return
-        hostStore = HostStore.get(appContext)
-        discovery = DiscoveryClient(appContext).also { it.start(viewModelScope) }
-        readyFlag.value = true
-    }
+    /**
+     * Eagerly-started state flow of the rendered list. `Eagerly` means
+     * collection begins as soon as the ViewModel is constructed, so by
+     * the time the fragment's collector subscribes, `.value` already
+     * holds the populated list (USB + saved + discovered).
+     */
+    val items: StateFlow<List<HostListItem>> = repository.items
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     override fun onCleared() {
-        discovery?.stop()
+        discovery.stop()
         super.onCleared()
     }
 }

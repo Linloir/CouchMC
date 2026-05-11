@@ -1,36 +1,42 @@
 package com.mccontroller.ui.adapter
 
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.mccontroller.R
+import com.mccontroller.core.DiscoveredHost
 import com.mccontroller.core.HostListItem
 import com.mccontroller.core.SavedHost
 
 /**
- * Multi-view-type adapter for the home screen. Supported types:
+ * Multi-view-type adapter for the home screen. Sections:
  *
  *   • [HostListItem.Header] — section title (Saved / On this network)
  *   • [HostListItem.Empty]  — placeholder when a section has 0 rows
  *   • [HostListItem.Saved] / [HostListItem.Discovered] — host card
  *
- * Card visual is owned here (per-host gradient avatar, status pill,
- * meta line). DiffUtil on [HostListItem.key] keeps animations stable.
+ * Card visual matches the iOS-leaning design the user picked from a
+ * reference screenshot: big bold title, descriptor subtitle, meta line
+ * with clock glyph, and a 3-column tinted-icon stats footer
+ * (Address / Port / Minecraft).
+ *
+ * Long-press a card → context menu (rename / change-port / forget),
+ * since there's no persistent overflow icon to clutter the surface.
  */
 class HostListAdapter(
     private val onHostClick: (HostListItem) -> Unit,
-    private val onHostOverflow: (HostListItem, View) -> Unit,
+    private val onHostLongPress: (HostListItem, View) -> Unit,
     private val isHostConnecting: (HostListItem) -> Boolean,
 ) : ListAdapter<HostListItem, RecyclerView.ViewHolder>(DIFF) {
 
@@ -73,82 +79,76 @@ class HostListAdapter(
 
     private inner class HostViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val card: MaterialCardView = view as MaterialCardView
-        private val avatar: View = view.findViewById(R.id.host_avatar)
-        private val icon: ImageView = view.findViewById(R.id.host_icon)
         private val name: TextView = view.findViewById(R.id.host_name)
         private val subtitle: TextView = view.findViewById(R.id.host_subtitle)
         private val meta: TextView = view.findViewById(R.id.host_meta)
-        private val statusPill: TextView = view.findViewById(R.id.host_status_pill)
-        private val overflow: ImageButton = view.findViewById(R.id.host_overflow)
+        private val statusPill: LinearLayout = view.findViewById(R.id.host_status_pill)
+        private val statusIcon: ImageView = view.findViewById(R.id.host_status_icon)
+        private val statusLabel: TextView = view.findViewById(R.id.host_status_label)
+        private val statAddressValue: TextView = view.findViewById(R.id.stat_address_value)
+        private val statPortValue: TextView = view.findViewById(R.id.stat_port_value)
+        private val statMcValue: TextView = view.findViewById(R.id.stat_mc_value)
         private val progress: ProgressBar = view.findViewById(R.id.host_progress)
 
         fun bindSaved(item: HostListItem.Saved) {
             val saved = item.saved
-            applyAvatar(saved)
+            val ctx = card.context
             name.text = saved.name
-            subtitle.text = "${saved.ip} · ${saved.port}"
-            meta.text = buildMetaText(item.live, saved.lastConnectedAt, card.context)
+            subtitle.setText(
+                if (saved.isSystem) R.string.home_descriptor_usb
+                else R.string.home_descriptor_saved,
+            )
+            meta.text = metaTextFor(item.live, saved.lastConnectedAt, ctx)
             applyStatus(item.live)
-            overflow.visibility = View.VISIBLE
+            applyStats(saved.ip, saved.port, item.live, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
-            overflow.setOnClickListener { v -> onHostOverflow(item, v) }
+            card.setOnLongClickListener {
+                onHostLongPress(item, card); true
+            }
         }
 
         fun bindDiscovered(item: HostListItem.Discovered) {
-            val ip = item.ip; val port = item.port
-            applyAvatarColor(item.name)
-            icon.setImageResource(R.drawable.ic_computer)
+            val ctx = card.context
             name.text = item.name
-            subtitle.text = "$ip · $port"
-            meta.text = buildMetaText(item.discovered, null, card.context)
+            subtitle.setText(R.string.home_descriptor_discovered)
+            meta.text = metaTextFor(item.discovered, null, ctx)
             applyStatus(item.discovered)
-            overflow.visibility = View.GONE
+            applyStats(item.ip, item.port, item.discovered, ctx)
             progress.visibility = if (isHostConnecting(item)) View.VISIBLE else View.GONE
             card.setOnClickListener { onHostClick(item) }
-            overflow.setOnClickListener(null)
+            // Long-press still works to "save" the discovered host (handled
+            // in the fragment's onHostLongPress for Discovered items, if
+            // we expose that later). For now, no menu — just click.
+            card.setOnLongClickListener(null)
         }
 
         // ---- helpers ----
 
-        private fun applyAvatar(saved: SavedHost) {
-            applyAvatarColor(saved.name)
-            icon.setImageResource(
-                if (saved.isSystem) R.drawable.ic_usb else R.drawable.ic_computer,
-            )
-        }
-
-        private fun applyAvatarColor(seed: String) {
-            val (c1, c2) = avatarGradientFor(seed)
-            val drawable = GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                intArrayOf(c1, c2),
-            ).apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = card.context.resources.displayMetrics.density * 14f
-            }
-            avatar.background = drawable
-        }
-
-        private fun applyStatus(live: com.mccontroller.core.DiscoveredHost?) {
+        private fun applyStatus(live: DiscoveredHost?) {
             val ctx = card.context
-            when {
-                live == null -> {
-                    statusPill.setText(R.string.home_host_status_offline)
-                    statusPill.setTextColor(ContextCompat.getColor(ctx, R.color.status_offline))
-                    statusPill.setBackgroundResource(R.drawable.status_pill_bg_offline)
-                }
-                live.busy -> {
-                    statusPill.setText(R.string.home_host_status_busy)
-                    statusPill.setTextColor(ContextCompat.getColor(ctx, R.color.status_busy))
-                    statusPill.setBackgroundResource(R.drawable.status_pill_bg_busy)
-                }
-                else -> {
-                    statusPill.setText(R.string.home_host_status_idle)
-                    statusPill.setTextColor(ContextCompat.getColor(ctx, R.color.status_online))
-                    statusPill.setBackgroundResource(R.drawable.status_pill_bg_online)
-                }
+            val (label, color, bg) = when {
+                live == null -> Triple(R.string.home_host_status_offline, R.color.status_offline, R.drawable.status_pill_bg_offline)
+                live.busy -> Triple(R.string.home_host_status_busy, R.color.status_busy, R.drawable.status_pill_bg_busy)
+                else -> Triple(R.string.home_host_status_idle, R.color.status_online, R.drawable.status_pill_bg_online)
             }
+            statusPill.setBackgroundResource(bg)
+            statusLabel.setText(label)
+            val colour = ContextCompat.getColor(ctx, color)
+            statusLabel.setTextColor(colour)
+            ImageViewCompat.setImageTintList(statusIcon, android.content.res.ColorStateList.valueOf(colour))
+        }
+
+        private fun applyStats(ip: String, port: Int, live: DiscoveredHost?, ctx: Context) {
+            statAddressValue.text = ip
+            statPortValue.text = port.toString()
+            statMcValue.setText(
+                when {
+                    live == null -> R.string.home_stat_mc_unknown
+                    live.mcInForeground -> R.string.home_stat_mc_running
+                    else -> R.string.home_stat_mc_idle
+                },
+            )
         }
     }
 
@@ -162,64 +162,20 @@ class HostListAdapter(
             override fun areContentsTheSame(a: HostListItem, b: HostListItem) = a == b
         }
 
-        /**
-         * Two-stop HSL gradient derived from a name hash. Produces a
-         * stable, distinctive avatar swatch per host without requiring
-         * the user to pick colours. Saturation + lightness fixed; only
-         * the hue varies — keeps swatches in the same visual family.
-         */
-        private fun avatarGradientFor(seed: String): Pair<Int, Int> {
-            val h = (seed.hashCode().toLong() and 0xffffffffL).toFloat()
-            val hue = (h % 360f + 360f) % 360f
-            val c1 = hslToRgb(hue, 0.66f, 0.58f)
-            val c2 = hslToRgb((hue + 28f) % 360f, 0.74f, 0.46f)
-            return c1 to c2
-        }
-
-        private fun hslToRgb(h: Float, s: Float, l: Float): Int {
-            val c = (1 - Math.abs(2 * l - 1)) * s
-            val hp = h / 60f
-            val x = c * (1 - Math.abs(hp % 2 - 1))
-            val (r, g, b) = when {
-                hp < 1 -> Triple(c, x, 0f)
-                hp < 2 -> Triple(x, c, 0f)
-                hp < 3 -> Triple(0f, c, x)
-                hp < 4 -> Triple(0f, x, c)
-                hp < 5 -> Triple(x, 0f, c)
-                else -> Triple(c, 0f, x)
-            }
-            val m = l - c / 2f
-            return Color.rgb(
-                ((r + m) * 255).toInt().coerceIn(0, 255),
-                ((g + m) * 255).toInt().coerceIn(0, 255),
-                ((b + m) * 255).toInt().coerceIn(0, 255),
-            )
-        }
-
-        private fun buildMetaText(
-            live: com.mccontroller.core.DiscoveredHost?,
+        private fun metaTextFor(
+            live: DiscoveredHost?,
             lastConnectedAt: Long?,
-            ctx: android.content.Context,
-        ): String {
-            val parts = mutableListOf<String>()
-            if (live != null) {
-                parts += if (live.mcInForeground) {
-                    ctx.getString(R.string.home_host_mc_foreground)
-                } else {
-                    ctx.getString(R.string.home_host_mc_background)
-                }
-            }
-            if (lastConnectedAt != null) {
-                parts += ctx.getString(
-                    R.string.home_host_last_connected,
-                    formatRelativeTime(ctx, lastConnectedAt),
-                )
-            }
-            return parts.joinToString(" · ")
+            ctx: Context,
+        ): String = when {
+            live != null -> ctx.getString(R.string.home_meta_seen_just_now)
+            lastConnectedAt != null -> ctx.getString(
+                R.string.home_meta_last_used,
+                formatRelativeTime(ctx, lastConnectedAt),
+            )
+            else -> ctx.getString(R.string.home_meta_never_used)
         }
 
-        /** Lightweight relative-time formatter. */
-        private fun formatRelativeTime(ctx: android.content.Context, then: Long): String {
+        private fun formatRelativeTime(ctx: Context, then: Long): String {
             val delta = (System.currentTimeMillis() - then).coerceAtLeast(0L)
             val sec = delta / 1000
             return when {
