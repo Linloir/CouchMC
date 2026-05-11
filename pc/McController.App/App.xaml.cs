@@ -46,22 +46,23 @@ public partial class App : Application
 
         MainAppWindow = new MainWindow();
 
-        // Hide-to-tray instead of exit when the close button is pressed.
-        // The server keeps running so a phone session isn't disrupted just
-        // because the user dismissed the panel. AppWindow.Closing.Cancel
-        // suppresses the destroy; WindowExtensions.Hide() drops the window
-        // out of the taskbar so the tray icon is the only visible surface.
+        // Hide-to-tray when the user clicks the window's X. Cancel the
+        // close before it propagates; AppWindow.Hide() then drops the
+        // window from the taskbar without destroying it. The server
+        // listeners and tray icon stay alive — the only path that tears
+        // those down is ExitApp(), triggered exclusively by the tray
+        // menu's "退出服务" item.
+        //
+        // Crucially we DON'T subscribe to Window.Closed for cleanup —
+        // an earlier version disposed Host + Tray there, which killed
+        // both the moment the window hid. Now all teardown lives in
+        // ExitApp(), so accidental Closed firings can't strand the app
+        // with no listeners and no tray.
         MainAppWindow.AppWindow.Closing += (sender, ev) =>
         {
             if (_exiting) return;
             ev.Cancel = true;
-            MainAppWindow.Hide(enableEfficiencyMode: true);
-        };
-        MainAppWindow.Closed += (_, _) =>
-        {
-            // Only reached when ExitApp() actually destroys the window.
-            try { Host.Dispose(); } catch { }
-            try { Tray.Dispose(); } catch { }
+            try { MainAppWindow.AppWindow.Hide(); } catch { }
         };
 
         Tray = new Services.TrayService(ShowWindow, ExitApp);
@@ -73,12 +74,12 @@ public partial class App : Application
     private void ShowWindow()
     {
         if (MainAppWindow is null) return;
-        MainAppWindow.Show();
-        // Pull to foreground in case it was already shown but hidden behind
-        // other apps.
         try
         {
+            MainAppWindow.AppWindow.Show();
             MainAppWindow.Activate();
+            // Pull to the foreground in case Windows decided to keep us
+            // behind another window after the show.
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(MainAppWindow);
             SetForegroundWindow(hwnd);
         }
@@ -88,8 +89,9 @@ public partial class App : Application
     private void ExitApp()
     {
         _exiting = true;
-        try { MainAppWindow?.Close(); }
-        catch { }
+        try { Host?.Dispose(); } catch { }
+        try { Tray?.Dispose(); } catch { }
+        try { MainAppWindow?.Close(); } catch { }
         Exit();
     }
 
