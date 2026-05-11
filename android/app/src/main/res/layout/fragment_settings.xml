@@ -57,27 +57,20 @@
 
                 <LinearLayout style="@style/SettingsCardInner">
 
-                    <include
-                        android:id="@+id/row_layout_in_game"
-                        layout="@layout/view_settings_navigation" />
-
-                    <View style="@style/SettingsDivider" />
-
-                    <include
-                        android:id="@+id/row_layout_ui"
-                        layout="@layout/view_settings_navigation" />
-
-                    <View style="@style/SettingsDivider" />
-
                     <!--
-                        Profile management lives under Layout — these
-                        edits all affect the layout the editor opens.
-                        Active-profile picker on top, three icon-only
-                        Material 3 buttons (new / rename / delete) in
-                        a right-aligned row underneath. Text labels were
-                        truncating in CJK locales and felt cluttered;
-                        glyphs + contentDescription tooltips read
-                        better and group naturally.
+                        Profile picker first — it sets context for the
+                        two layout-editor entries below ("which layout
+                        is the editor going to open?"). The three icon
+                        chips (new / rename / delete) follow on the same
+                        line as the dropdown.
+
+                        IconButton.Filled / Filled.Tonal corner-radius is
+                        8 dp by default; an explicit cornerRadius=22dp
+                        on a 44 dp button makes them perfect circles.
+                        Zero-ing insets + padding lets the glyph centre
+                        inside the chip (without those overrides the
+                        default 6 dp top/bottom insets push the icon to
+                        the top-left).
                     -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -114,16 +107,6 @@
                                 app:iconPadding="8dp"
                                 tools:text="Default" />
 
-                            <!--
-                                MaterialButton.IconButton.Filled gets its
-                                default 6 dp top/bottom insets from the
-                                Material library. When we constrain the
-                                view to 44 dp height, those insets push
-                                the icon off-centre (the icon ends up at
-                                the top-left of the visible rectangle).
-                                Zeroing inset* + padding lets the icon
-                                centre cleanly inside the chip.
-                            -->
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_new"
                                 style="@style/Widget.Material3.Button.IconButton.Filled"
@@ -134,6 +117,7 @@
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_new_profile"
+                                app:cornerRadius="22dp"
                                 app:icon="@drawable/ic_add"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"
@@ -149,6 +133,7 @@
                                 android:insetBottom="0dp"
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_rename_profile"
+                                app:cornerRadius="22dp"
                                 app:icon="@drawable/ic_edit"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"
@@ -165,6 +150,7 @@
                                 android:padding="0dp"
                                 android:contentDescription="@string/settings_delete_profile"
                                 android:backgroundTint="?attr/colorErrorContainer"
+                                app:cornerRadius="22dp"
                                 app:icon="@drawable/ic_delete"
                                 app:iconSize="20dp"
                                 app:iconPadding="0dp"
@@ -174,6 +160,18 @@
                         </LinearLayout>
 
                     </LinearLayout>
+
+                    <View style="@style/SettingsDivider" />
+
+                    <include
+                        android:id="@+id/row_layout_in_game"
+                        layout="@layout/view_settings_navigation" />
+
+                    <View style="@style/SettingsDivider" />
+
+                    <include
+                        android:id="@+id/row_layout_ui"
+                        layout="@layout/view_settings_navigation" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

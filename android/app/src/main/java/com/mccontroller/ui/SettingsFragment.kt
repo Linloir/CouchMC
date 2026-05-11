@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -149,44 +148,56 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showNewProfileDialog() {
-        val edit = EditText(requireContext())
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.settings_new_profile_dialog)
-            .setView(edit)
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                val name = edit.text.toString().trim().ifBlank { return@setPositiveButton }
-                val (profiles, _) = profileStore.loadAll()
-                if (profiles.any { it.name == name }) return@setPositiveButton
-                val seed = profiles.firstOrNull() ?: return@setPositiveButton
-                val copy = LayoutProfile(
-                    name = name,
-                    inGame = seed.inGame,
-                    uiMode = seed.uiMode,
-                    hotbarSwipeMode = seed.hotbarSwipeMode,
-                )
-                profileStore.saveAll(profiles + copy, activeName = name)
-                renderActiveProfileButton()
-            }
-            .show()
+        TextInputDialogs.show(
+            context = requireContext(),
+            titleRes = R.string.settings_new_profile_dialog,
+            hintRes = R.string.settings_new_profile_dialog,
+            validate = { name ->
+                when {
+                    name.isBlank() -> getString(R.string.settings_profile_name_required)
+                    profileStore.loadAll().first.any { it.name == name } ->
+                        getString(R.string.settings_profile_name_taken)
+                    else -> null
+                }
+            },
+        ) { name ->
+            val (profiles, _) = profileStore.loadAll()
+            val seed = profiles.firstOrNull() ?: return@show
+            val copy = LayoutProfile(
+                name = name,
+                inGame = seed.inGame,
+                uiMode = seed.uiMode,
+                hotbarSwipeMode = seed.hotbarSwipeMode,
+            )
+            profileStore.saveAll(profiles + copy, activeName = name)
+            renderActiveProfileButton()
+        }
     }
 
     private fun showRenameProfileDialog() {
         val (_, activeName) = profileStore.loadAll()
-        val edit = EditText(requireContext()).apply { setText(activeName); setSelection(text.length) }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.settings_rename_profile_dialog)
-            .setView(edit)
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                val newName = edit.text.toString().trim().ifBlank { return@setPositiveButton }
+        TextInputDialogs.show(
+            context = requireContext(),
+            titleRes = R.string.settings_rename_profile_dialog,
+            hintRes = R.string.settings_rename_profile_dialog,
+            prefill = activeName,
+            validate = { newName ->
                 val (profiles, current) = profileStore.loadAll()
-                if (profiles.any { it.name == newName && it.name != current }) return@setPositiveButton
-                val updated = profiles.map { if (it.name == current) it.copy(name = newName) else it }
-                profileStore.saveAll(updated, activeName = newName)
-                renderActiveProfileButton()
-            }
-            .show()
+                when {
+                    newName.isBlank() -> getString(R.string.settings_profile_name_required)
+                    newName == current -> null     // unchanged: just dismiss
+                    profiles.any { it.name == newName } ->
+                        getString(R.string.settings_profile_name_taken)
+                    else -> null
+                }
+            },
+        ) { newName ->
+            val (profiles, current) = profileStore.loadAll()
+            if (newName == current) return@show
+            val updated = profiles.map { if (it.name == current) it.copy(name = newName) else it }
+            profileStore.saveAll(updated, activeName = newName)
+            renderActiveProfileButton()
+        }
     }
 
     private fun showDeleteProfileDialog() {

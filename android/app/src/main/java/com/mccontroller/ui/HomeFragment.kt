@@ -226,39 +226,33 @@ class HomeFragment : Fragment() {
     }
 
     private fun showRenameDialog(host: SavedHost) {
-        val edit = EditText(requireContext()).apply {
-            setText(host.name)
-            setSelection(text.length)
+        TextInputDialogs.show(
+            context = requireContext(),
+            titleRes = R.string.hostmenu_rename,
+            hintRes = R.string.addhost_name,
+            prefill = host.name,
+            validate = { value ->
+                if (value.isBlank()) getString(R.string.settings_profile_name_required) else null
+            },
+        ) { newName ->
+            viewModel.hostStore.rename(host.id, newName)
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.hostmenu_rename)
-            .setView(edit)
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                viewModel.hostStore.rename(host.id, edit.text.toString().trim())
-            }
-            .show()
     }
 
     private fun showEditPortDialog(host: SavedHost) {
-        val edit = EditText(requireContext()).apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            setText(host.port.toString())
-            setSelection(text.length)
+        TextInputDialogs.show(
+            context = requireContext(),
+            titleRes = R.string.addhost_port,
+            hintRes = R.string.addhost_port,
+            prefill = host.port.toString(),
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER,
+            validate = { value ->
+                val port = value.toIntOrNull()
+                if (port == null || port !in 1..65535) getString(R.string.addhost_invalid_port) else null
+            },
+        ) { value ->
+            value.toIntOrNull()?.let { viewModel.hostStore.changePort(host.id, it) }
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.addhost_port)
-            .setView(edit)
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                val port = edit.text.toString().trim().toIntOrNull() ?: return@setPositiveButton
-                if (port !in 1..65535) return@setPositiveButton
-                // Re-save with same name + ip + new port. For the system USB
-                // host this also gives the user a way to track a non-default
-                // PC port; the singleton-id semantics keep it pinned.
-                viewModel.hostStore.changePort(host.id, port)
-            }
-            .show()
     }
 
     private fun showRemoveDialog(host: SavedHost) {

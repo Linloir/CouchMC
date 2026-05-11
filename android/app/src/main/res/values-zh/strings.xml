@@ -83,6 +83,8 @@
     <string name="settings_rename_profile_dialog">新名称</string>
     <string name="settings_delete_confirm">删除方案「%1$s」？</string>
     <string name="settings_cannot_delete_last">至少保留一个方案</string>
+    <string name="settings_profile_name_required">名称不能为空</string>
+    <string name="settings_profile_name_taken">名称已存在</string>
 
     <string name="settings_section_hotbar">物品栏</string>
     <string name="settings_hotbar_swipe_mode">滑动模式</string>

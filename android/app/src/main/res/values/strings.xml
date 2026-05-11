@@ -87,6 +87,8 @@
     <string name="settings_rename_profile_dialog">New name</string>
     <string name="settings_delete_confirm">Delete profile \"%1$s\"?</string>
     <string name="settings_cannot_delete_last">At least one profile is required</string>
+    <string name="settings_profile_name_required">Name can\'t be empty</string>
+    <string name="settings_profile_name_taken">Name is already in use</string>
 
     <string name="settings_section_hotbar">Hotbar</string>
     <string name="settings_hotbar_swipe_mode">Swipe behavior</string>
