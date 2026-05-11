@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Drop icon — a hand below a downward arrow, reading as "let go".
-    Used by the UI-mode dedicated Q button.
+    Drop (Q) — trash-can silhouette. The previous downward-arrow-on-
+    a-shelf glyph was hard to distinguish from a "download" icon, so
+    we swap it for the universal discard metaphor: a lid + handle on
+    top, body with rounded bottom corners, and three thin vertical
+    cutouts in the body suggesting the can's contents.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Downward arrow -->
+
+    <!-- Lift handle (small bar at very top) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 12,15 L 4.5,7 L 9,7 L 9,2.5 L 15,2.5 L 15,7 L 19.5,7 Z" />
-    <!-- "Ground" line beneath -->
+        android:pathData="M 9.5,3 L 14.5,3 L 14.5,5 L 9.5,5 Z" />
+
+    <!-- Lid (wider horizontal strip) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 3,18 L 21,18 L 21,21 L 3,21 Z" />
+        android:pathData="M 5,5.5 L 19,5.5 L 19,7.5 L 5,7.5 Z" />
+
+    <!--
+        Body with rounded bottom + three thin vertical cutouts via
+        evenOdd. The cutouts read as "lines of contents inside the
+        bin", lifted straight from the Material `delete` glyph idiom.
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M 7,8.5 L 17,8.5 L 17,19 A 2,2 0 0 1 15,21 L 9,21 A 2,2 0 0 1 7,19 Z M 10,11.5 L 10.8,11.5 L 10.8,18 L 10,18 Z M 12,11.5 L 12.8,11.5 L 12.8,18 L 12,18 Z M 14,11.5 L 14.8,11.5 L 14.8,18 L 14,18 Z" />
+
 </vector>
