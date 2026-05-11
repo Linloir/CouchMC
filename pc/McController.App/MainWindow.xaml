@@ -30,6 +30,8 @@
                            OpenPaneLength="248"
                            IsBackButtonVisible="Collapsed"
                            IsPaneToggleVisible="True"
+                           Transition="FadeInWithSlide"
+                           TransitionDuration="220"
                            Loaded="Nav_Loaded">
 
             <ui:NavigationView.MenuItems>

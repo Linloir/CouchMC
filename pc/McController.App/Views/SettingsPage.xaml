@@ -8,214 +8,287 @@
       TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       TextElement.FontSize="13">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="36,16,36,36" MaxWidth="900" HorizontalAlignment="Stretch">
+    <Grid>
+        <ui:DynamicScrollViewer x:Name="Scroller"
+                                VerticalScrollBarVisibility="Auto"
+                                HorizontalScrollBarVisibility="Disabled"
+                                PreviewMouseWheel="Scroller_PreviewMouseWheel">
+            <StackPanel Margin="40,28,40,40" MaxWidth="920" HorizontalAlignment="Stretch">
 
-            <TextBlock Text="设置" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,2"/>
-            <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,24"/>
+                <!-- Page header — Win11 Settings uses ~32pt SemiBold + 14pt subtitle -->
+                <TextBlock Text="设置" FontSize="30" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                <TextBlock Text="服务、配置方案与视角曲线" Opacity="0.6" FontSize="14" Margin="0,0,0,28"/>
 
-            <!-- ===== 服务 ===== -->
-            <ui:Card Margin="0,0,0,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="服务端口" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="PortStatusText" Opacity="0.6" FontSize="12" Margin="0,4,0,0"
-                                   Text="服务正在监听..."/>
-                    </StackPanel>
-                    <ui:NumberBox Grid.Column="1" x:Name="PortBox"
-                                  Width="140"
-                                  Minimum="1024" Maximum="65535"
-                                  ClearButtonEnabled="False"
-                                  ValueChanged="PortBox_ValueChanged"
-                                  VerticalAlignment="Center"/>
-                </Grid>
-            </ui:Card>
+                <!-- ===== 服务 ===== -->
+                <TextBlock Text="服务" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-            <!-- ===== 配置方案 ===== -->
-            <ui:Card Margin="0,0,0,12">
-                <StackPanel>
+                <ui:Card Margin="0,0,0,24">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="配置方案" FontWeight="SemiBold"/>
-                            <TextBlock Text="切换不同的灵敏度、曲线与死区组合" Opacity="0.6" FontSize="12" Margin="0,4,0,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="服务端口" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PortStatusText" Opacity="0.6" FontSize="12" Margin="0,3,0,0"
+                                       Text="服务正在监听..."/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <ComboBox x:Name="ProfileCombo" MinWidth="220"
-                                      DisplayMemberPath="Name"
-                                      SelectionChanged="ProfileCombo_SelectionChanged"/>
-                            <ui:Button Margin="8,0,0,0" Content="新建" Click="NewProfile_Click"/>
-                            <ui:Button Margin="6,0,0,0" Content="复制" Click="DuplicateProfile_Click"/>
-                            <ui:Button Margin="6,0,0,0" Content="删除" Click="DeleteProfile_Click"
-                                       Appearance="Caution"/>
-                        </StackPanel>
+                        <ui:NumberBox Grid.Column="1" x:Name="PortBox"
+                                      Width="140"
+                                      Minimum="1024" Maximum="65535"
+                                      SmallChange="1" LargeChange="100"
+                                      ClearButtonEnabled="False"
+                                      ValueChanged="PortBox_ValueChanged"
+                                      VerticalAlignment="Center"/>
                     </Grid>
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="方案名称" VerticalAlignment="Center" Opacity="0.7"/>
-                        <ui:TextBox Grid.Column="1" x:Name="ProfileNameBox"
-                                    TextChanged="ProfileNameBox_TextChanged"/>
-                    </Grid>
-                </StackPanel>
-            </ui:Card>
+                </ui:Card>
 
-            <!-- ===== 视角（用户）===== -->
-            <ui:Card Margin="0,0,0,12">
-                <StackPanel>
-                    <Grid Margin="0,0,0,6">
+                <!-- ===== 配置方案 ===== -->
+                <TextBlock Text="配置方案" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                <ui:Card Margin="0,0,0,8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="视角灵敏度" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="1" x:Name="SensitivityValue" Opacity="0.8"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="当前方案" FontWeight="SemiBold"/>
+                            <TextBlock Text="切换不同的灵敏度、曲线与死区组合" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" x:Name="ProfileCombo" MinWidth="220"
+                                  DisplayMemberPath="Name"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="ProfileCombo_SelectionChanged"/>
                     </Grid>
-                    <Slider x:Name="SensitivitySlider"
-                            Minimum="0.5" Maximum="3.0" TickFrequency="0.1"
-                            IsSnapToTickEnabled="False"
-                            ValueChanged="SensitivitySlider_ValueChanged"/>
-                    <TextBlock Text="鼠标移动的整体放大倍率。建议先关闭 Windows“提高指针精度”。"
-                               Opacity="0.55" FontSize="12" Margin="0,6,0,0"/>
-                </StackPanel>
-            </ui:Card>
+                </ui:Card>
 
-            <!-- ===== 视角（高级）===== -->
-            <ui:CardExpander Margin="0,0,0,12" Icon="{ui:SymbolIcon Symbol=Options24}">
-                <ui:CardExpander.Header>
-                    <StackPanel>
-                        <TextBlock Text="视角曲线（高级）" FontWeight="SemiBold"/>
-                        <TextBlock Text="加速曲线、最大放大倍率、实时预览" Opacity="0.6" FontSize="12" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </ui:CardExpander.Header>
-
-                <StackPanel>
-                    <Grid Margin="0,0,0,12">
+                <ui:Card Margin="0,0,0,8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="曲线类型" VerticalAlignment="Center" Opacity="0.7"/>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <RadioButton x:Name="CurveLinear" Content="Linear（线性）"
-                                         GroupName="curve" Checked="CurveType_Checked"/>
-                            <RadioButton x:Name="CurvePower" Content="Power（带加速）"
-                                         GroupName="curve" Margin="20,0,0,0" Checked="CurveType_Checked"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="方案名称" FontWeight="SemiBold"/>
+                            <TextBlock Text="仅作显示用" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <ui:TextBox Grid.Column="1" x:Name="ProfileNameBox" Width="280"
+                                    VerticalAlignment="Center"
+                                    TextChanged="ProfileNameBox_TextChanged"/>
+                    </Grid>
+                </ui:Card>
+
+                <ui:Card Margin="0,0,0,24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="方案管理" FontWeight="SemiBold"/>
+                            <TextBlock Text="新建、复制或删除当前方案" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:Button Content="新建" Click="NewProfile_Click" MinWidth="84"/>
+                            <ui:Button Margin="8,0,0,0" Content="复制" Click="DuplicateProfile_Click" MinWidth="84"/>
+                            <ui:Button Margin="8,0,0,0" Content="删除" Click="DeleteProfile_Click" MinWidth="84"/>
                         </StackPanel>
                     </Grid>
+                </ui:Card>
 
-                    <Grid Margin="0,4,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="加速强度" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="AccelFactorSlider"
-                                Minimum="0" Maximum="0.05" TickFrequency="0.001"
-                                ValueChanged="AccelSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="AccelFactorValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                <!-- ===== 视角 ===== -->
+                <TextBlock Text="视角" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                    <Grid Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="加速指数" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="AccelExpSlider"
-                                Minimum="0.5" Maximum="2.5" TickFrequency="0.05"
-                                ValueChanged="AccelSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="AccelExpValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                <ui:Card Margin="0,0,0,8">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="灵敏度" FontWeight="SemiBold"/>
+                                <TextBlock Text="鼠标移动的整体放大倍率（建议先关闭 Windows 的“提高指针精度”）"
+                                           Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ui:NumberBox Grid.Column="1" x:Name="SensitivityNumber"
+                                          Width="110" Minimum="0.5" Maximum="3.0"
+                                          SmallChange="0.05" LargeChange="0.5"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="SensitivityNumber_ValueChanged"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                        <Slider x:Name="SensitivitySlider"
+                                Minimum="0.5" Maximum="3.0" TickFrequency="0.1"
+                                ValueChanged="SensitivitySlider_ValueChanged"/>
+                    </StackPanel>
+                </ui:Card>
 
-                    <Grid Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="最大放大倍率" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="MaxMulSlider"
-                                Minimum="1" Maximum="5" TickFrequency="0.1"
-                                ValueChanged="AccelSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="MaxMulValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                <ui:CardExpander Margin="0,0,0,24">
+                    <ui:CardExpander.Header>
+                        <StackPanel>
+                            <TextBlock Text="曲线（高级）" FontWeight="SemiBold"/>
+                            <TextBlock Text="加速曲线、最大倍率与实时预览" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </ui:CardExpander.Header>
 
-                    <TextBlock Text="实时预览" Margin="0,12,0,4" Opacity="0.7" FontSize="12"/>
-                    <ctrl:CurveCanvas x:Name="CurvePreview"/>
-                </StackPanel>
-            </ui:CardExpander>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="曲线类型" VerticalAlignment="Center" Opacity="0.75"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <RadioButton x:Name="CurveLinear" Content="Linear（线性）"
+                                             GroupName="curve" Checked="CurveType_Checked"/>
+                                <RadioButton x:Name="CurvePower" Content="Power（带加速）"
+                                             GroupName="curve" Margin="20,0,0,0" Checked="CurveType_Checked"/>
+                            </StackPanel>
+                        </Grid>
 
-            <!-- ===== 移动 ===== -->
-            <ui:Card Margin="0,0,0,12">
-                <StackPanel>
-                    <TextBlock Text="移动" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="加速强度" VerticalAlignment="Center" Opacity="0.75"/>
+                            <Slider Grid.Column="1" x:Name="AccelFactorSlider"
+                                    Minimum="0" Maximum="0.05" TickFrequency="0.001"
+                                    Margin="0,0,12,0"
+                                    ValueChanged="AccelFactorSlider_ValueChanged"/>
+                            <ui:NumberBox Grid.Column="2" x:Name="AccelFactorNumber"
+                                          Minimum="0" Maximum="0.05" SmallChange="0.001"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="AccelFactorNumber_ValueChanged"/>
+                        </Grid>
 
-                    <Grid Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="死区" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="DeadZoneSlider"
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="加速指数" VerticalAlignment="Center" Opacity="0.75"/>
+                            <Slider Grid.Column="1" x:Name="AccelExpSlider"
+                                    Minimum="0.5" Maximum="2.5" TickFrequency="0.05"
+                                    Margin="0,0,12,0"
+                                    ValueChanged="AccelExpSlider_ValueChanged"/>
+                            <ui:NumberBox Grid.Column="2" x:Name="AccelExpNumber"
+                                          Minimum="0.5" Maximum="2.5" SmallChange="0.05"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="AccelExpNumber_ValueChanged"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="最大放大倍率" VerticalAlignment="Center" Opacity="0.75"/>
+                            <Slider Grid.Column="1" x:Name="MaxMulSlider"
+                                    Minimum="1" Maximum="5" TickFrequency="0.1"
+                                    Margin="0,0,12,0"
+                                    ValueChanged="MaxMulSlider_ValueChanged"/>
+                            <ui:NumberBox Grid.Column="2" x:Name="MaxMulNumber"
+                                          Minimum="1" Maximum="5" SmallChange="0.1"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="MaxMulNumber_ValueChanged"/>
+                        </Grid>
+
+                        <TextBlock Text="实时预览" Margin="0,4,0,6" Opacity="0.75" FontSize="12"/>
+                        <ctrl:CurveCanvas x:Name="CurvePreview"/>
+                    </StackPanel>
+                </ui:CardExpander>
+
+                <!-- ===== 移动 ===== -->
+                <TextBlock Text="移动" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                <ui:Card Margin="0,0,0,8">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="死区" FontWeight="SemiBold"/>
+                                <TextBlock Text="摇杆中心忽略的范围" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ui:NumberBox Grid.Column="1" x:Name="DeadZoneNumber"
+                                          Width="110" Minimum="0" Maximum="0.5" SmallChange="0.01"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="DeadZoneNumber_ValueChanged"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                        <Slider x:Name="DeadZoneSlider"
                                 Minimum="0" Maximum="0.5" TickFrequency="0.01"
-                                ValueChanged="MovementSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="DeadZoneValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                                ValueChanged="DeadZoneSlider_ValueChanged"/>
+                    </StackPanel>
+                </ui:Card>
 
-                    <Grid Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="进入阈值" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="EnterSlider"
+                <ui:Card Margin="0,0,0,8">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="进入阈值" FontWeight="SemiBold"/>
+                                <TextBlock Text="开始按下方向键的阈值" Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ui:NumberBox Grid.Column="1" x:Name="EnterNumber"
+                                          Width="110" Minimum="0" Maximum="0.6" SmallChange="0.01"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="EnterNumber_ValueChanged"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                        <Slider x:Name="EnterSlider"
                                 Minimum="0" Maximum="0.6" TickFrequency="0.01"
-                                ValueChanged="MovementSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="EnterValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                                ValueChanged="EnterSlider_ValueChanged"/>
+                    </StackPanel>
+                </ui:Card>
 
-                    <Grid Margin="0,0,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="退出阈值" VerticalAlignment="Center" Opacity="0.7"/>
-                        <Slider Grid.Column="1" x:Name="ExitSlider"
+                <ui:Card Margin="0,0,0,24">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="退出阈值" FontWeight="SemiBold"/>
+                                <TextBlock Text="松开方向键的阈值（须小于进入阈值，提供滞回）"
+                                           Opacity="0.6" FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ui:NumberBox Grid.Column="1" x:Name="ExitNumber"
+                                          Width="110" Minimum="0" Maximum="0.5" SmallChange="0.01"
+                                          ClearButtonEnabled="False"
+                                          ValueChanged="ExitNumber_ValueChanged"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                        <Slider x:Name="ExitSlider"
                                 Minimum="0" Maximum="0.5" TickFrequency="0.01"
-                                ValueChanged="MovementSlider_ValueChanged"/>
-                        <TextBlock Grid.Column="2" x:Name="ExitValue"
-                                   TextAlignment="Right" VerticalAlignment="Center" Opacity="0.8"/>
-                    </Grid>
+                                ValueChanged="ExitSlider_ValueChanged"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Save row -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <TextBlock x:Name="SaveStatus" VerticalAlignment="Center" Margin="0,0,14,0"
+                               Opacity="0.7" FontSize="12"/>
+                    <ui:Button Content="保存到磁盘" Appearance="Primary" Click="Save_Click">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Save24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
                 </StackPanel>
-            </ui:Card>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <ui:Button Content="保存到磁盘" Icon="{ui:SymbolIcon Symbol=Save24}"
-                           Appearance="Primary" Click="Save_Click"/>
-                <TextBlock x:Name="SaveStatus" VerticalAlignment="Center" Margin="14,0,0,0"
-                           Opacity="0.6" FontSize="12"/>
             </StackPanel>
-
-        </StackPanel>
-    </ScrollViewer>
+        </ui:DynamicScrollViewer>
+    </Grid>
 </Page>

@@ -12,8 +12,11 @@ namespace McController.App.Controls;
 ///
 /// X axis: raw finger speed (pixels/frame, 0..MaxInput).
 /// Y axis: effective on-screen pixels after curve + user sensitivity.
-/// Dashed line is the linear identity reference (output = input * sensitivity)
-/// so the user can see how aggressively the curve bends.
+/// Dashed line is the y = x identity reference (no scaling), so the live
+/// curve always shows up as a distinct line above it whenever sensitivity
+/// or curve params change. (An earlier version used sensitivity*x as the
+/// reference, which made Linear mode look frozen — reference and curve
+/// were identical.)
 ///
 /// Recomputes whenever <see cref="SetCamera"/> is called — cheap (samples
 /// ~80 points), no animation, just sets a Path's data.
@@ -55,7 +58,7 @@ public partial class CurveCanvas : UserControl
         var displayMax = Math.Max(MaxOutput, maxOut * 1.1);
 
         GridPath.Data = BuildGridGeometry(w, h);
-        ReferencePath.Data = BuildReferenceGeometry(_camera.UserSensitivity, w, h, displayMax);
+        ReferencePath.Data = BuildIdentityReferenceGeometry(w, h, displayMax);
         CurvePath.Data = BuildCurveGeometry(_camera, w, h, displayMax);
     }
 
@@ -72,12 +75,12 @@ public partial class CurveCanvas : UserControl
         return g;
     }
 
-    private Geometry BuildReferenceGeometry(double sensitivity, double w, double h, double displayMax)
+    private Geometry BuildIdentityReferenceGeometry(double w, double h, double displayMax)
     {
-        // y = sensitivity * x; plot from (0,0) to (MaxInput, MaxInput*sensitivity)
+        // y = x identity (slope 1.0). The live curve must always sit above
+        // this, so the user can see "raw finger speed → mouse pixels" gain.
         double xEnd = PadL + w;
-        double rawY = MaxInput * sensitivity;
-        double yEnd = PadT + h - h * (rawY / displayMax);
+        double yEnd = PadT + h - h * (MaxInput / displayMax);
         yEnd = Math.Max(PadT, yEnd);
         return new LineGeometry(new Point(PadL, PadT + h), new Point(xEnd, yEnd));
     }
