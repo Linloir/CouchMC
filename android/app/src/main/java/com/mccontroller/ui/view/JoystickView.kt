@@ -1,35 +1,40 @@
 package com.mccontroller.ui.view
 
 import android.content.Context
-import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
+import android.graphics.SweepGradient
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import kotlin.math.atan2
 import kotlin.math.sqrt
 
 /**
  * Dynamic (floating) virtual joystick, inspired by PUBG Mobile / Honor of Kings.
  *
- * Behavior:
- * - The view is the "activation zone". Tap anywhere inside it; the base
- *   appears at the touch point (clamped so the full base remains visible).
- * - The knob tracks the active pointer, clamped to `baseRadius` from base.
- * - On release, the knob snaps to base and the whole stack fades out.
+ * Visual (Phase 4 redesign):
+ *   - **At rest the only thing visible is the glowing knob.** No
+ *     backdrop disc, no fully-drawn outline. RadialGradient creates the
+ *     glow without needing BlurMaskFilter (and the software layer it
+ *     would force).
+ *   - **When the knob leaves the centre the rim "lights up" as an arc**
+ *     pointing in the direction the knob is pushing. A SweepGradient is
+ *     rotated to align its bright peak with the knob's angle; the arc
+ *     fades out toward its two ends. The further the knob is pushed,
+ *     the brighter the arc — interpolated linearly with knob distance.
  *
- * Visual stack (drawn order):
- * - Soft outer glow (BlurMaskFilter)
- * - Translucent dark backdrop (subtle "glass")
- * - Thin white ring
- * - Knob with drop shadow (lit-from-above), inner highlight (specular),
- *   and a hairline dark edge for definition.
+ * Behaviour: same as before — tap anywhere in the activation zone, the
+ * base appears under the touch (clamped so the full base stays visible),
+ * the knob tracks the finger to `baseRadius`, snaps back on release.
  *
- * Output: normalized `[-1, 1]`, **Y flipped** (UP = positive = forward in MC).
- * Throttled to ≤60Hz; bypasses throttle on release to ensure (0, 0) is sent.
+ * Output: normalised `[-1, 1]`, Y flipped (UP = positive = forward in MC).
  */
 class JoystickView @JvmOverloads constructor(
     context: Context,
@@ -38,50 +43,33 @@ class JoystickView @JvmOverloads constructor(
 
     var onPositionChanged: ((x: Float, y: Float) -> Unit)? = null
 
-    /**
-     * Fires when the user pushes the stick past the rim (engage) or returns
-     * back inside the inner threshold (disengage). Independent of the
-     * Sprint toggle button — caller OR-combines the two.
-     */
     var onSprintExtensionChanged: ((engaged: Boolean) -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private fun dp(v: Float) = v * density
 
-    private val knobRadius = dp(24f)
-    private val baseRadius = dp(72f)
+    private val knobRadius = dp(22f)
+    private val baseRadius = dp(70f)
+    private val haloRadius = knobRadius * 2.6f
 
-    private val baseGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(40, 255, 255, 255)         // ~16% white
-        style = Paint.Style.STROKE
-        strokeWidth = dp(4f)
-        maskFilter = BlurMaskFilter(dp(2.5f), BlurMaskFilter.Blur.NORMAL)
-    }
-    private val baseFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(28, 0, 0, 0)               // ~11% black "glass"
+    // ---- Paints ----
+    // Knob solid body — nearly opaque white. Slight inset from the halo
+    // so the halo's bright centre overlaps the knob edge cleanly.
+    private val knobPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(245, 255, 255, 255)
         style = Paint.Style.FILL
     }
-    private val baseStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(125, 255, 255, 255)        // ~49% white ring
+
+    // Halo paint — shader is re-created each frame (knob moves, intensity changes).
+    private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    // Rim arc paint — shader is re-created each frame; rotation matrix
+    // applied via setLocalMatrix to align the gradient with knob angle.
+    private val rimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = dp(1.5f)
+        strokeWidth = dp(2.5f)
     }
-    private val knobFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(235, 255, 255, 255)        // 92% white solid
-        style = Paint.Style.FILL
-        // Drop shadow: 4dp blur, 1.5dp downward offset, ~31% black.
-        setShadowLayer(dp(4f), 0f, dp(1.5f), Color.argb(80, 0, 0, 0))
-    }
-    private val knobHighlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(80, 255, 255, 255)         // soft white highlight
-        style = Paint.Style.FILL
-        maskFilter = BlurMaskFilter(dp(3f), BlurMaskFilter.Blur.NORMAL)
-    }
-    private val knobEdgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(45, 0, 0, 0)               // hairline dark edge
-        style = Paint.Style.STROKE
-        strokeWidth = dp(0.7f)
-    }
+    private val rimMatrix = Matrix()
 
     private var baseX = 0f
     private var baseY = 0f
@@ -96,8 +84,6 @@ class JoystickView @JvmOverloads constructor(
     private var sprintEngaged = false
 
     init {
-        // Shadow + BlurMaskFilter need software rendering on most API levels.
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
         alpha = 0f  // hidden until first touch
     }
 
@@ -140,12 +126,9 @@ class JoystickView @JvmOverloads constructor(
         return true
     }
 
-    /**
-     * Clamp `(tx, ty)` so the knob at maximum excursion (base + baseRadius +
-     * knobRadius) plus the glow halo stays inside view bounds — no clipping.
-     */
     private fun setBasePosition(tx: Float, ty: Float) {
-        val safeMargin = baseRadius + knobRadius + dp(4f)
+        // Keep the rim + knob + halo + a little slack inside view bounds.
+        val safeMargin = baseRadius + knobRadius + haloRadius * 0.5f + dp(4f)
         baseX = tx.coerceIn(safeMargin, width - safeMargin)
         baseY = ty.coerceIn(safeMargin, height - safeMargin)
     }
@@ -164,8 +147,6 @@ class JoystickView @JvmOverloads constructor(
         }
         invalidate()
 
-        // Sprint-on-extend: hysteresis between two thresholds so it doesn't
-        // chatter when the finger sits near the rim.
         val engageDist = baseRadius * SPRINT_ENGAGE_FACTOR
         val disengageDist = baseRadius * SPRINT_DISENGAGE_FACTOR
         val newEngaged = if (sprintEngaged) dist > disengageDist else dist > engageDist
@@ -213,23 +194,53 @@ class JoystickView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (alpha == 0f) return  // skip work when fully hidden
+        if (alpha == 0f) return
 
-        // Base layer
-        canvas.drawCircle(baseX, baseY, baseRadius, baseGlowPaint)
-        canvas.drawCircle(baseX, baseY, baseRadius, baseFillPaint)
-        canvas.drawCircle(baseX, baseY, baseRadius, baseStrokePaint)
+        val dx = knobX - baseX
+        val dy = knobY - baseY
+        val dist = sqrt(dx * dx + dy * dy)
+        val intensity = if (dist > 0f) (dist / baseRadius).coerceIn(0f, 1f) else 0f
 
-        // Knob layer
-        canvas.drawCircle(knobX, knobY, knobRadius, knobFillPaint)
-        // Specular highlight: small soft circle at upper-left of knob.
-        canvas.drawCircle(
-            knobX - knobRadius * 0.32f,
-            knobY - knobRadius * 0.42f,
-            knobRadius * 0.45f,
-            knobHighlightPaint,
+        // ---- Rim arc (only when knob is off-centre) ----
+        if (intensity > 0.02f) {
+            // Brightest at peak; tapered to transparent at the arc's edges.
+            // Stops constrained to ~40% of the sweep so the lit region is a
+            // distinct arc, not a soft full-circle wash.
+            val brightAlpha = (intensity * 235f).toInt().coerceIn(0, 255)
+            val brightColor = Color.argb(brightAlpha, 255, 255, 255)
+            val transparent = Color.argb(0, 255, 255, 255)
+            val gradient = SweepGradient(
+                baseX, baseY,
+                intArrayOf(transparent, transparent, brightColor, transparent, transparent),
+                floatArrayOf(0f, 0.30f, 0.50f, 0.70f, 1f),
+            )
+            // SweepGradient starts at angle 0 (positive X, screen-right). To
+            // centre the bright zone at the knob angle we rotate so that the
+            // gradient's 0.5 mark (= 180° from start in default orientation)
+            // lands on the knob's atan2 angle.
+            val angleDeg = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
+            rimMatrix.setRotate(angleDeg - 180f, baseX, baseY)
+            gradient.setLocalMatrix(rimMatrix)
+            rimPaint.shader = gradient
+            canvas.drawCircle(baseX, baseY, baseRadius, rimPaint)
+        }
+
+        // ---- Knob glow halo ----
+        val haloGradient = RadialGradient(
+            knobX, knobY, haloRadius,
+            intArrayOf(
+                Color.argb(140, 255, 255, 255),    // bright translucent centre
+                Color.argb(55, 255, 255, 255),     // mid taper
+                Color.argb(0, 255, 255, 255),      // transparent rim
+            ),
+            floatArrayOf(0f, 0.45f, 1f),
+            Shader.TileMode.CLAMP,
         )
-        canvas.drawCircle(knobX, knobY, knobRadius, knobEdgePaint)
+        haloPaint.shader = haloGradient
+        canvas.drawCircle(knobX, knobY, haloRadius, haloPaint)
+
+        // ---- Knob solid body ----
+        canvas.drawCircle(knobX, knobY, knobRadius, knobPaint)
     }
 
     companion object {
@@ -237,9 +248,8 @@ class JoystickView @JvmOverloads constructor(
         private const val MAX_INTERVAL_MS = 16L
         private const val FADE_IN_MS = 120L
         private const val FADE_OUT_MS = 180L
-        // Symmetric sprint trigger: same radius for engage and disengage
-        // (per user request). Push past 1.2x the rim engages, pull back
-        // inside 1.2x disengages. No hysteresis band.
+        // Push past 1.2× the rim engages sprint; pull back inside 1.2×
+        // disengages — symmetric, no hysteresis band, per user request.
         private const val SPRINT_ENGAGE_FACTOR = 1.2f
         private const val SPRINT_DISENGAGE_FACTOR = 1.2f
     }

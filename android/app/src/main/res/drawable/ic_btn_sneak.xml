@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sneak: downward arrow tucked above a horizontal floor line. Reads as
+    "press down / get low" — visually paired with ic_btn_jump (mirror).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 12,18 L 4.5,9.5 L 9,9.5 L 9,3 L 15,3 L 15,9.5 L 19.5,9.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 4,20 L 20,20 L 20,22 L 4,22 Z" />
+</vector>

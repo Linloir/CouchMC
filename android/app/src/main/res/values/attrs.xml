@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ActionButtonView">
+        <!-- Optional plain-text label, rendered if no [icon] is provided. -->
         <attr name="label" format="string" />
+        <!-- Vector drawable rendered in the centre of the button. Replaces
+             the text label entirely; tinted to white at ~88% alpha. -->
+        <attr name="icon" format="reference" />
         <attr name="buttonMode" format="enum">
             <enum name="hold" value="0" />
             <enum name="toggle" value="1" />

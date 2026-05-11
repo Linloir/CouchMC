@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Mouse silhouette with the LEFT button highlighted. Top-down view —
+    a rounded rectangle with a horizontal divider; the upper-left quadrant
+    is filled, the rest is just the outline. Tinted by the consumer.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Left-top button cap (highlighted) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 8,4 A 4,4 0 0 0 5,8 L 5,11 L 11.25,11 L 11.25,4 Z" />
+    <!-- Body outline (closed) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.6"
+        android:fillColor="#00000000"
+        android:pathData="M 9,4 L 15,4 A 4,4 0 0 1 19,8 L 19,16 A 4,4 0 0 1 15,20 L 9,20 A 4,4 0 0 1 5,16 L 5,8 A 4,4 0 0 1 9,4 Z" />
+    <!-- Horizontal divider line -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.4"
+        android:fillColor="#00000000"
+        android:pathData="M 5,11 L 19,11" />
+    <!-- Center vertical divider -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.4"
+        android:fillColor="#00000000"
+        android:pathData="M 12,4 L 12,11" />
+</vector>

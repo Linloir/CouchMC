@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Swap hands: two horizontal arrows pointing opposite ways. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Top arrow → right -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 3.5,8 L 17,8 L 17,5 L 21.5,9.5 L 17,14 L 17,11 L 3.5,11 Z" />
+    <!-- Bottom arrow ← left -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 20.5,16 L 7,16 L 7,13 L 2.5,17.5 L 7,22 L 7,19 L 20.5,19 Z" />
+</vector>

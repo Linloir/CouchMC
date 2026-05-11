@@ -43,7 +43,7 @@
             android:layout_gravity="bottom|start"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="296dp"
-            app:label="SNK"
+            app:icon="@drawable/ic_btn_sneak"
             app:buttonMode="toggle" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -53,7 +53,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            app:label="L"
+            app:icon="@drawable/ic_btn_mouse_left"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -63,7 +63,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="140dp"
             android:layout_marginBottom="30dp"
-            app:label="R"
+            app:icon="@drawable/ic_btn_mouse_right"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -73,7 +73,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="108dp"
             android:layout_marginBottom="108dp"
-            app:label="↑"
+            app:icon="@drawable/ic_btn_jump"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -83,7 +83,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="140dp"
-            app:label="SPR"
+            app:icon="@drawable/ic_btn_sprint"
             app:buttonMode="toggle" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -93,7 +93,7 @@
             android:layout_gravity="top|end"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            app:label="F"
+            app:icon="@drawable/ic_btn_swap"
             app:buttonMode="tap" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -103,7 +103,7 @@
             android:layout_gravity="top|end"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="72dp"
-            app:label="E"
+            app:icon="@drawable/ic_btn_inventory"
             app:buttonMode="tap" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -113,7 +113,7 @@
             android:layout_gravity="top|end"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="128dp"
-            app:label="Esc"
+            app:icon="@drawable/ic_btn_esc"
             app:buttonMode="tap" />
 
         <com.mccontroller.ui.view.HotbarView
@@ -131,7 +131,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="20dp"
             android:visibility="gone"
-            app:label="L"
+            app:icon="@drawable/ic_btn_mouse_left"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -142,7 +142,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="104dp"
             android:visibility="gone"
-            app:label="R"
+            app:icon="@drawable/ic_btn_mouse_right"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -153,7 +153,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="188dp"
             android:visibility="gone"
-            app:label="Q"
+            app:icon="@drawable/ic_btn_drop"
             app:buttonMode="tap" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -164,7 +164,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="256dp"
             android:visibility="gone"
-            app:label="Shft"
+            app:icon="@drawable/ic_btn_shift"
             app:buttonMode="hold" />
 
         <com.mccontroller.ui.view.ActionButtonView
@@ -175,7 +175,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="324dp"
             android:visibility="gone"
-            app:label="Esc"
+            app:icon="@drawable/ic_btn_esc"
             app:buttonMode="tap" />
     </com.mccontroller.ui.view.EditorCanvas>
 
