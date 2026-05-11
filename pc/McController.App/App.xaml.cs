@@ -1,17 +1,23 @@
 using System;
+using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 
 namespace McController.App;
 
 /// <summary>
 /// WinUI 3 entry point. Owns the singleton <see cref="Services.ServerHost"/>
-/// for the lifetime of the app — the host is created in OnLaunched and
-/// disposed when the main window closes.
+/// and <see cref="Services.TrayService"/> for the lifetime of the app.
+/// The main window's close button hides to tray instead of exiting; the
+/// real shutdown path is the tray menu's 退出服务 item, which calls
+/// <see cref="ExitApp"/>.
 /// </summary>
 public partial class App : Application
 {
     public static Services.ServerHost Host { get; private set; } = null!;
     public static Window MainAppWindow { get; private set; } = null!;
+    public static Services.TrayService Tray { get; private set; } = null!;
+
+    private bool _exiting;
 
     public App()
     {
@@ -39,12 +45,56 @@ public partial class App : Application
         Host.Start();
 
         MainAppWindow = new MainWindow();
+
+        // Hide-to-tray instead of exit when the close button is pressed.
+        // The server keeps running so a phone session isn't disrupted just
+        // because the user dismissed the panel. AppWindow.Closing.Cancel
+        // suppresses the destroy; WindowExtensions.Hide() drops the window
+        // out of the taskbar so the tray icon is the only visible surface.
+        MainAppWindow.AppWindow.Closing += (sender, ev) =>
+        {
+            if (_exiting) return;
+            ev.Cancel = true;
+            MainAppWindow.Hide(enableEfficiencyMode: true);
+        };
         MainAppWindow.Closed += (_, _) =>
         {
+            // Only reached when ExitApp() actually destroys the window.
             try { Host.Dispose(); } catch { }
+            try { Tray.Dispose(); } catch { }
         };
+
+        Tray = new Services.TrayService(ShowWindow, ExitApp);
+        Tray.Initialize();
+
         MainAppWindow.Activate();
     }
+
+    private void ShowWindow()
+    {
+        if (MainAppWindow is null) return;
+        MainAppWindow.Show();
+        // Pull to foreground in case it was already shown but hidden behind
+        // other apps.
+        try
+        {
+            MainAppWindow.Activate();
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(MainAppWindow);
+            SetForegroundWindow(hwnd);
+        }
+        catch { }
+    }
+
+    private void ExitApp()
+    {
+        _exiting = true;
+        try { MainAppWindow?.Close(); }
+        catch { }
+        Exit();
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
 }
 
 /// <summary>
