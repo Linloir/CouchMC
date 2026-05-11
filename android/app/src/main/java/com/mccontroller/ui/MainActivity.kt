@@ -88,20 +88,28 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         // BottomNavigationView auto-installs a long-press tooltip on each
-        // item containing the item's title. Since `labelVisibilityMode`
-        // is `labeled`, the title is *already* visible directly under the
-        // icon — the tooltip is redundant. And the system positions it
-        // near the touch point rather than above the icon, which led to
-        // the tooltip floating up and to the side of where the user
-        // pressed. Walk the view tree once after layout and clear
-        // tooltipText so the long-press becomes a silent no-op.
-        binding.bottomNav.post { clearTooltipsRecursive(binding.bottomNav) }
-    }
-
-    private fun clearTooltipsRecursive(v: View) {
-        v.tooltipText = null
-        if (v is ViewGroup) {
-            for (i in 0 until v.childCount) clearTooltipsRecursive(v.getChildAt(i))
+        // item whose anchor + content are both controlled by the system.
+        // Since `labelVisibilityMode` is `labeled`, the label is already
+        // visible directly under the icon — the tooltip is redundant —
+        // and Android positions it near the touch point rather than
+        // above the icon, so a slightly-off-center press makes it float
+        // up and to the side.
+        //
+        // Just clearing tooltipText didn't stick because
+        // NavigationBarItemView.initialize() re-runs setTooltipText every
+        // time the item rebinds (e.g. on tab change). The reliable
+        // suppression: install an OnLongClickListener that returns true,
+        // which consumes the long-press *before* the framework's tooltip
+        // path runs. OnLongClickListener isn't touched by initialize(),
+        // so it persists for the life of the view.
+        binding.bottomNav.post {
+            val menuView = binding.bottomNav.getChildAt(0) as? ViewGroup ?: return@post
+            for (i in 0 until menuView.childCount) {
+                menuView.getChildAt(i).apply {
+                    setOnLongClickListener { true }
+                    tooltipText = null
+                }
+            }
         }
     }
 
