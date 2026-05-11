@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Full-screen layout editor (post-Phase 3 simplification).
+
+    The editor is now strictly per-mode: SettingsActivity launches it
+    with EXTRA_MODE = in_game | ui, and only that mode's widgets are
+    movable. Profile selection, hotbar swipe mode, and edge offsets all
+    live in Settings now — the editor only owns button geometry.
+
+    The previously-cluttered top/bottom toolbars collapse into two soft
+    Material-3 surface pills floating over the canvas: title + save on
+    top, reset/cancel + per-widget reset buttons at the bottom.
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -167,267 +179,146 @@
             app:buttonMode="tap" />
     </com.mccontroller.ui.view.EditorCanvas>
 
-    <!-- ==== Top floating toolbar ==== -->
-    <LinearLayout
+    <!-- ==== Top floating toolbar — title + reset + cancel + save ==== -->
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/toolbar_top"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:background="#E61E1E1E"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp">
-
-        <Spinner
-            android:id="@+id/spinner_profile"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_new_profile"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="4dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="8dp"
-            android:text="@string/editor_new_profile"
-            android:textSize="11sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_rename_profile"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="4dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="8dp"
-            android:text="@string/editor_rename_profile"
-            android:textSize="11sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_delete_profile"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="4dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="8dp"
-            android:text="@string/editor_delete_profile"
-            android:textSize="11sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_reset_layout"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="8dp"
-            android:text="@string/editor_reset"
-            android:textSize="11sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="4dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="10dp"
-            android:text="@string/editor_cancel"
-            android:textSize="11sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="14dp"
-            android:text="@string/editor_save"
-            android:textSize="11sp"
-            android:layout_marginEnd="48dp" />
-    </LinearLayout>
-
-    <!-- ==== Bottom floating toolbar ==== -->
-    <LinearLayout
-        android:id="@+id/toolbar_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="#E61E1E1E"
-        android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp">
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="#E61E1E1E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="4dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="6dp"
+            android:paddingVertical="4dp">
 
-            <RadioGroup
-                android:id="@+id/mode_tabs"
+            <TextView
+                android:id="@+id/txt_editor_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:textColor="#FFFFFFFF"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                tools:text="In-game layout" />
 
-                <RadioButton
-                    android:id="@+id/mode_in_game"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/editor_mode_in_game"
-                    android:textColor="#FFFFFFFF" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset_layout"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:minWidth="0dp"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/editor_reset" />
 
-                <RadioButton
-                    android:id="@+id/mode_ui"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text="@string/editor_mode_ui"
-                    android:textColor="#FFFFFFFF" />
-            </RadioGroup>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/editor_cancel" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:textAllCaps="false"
+                android:text="@string/editor_save" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ==== Bottom floating toolbar — selection actions ==== -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/toolbar_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#E61E1E1E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="6dp">
 
             <TextView
                 android:id="@+id/txt_selected_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:textColor="#FFE8C547"
-                android:textSize="11sp"
-                android:visibility="gone"
-                tools:text="Selected: btn_lmb"
-                tools:visibility="visible" />
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                tools:text="btn_lmb" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_reset_position"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_marginEnd="4dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:minWidth="0dp"
-                android:paddingHorizontal="10dp"
-                android:text="@string/editor_reset_position"
-                android:textSize="11sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:textAllCaps="false"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/editor_reset_position" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_reset_size"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_marginEnd="4dp"
+                android:layout_height="wrap_content"
                 android:minWidth="0dp"
-                android:paddingHorizontal="10dp"
-                android:text="@string/editor_reset_size"
-                android:textSize="11sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:textAllCaps="false"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/editor_reset_size" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_hotbar_mode_toggle"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:minWidth="0dp"
-                android:paddingHorizontal="10dp"
-                android:text="@string/editor_hotbar_mode_precise"
-                android:textSize="11sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/editor_l_margin"
-                android:textColor="#FFFFFFFF"
-                android:textSize="11sp" />
-
-            <SeekBar
-                android:id="@+id/slider_l_margin"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:max="120" />
-
-            <TextView
-                android:id="@+id/txt_l_margin_value"
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFFFF"
-                android:textSize="11sp"
-                tools:text="0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="@string/editor_r_margin"
-                android:textColor="#FFFFFFFF"
-                android:textSize="11sp" />
-
-            <SeekBar
-                android:id="@+id/slider_r_margin"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:max="120" />
-
-            <TextView
-                android:id="@+id/txt_r_margin_value"
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFFFF"
-                android:textSize="11sp"
-                tools:text="0" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- ==== Toolbar collapse toggle (always visible at top-right) ==== -->
+    <!-- ==== Toolbar collapse toggle ==== -->
     <ImageButton
         android:id="@+id/btn_toggle_toolbars"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="top|end"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="4dp"
-        android:background="#CC1A1A1A"
-        android:contentDescription="Toggle toolbars"
-        android:padding="6dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/editor_toggle_pill"
+        android:contentDescription="@null"
+        android:padding="8dp"
         android:src="@android:drawable/ic_menu_view"
-        android:tint="#FFFFFFFF" />
+        app:tint="#FFFFFFFF" />
 
-    <!-- ==== Hint banner (small floating) ==== -->
+    <!-- ==== Hint banner ==== -->
     <TextView
         android:id="@+id/txt_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="56dp"
-        android:padding="6dp"
-        android:background="#80000000"
+        android:layout_marginTop="68dp"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="6dp"
+        android:background="@drawable/editor_hint_pill"
         android:textColor="#CCFFFFFF"
-        android:textSize="11sp"
+        android:textAppearance="?attr/textAppearanceLabelMedium"
         android:text="@string/editor_hint" />
 
 </FrameLayout>

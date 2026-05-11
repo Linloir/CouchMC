@@ -127,35 +127,4 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
 
-    <!--
-        Legacy strings kept temporarily so the old ConnectActivity and the
-        current LayoutEditorActivity still compile. Removed as those screens
-        are replaced by HomeActivity / SettingsActivity in subsequent phases.
-    -->
-    <string name="connect_title">Connect to PC</string>
-    <string name="ip_address_hint">PC IP address</string>
-    <string name="port_hint">Port</string>
-    <string name="default_port">34555</string>
-    <string name="connect_wifi">Connect (WiFi)</string>
-    <string name="connect_usb">Connect (USB / 127.0.0.1)</string>
-    <string name="status_connecting">Connecting…</string>
-    <string name="status_connected">Connected</string>
-    <string name="status_disconnected">Disconnected</string>
-    <string name="status_failed">Connection failed: %1$s</string>
-    <string name="profile_picker_label">Layout profile</string>
-    <string name="edit_layout">Edit layout</string>
-    <string name="editor_title">Layout editor</string>
-    <string name="editor_new_profile">New profile</string>
-    <string name="editor_rename_profile">Rename</string>
-    <string name="editor_delete_profile">Delete</string>
-    <string name="editor_mode_in_game">In-game</string>
-    <string name="editor_mode_ui">UI mode</string>
-    <string name="editor_l_margin">Left margin offset</string>
-    <string name="editor_r_margin">Right margin offset</string>
-    <string name="editor_hotbar_mode_precise">Hotbar: precise</string>
-    <string name="editor_hotbar_mode_relative">Hotbar: relative</string>
-    <string name="editor_new_profile_dialog">New profile name</string>
-    <string name="editor_rename_profile_dialog">New name</string>
-    <string name="editor_delete_confirm">Delete profile \"%1$s\"?</string>
-    <string name="editor_cannot_delete_last">At least one profile is required</string>
 </resources>

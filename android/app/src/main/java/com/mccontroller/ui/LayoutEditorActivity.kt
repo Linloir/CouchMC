@@ -7,12 +7,7 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.SeekBar
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,11 +15,11 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.mccontroller.R
 import com.mccontroller.core.Anchor
 import com.mccontroller.core.DefaultLayouts
-import com.mccontroller.core.HotbarSwipeMode
 import com.mccontroller.core.LayoutApplier
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ModeLayout
 import com.mccontroller.core.ProfileStore
+import com.mccontroller.core.SettingsStore
 import com.mccontroller.core.WidgetSpec
 import com.mccontroller.databinding.ActivityLayoutEditorBinding
 import com.mccontroller.ui.view.EditorCanvas
@@ -91,18 +86,40 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
             else -> EditMode.InGame
         }
 
-        setupSpinner()
-        setupModeTabs()
-        setupSliders()
+        // Title reflects the mode the editor was launched into.
+        binding.txtEditorTitle.setText(
+            when (currentEditMode) {
+                EditMode.InGame -> R.string.editor_title_in_game
+                EditMode.UiInteract -> R.string.editor_title_ui
+            },
+        )
+
+        // Apply current app settings (hotbar swipe mode, edge offsets) to
+        // the preview so the editor reflects exactly what will be rendered
+        // in the controller — but these aren't editable here anymore.
+        applyAppSettingsToPreview()
+
         setupActions()
         setupResetSelectionButtons()
         setupToolbarToggle()
         attachWidgetEditListeners()
 
         applyCurrentToCanvas()
-        updateModeVisibility()
-        refreshSliders()
+        applyModeVisibility()
         updateSelectionUi()
+    }
+
+    private fun applyAppSettingsToPreview() {
+        val s = SettingsStore.get(this).current
+        binding.hotbar.swipeMode = s.hotbarSwipeMode
+    }
+
+    private fun applyModeVisibility() {
+        val showInGame = currentEditMode == EditMode.InGame
+        inGameViews().forEach { it.visibility = if (showInGame) View.VISIBLE else View.GONE }
+        uiModeWidgetMap().values.forEach {
+            it.visibility = if (!showInGame) View.VISIBLE else View.GONE
+        }
     }
 
     // ===== EditorCanvas.Callback =====
@@ -123,172 +140,31 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         setSelectedWidget(null)
     }
 
-    // ===== Profile spinner =====
-
-    private fun setupSpinner() {
-        refreshSpinner(initial = true)
-        binding.spinnerProfile.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position != activeIdx) {
-                    activeIdx = position
-                    setSelectedWidget(null)
-                    applyCurrentToCanvas()
-                    refreshSliders()
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-    }
-
-    private fun refreshSpinner(initial: Boolean = false) {
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            workingProfiles.map { it.name },
-        )
-        binding.spinnerProfile.adapter = adapter
-        binding.spinnerProfile.setSelection(activeIdx, !initial)
-    }
-
-    // ===== Mode tabs =====
-
-    private fun setupModeTabs() {
-        binding.modeTabs.setOnCheckedChangeListener { _, id ->
-            currentEditMode =
-                if (id == binding.modeInGame.id) EditMode.InGame else EditMode.UiInteract
-            setSelectedWidget(null)  // selection doesn't carry across modes
-            updateModeVisibility()
-            refreshSliders()
-        }
-    }
-
-    private fun updateModeVisibility() {
-        val showInGame = currentEditMode == EditMode.InGame
-        inGameViews().forEach { it.visibility = if (showInGame) View.VISIBLE else View.GONE }
-        uiModeWidgetMap().values.forEach {
-            it.visibility = if (!showInGame) View.VISIBLE else View.GONE
-        }
-    }
-
-    // ===== Sliders =====
-
-    private fun setupSliders() {
-        binding.sliderLMargin.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (!fromUser) return
-                binding.txtLMarginValue.text = progress.toString()
-                mutateMode { it.copy(leftOffsetDp = progress.toFloat()) }
-                applyCurrentToCanvas()
-            }
-            override fun onStartTrackingTouch(sb: SeekBar?) {}
-            override fun onStopTrackingTouch(sb: SeekBar?) {}
-        })
-        binding.sliderRMargin.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (!fromUser) return
-                binding.txtRMarginValue.text = progress.toString()
-                mutateMode { it.copy(rightOffsetDp = progress.toFloat()) }
-                applyCurrentToCanvas()
-            }
-            override fun onStartTrackingTouch(sb: SeekBar?) {}
-            override fun onStopTrackingTouch(sb: SeekBar?) {}
-        })
-    }
-
-    private fun refreshSliders() {
-        val mode = currentMode()
-        binding.sliderLMargin.progress = mode.leftOffsetDp.toInt().coerceIn(0, 120)
-        binding.sliderRMargin.progress = mode.rightOffsetDp.toInt().coerceIn(0, 120)
-        binding.txtLMarginValue.text = mode.leftOffsetDp.toInt().toString()
-        binding.txtRMarginValue.text = mode.rightOffsetDp.toInt().toString()
-    }
-
-    // ===== Profile actions =====
+    // ===== Save / cancel / reset-all =====
 
     private fun setupActions() {
         binding.btnSave.setOnClickListener {
             store.saveAll(workingProfiles, workingProfiles[activeIdx].name)
-            Toast.makeText(this, "已保存", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.editor_save, Toast.LENGTH_SHORT).show()
             finish()
         }
         binding.btnCancel.setOnClickListener { finish() }
-        binding.btnNewProfile.setOnClickListener { onNewProfile() }
-        binding.btnRenameProfile.setOnClickListener { onRenameProfile() }
-        binding.btnDeleteProfile.setOnClickListener { onDeleteProfile() }
         binding.btnResetLayout.setOnClickListener { onResetLayout() }
     }
 
-    private fun onNewProfile() {
-        showInputDialog(getString(R.string.editor_new_profile_dialog), prefill = "") { name ->
-            if (name.isBlank()) return@showInputDialog
-            if (workingProfiles.any { it.name == name }) {
-                Toast.makeText(this, "名称已存在", Toast.LENGTH_SHORT).show()
-                return@showInputDialog
-            }
-            val source = workingProfiles[activeIdx]
-            workingProfiles.add(source.copy(name = name))
-            activeIdx = workingProfiles.size - 1
-            refreshSpinner()
-        }
-    }
-
-    private fun onRenameProfile() {
-        val current = workingProfiles[activeIdx]
-        showInputDialog(getString(R.string.editor_rename_profile_dialog), prefill = current.name) { name ->
-            if (name.isBlank() || name == current.name) return@showInputDialog
-            if (workingProfiles.any { it.name == name }) {
-                Toast.makeText(this, "名称已存在", Toast.LENGTH_SHORT).show()
-                return@showInputDialog
-            }
-            workingProfiles[activeIdx] = current.copy(name = name)
-            refreshSpinner()
-        }
-    }
-
-    private fun onDeleteProfile() {
-        if (workingProfiles.size <= 1) {
-            Toast.makeText(this, R.string.editor_cannot_delete_last, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val current = workingProfiles[activeIdx]
-        AlertDialog.Builder(this)
-            .setMessage(getString(R.string.editor_delete_confirm, current.name))
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                workingProfiles.removeAt(activeIdx)
-                if (activeIdx >= workingProfiles.size) activeIdx = workingProfiles.size - 1
-                setSelectedWidget(null)
-                refreshSpinner()
-                applyCurrentToCanvas()
-                refreshSliders()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
+    /**
+     * Reset the currently-edited mode's widgets back to factory defaults.
+     * The other mode (not visible right now) is left untouched, as is the
+     * profile name.
+     */
     private fun onResetLayout() {
         val current = workingProfiles[activeIdx]
-        workingProfiles[activeIdx] = current.copy(
-            inGame = DefaultLayouts.IN_GAME,
-            uiMode = DefaultLayouts.UI_MODE,
-        )
+        workingProfiles[activeIdx] = when (currentEditMode) {
+            EditMode.InGame -> current.copy(inGame = DefaultLayouts.IN_GAME)
+            EditMode.UiInteract -> current.copy(uiMode = DefaultLayouts.UI_MODE)
+        }
         setSelectedWidget(null)
         applyCurrentToCanvas()
-        refreshSliders()
-    }
-
-    private fun showInputDialog(title: String, prefill: String, onResult: (String) -> Unit) {
-        val edit = EditText(this).apply {
-            setText(prefill)
-            selectAll()
-        }
-        AlertDialog.Builder(this)
-            .setTitle(title)
-            .setView(edit)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                onResult(edit.text.toString().trim())
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
     }
 
     // ===== Reset position / size for selection =====
@@ -310,28 +186,6 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
             val def = defaultSpec(id) ?: return@setOnClickListener
             updateSpec(id) { it.copy(widthDp = def.widthDp, heightDp = def.heightDp) }
         }
-        binding.btnHotbarModeToggle.setOnClickListener {
-            // Only meaningful when hotbar is selected (we gate visibility
-            // accordingly), but guard anyway.
-            if (selectedId != "hotbar") return@setOnClickListener
-            val current = workingProfiles[activeIdx].hotbarSwipeMode
-            val next = if (current == HotbarSwipeMode.Precise)
-                HotbarSwipeMode.Relative
-            else HotbarSwipeMode.Precise
-            workingProfiles[activeIdx] = workingProfiles[activeIdx].copy(hotbarSwipeMode = next)
-            binding.hotbar.swipeMode = next
-            updateHotbarModeButtonLabel()
-        }
-    }
-
-    private fun updateHotbarModeButtonLabel() {
-        val mode = workingProfiles[activeIdx].hotbarSwipeMode
-        binding.btnHotbarModeToggle.setText(
-            when (mode) {
-                HotbarSwipeMode.Precise -> R.string.editor_hotbar_mode_precise
-                HotbarSwipeMode.Relative -> R.string.editor_hotbar_mode_relative
-            }
-        )
     }
 
     private fun defaultSpec(id: String): WidgetSpec? =
@@ -349,16 +203,13 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
 
     private fun updateSelectionUi() {
         val id = selectedId
-        binding.txtSelectedLabel.visibility = if (id != null) View.VISIBLE else View.GONE
-        binding.txtSelectedLabel.text = id?.let { "已选: $it" } ?: ""
+        // The whole bottom selection-actions pill collapses when nothing
+        // is selected — cleaner than three separately-toggled buttons.
+        binding.toolbarBottom.visibility = if (id != null) View.VISIBLE else View.GONE
+        binding.txtSelectedLabel.text = id ?: ""
         binding.btnResetPosition.visibility = if (id != null) View.VISIBLE else View.GONE
         binding.btnResetSize.visibility =
             if (id != null && id in DefaultLayouts.RESIZABLE_IDS) View.VISIBLE else View.GONE
-        // The hotbar-specific swipe-mode toggle is only meaningful when the
-        // hotbar itself is the selected widget.
-        binding.btnHotbarModeToggle.visibility =
-            if (id == "hotbar") View.VISIBLE else View.GONE
-        if (id == "hotbar") updateHotbarModeButtonLabel()
     }
 
     private fun makeSelectionDrawable(): Drawable = GradientDrawable().apply {

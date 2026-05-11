@@ -32,16 +32,6 @@
             </intent-filter>
         </activity>
 
-        <!--
-            Legacy entry. Kept registered (not LAUNCHER) so it still
-            compiles while we wind down references; removed once
-            SettingsActivity lands in Phase 2.
-        -->
-        <activity
-            android:name=".ui.ConnectActivity"
-            android:exported="false"
-            android:label="@string/connect_title" />
-
         <activity
             android:name=".ui.ControllerActivity"
             android:exported="false"
@@ -54,7 +44,8 @@
             android:exported="false"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/editor_title"
+            android:label="@string/editor_title_in_game"
+            android:parentActivityName=".ui.SettingsActivity"
             android:theme="@style/Theme.McController.Fullscreen" />
 
         <activity
