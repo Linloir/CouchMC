@@ -86,6 +86,18 @@ so the client can render the correct initial UI.
 |---|---|---|---|
 | `0x11` | `LOOK_DELTA` | `i16 dx, i16 dy` (the `seq` is in the common header) | C→S |
 
+### Sub-pixel scaling (since 2026-05 wire revision)
+
+Wire camera deltas are in **tenths-of-pixel**. The Android client multiplies its
+finger-pixel delta by `SUBPIXEL_SCALE = 10` before encoding; the PC server divides
+by 10 before applying camera curve + sensitivity. This applies to both
+`LOOK_DELTA` (UDP) and `LOOK_DELTA_TCP`.
+
+The i16 range (±32767 tenths) corresponds to ±3276 pixels per packet, more than
+enough for any reasonable single-tick swipe.
+
+Existing JOYSTICK fixed-point scaling (`×10000`) is unrelated and unchanged.
+
 ### Server reorder/loss handling
 
 The server maintains a single `lastSeq` (demo is single-client). On every received UDP packet:
