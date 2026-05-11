@@ -12,14 +12,19 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Invisible focus sink. The window-level PointerPressed handler
-             focuses this when the user clicks an empty area of any page,
-             which yanks focus away from whatever TextBox/NumberBox they
-             were editing. IsTabStop=False keeps it out of Tab navigation. -->
+        <!-- Invisible focus sink. The window-level Tapped handler focuses
+             this when the user clicks an empty area of any page, yanking
+             focus away from whatever TextBox/NumberBox they were editing.
+             IsTabStop=False keeps it out of Tab navigation. Width/Height
+             are 1 (not 0) and Margin pushes it just off the visible area
+             — a zero-size button doesn't reliably accept programmatic
+             focus on WinUI 3. -->
         <Button x:Name="FocusSink"
-                Width="0" Height="0" Opacity="0"
+                Width="1" Height="1" Opacity="0"
                 IsTabStop="False"
-                HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Margin="-10,-10,0,0"
+                Canvas.ZIndex="-1"/>
 
         <!-- Custom title bar. Sits in row 0; the OS-rendered caption buttons
              (min / max / close) draw over the right edge automatically when

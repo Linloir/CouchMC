@@ -71,12 +71,17 @@ public sealed partial class MainWindow : Window
         AppearancePreferences.Changed += OnAppearanceChanged;
         Closed += (_, _) => AppearancePreferences.Changed -= OnAppearanceChanged;
 
-        // Click-anywhere-to-defocus. Use AddHandler with handledEventsToo
-        // so we still see PointerPressed even when inner inputs handled
-        // it; the IsInsideInput check then decides whether to pull focus.
+        // Click-anywhere-to-defocus. Tapped (rather than PointerPressed)
+        // fires AFTER the inner controls have processed the click, so
+        // NumberBox / TextBox have already finished any focus dance of
+        // their own — calling Focus on our sink at this point reliably
+        // wins. AddHandler with handledEventsToo means we still see the
+        // event even if the inner control marked it handled. The Focus
+        // call is also dispatched to the next tick to ensure it lands
+        // after the gesture machine has fully unwound.
         RootGrid.AddHandler(
-            UIElement.PointerPressedEvent,
-            new PointerEventHandler(OnRootPointerPressed),
+            UIElement.TappedEvent,
+            new TappedEventHandler(OnRootTapped),
             handledEventsToo: true);
 
         try
@@ -137,11 +142,15 @@ public sealed partial class MainWindow : Window
     /// until the user explicitly tabs out — Win11 Settings dismisses it
     /// the moment you click empty space, this matches that.
     /// </summary>
-    private void OnRootPointerPressed(object sender, PointerRoutedEventArgs e)
+    private void OnRootTapped(object sender, TappedRoutedEventArgs e)
     {
         if (e.OriginalSource is DependencyObject src && !IsInsideTextInput(src))
         {
-            FocusSink.Focus(FocusState.Pointer);
+            // Defer to next tick. If we Focus() synchronously inside the
+            // Tapped handler, NumberBox's own pointer-released logic
+            // (which re-grabs focus to its inner TextBox in some cases)
+            // can win over ours; dispatching guarantees we land last.
+            DispatcherQueue.TryEnqueue(() => FocusSink.Focus(FocusState.Pointer));
         }
     }
 
