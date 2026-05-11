@@ -213,12 +213,17 @@
         android:id="@+id/txt_hud"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="6dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
         android:textColor="#FFFFFFFF"
         android:textSize="12sp"
         android:fontFamily="monospace"
-        android:layout_gravity="top|start"
-        android:background="@color/hud_bg"
+        android:shadowColor="#000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="3"
         tools:text="● USB · in-game · 4ms" />
 
 </FrameLayout>

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Jump — side-view leap, facing right. Filled head + filled torso
-    (the visual weight comes from these) with stroked limbs in a
-    long-jumper pose: front leg raised + extended forward, trailing
-    leg back-and-down, lead arm reaching up-forward, trailing arm
-    swung back. Faint ground line at the bottom anchors the figure
-    as "having just left the ground".
+    Jump — side-view leap, compact + centred. Previous pose was an
+    extreme long-jumper that splayed limbs across the full viewport,
+    so the figure read as "too far to the right". Toned down to a
+    contained mid-leap:
+      - body only slightly angled forward
+      - lead arm bent (elbow + forearm), not extended fully
+      - trailing arm bent back-down (not way back)
+      - lead leg knee raised gently, foot just ahead of body
+      - trailing leg knee bent, foot just behind body
+    Horizontal centroid lands around x=12 (icon viewport centre).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -16,51 +20,53 @@
     <!-- Head -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 15.5,3.8 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
+        android:pathData="M 12,4 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
 
-    <!-- Torso (angled-forward parallelogram, neck → hip) -->
+    <!-- Torso (narrow parallelogram, slight forward tilt) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 14.4,6 L 16.6,6.3 L 14.6,12.4 L 12.4,12.2 Z" />
+        android:pathData="M 11,6.4 L 13.2,6.6 L 12.3,12.2 L 10.1,12 Z" />
 
-    <!-- Lead arm reaching up + forward -->
+    <!-- Lead arm bent forward (shoulder → elbow → hand) -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.4"
         android:strokeLineCap="round"
+        android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 15.6,7 L 19.6,5" />
+        android:pathData="M 12.8,7.4 L 14.6,7 L 16,5.4" />
 
-    <!-- Trailing arm swung back + slightly down -->
+    <!-- Trail arm bent back -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.4"
         android:strokeLineCap="round"
+        android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 13.8,7.4 L 9.8,9.6" />
+        android:pathData="M 10.6,7.4 L 8.8,7.4 L 7.4,9.2" />
 
-    <!-- Lead leg: hip → knee raised forward → foot extended forward + up -->
+    <!-- Lead leg: hip → knee gently raised → foot forward + down -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 14.6,12.4 L 19,11 L 21.6,13" />
+        android:pathData="M 12.4,12.4 L 14.6,13.2 L 16,16.4" />
 
-    <!-- Trailing leg: hip → knee back → foot extended back + down -->
+    <!-- Trail leg: hip → knee back+down → foot trailing -->
     <path
         android:strokeColor="#FFFFFF"
         android:strokeWidth="2.6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"
-        android:pathData="M 12.4,12.4 L 8,14.6 L 4.4,17" />
+        android:pathData="M 10.4,12.2 L 8.6,13.6 L 7.4,16.4" />
 
-    <!-- Faint ground line -->
+    <!-- Faint ground line below the feet -->
     <path
         android:fillColor="#FFFFFF"
         android:fillAlpha="0.45"
-        android:pathData="M 3,20.6 L 21,20.6 L 21,22 L 3,22 Z" />
+        android:pathData="M 4,19.6 L 20,19.6 L 20,21 L 4,21 Z" />
 
 </vector>
