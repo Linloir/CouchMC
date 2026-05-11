@@ -114,36 +114,61 @@
                                 app:iconPadding="8dp"
                                 tools:text="Default" />
 
+                            <!--
+                                MaterialButton.IconButton.Filled gets its
+                                default 6 dp top/bottom insets from the
+                                Material library. When we constrain the
+                                view to 44 dp height, those insets push
+                                the icon off-centre (the icon ends up at
+                                the top-left of the visible rectangle).
+                                Zeroing inset* + padding lets the icon
+                                centre cleanly inside the chip.
+                            -->
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_new"
                                 style="@style/Widget.Material3.Button.IconButton.Filled"
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
                                 android:layout_marginStart="8dp"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:padding="0dp"
                                 android:contentDescription="@string/settings_new_profile"
                                 app:icon="@drawable/ic_add"
-                                app:iconSize="20dp" />
+                                app:iconSize="20dp"
+                                app:iconPadding="0dp"
+                                app:iconGravity="textStart" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_rename"
                                 style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:padding="0dp"
                                 android:contentDescription="@string/settings_rename_profile"
                                 app:icon="@drawable/ic_edit"
-                                app:iconSize="20dp" />
+                                app:iconSize="20dp"
+                                app:iconPadding="0dp"
+                                app:iconGravity="textStart" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_profile_delete"
                                 style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
                                 android:layout_marginStart="6dp"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:padding="0dp"
                                 android:contentDescription="@string/settings_delete_profile"
                                 android:backgroundTint="?attr/colorErrorContainer"
                                 app:icon="@drawable/ic_delete"
                                 app:iconSize="20dp"
+                                app:iconPadding="0dp"
+                                app:iconGravity="textStart"
                                 app:iconTint="?attr/colorOnErrorContainer" />
 
                         </LinearLayout>

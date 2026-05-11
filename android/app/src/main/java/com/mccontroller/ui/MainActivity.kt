@@ -43,7 +43,13 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemReselectedListener { /* no-op */ }
 
         if (savedInstanceState == null) {
-            binding.bottomNav.selectedItemId = R.id.nav_home
+            // Don't rely on setSelectedItemId(R.id.nav_home) to bootstrap
+            // the home fragment: BottomNavigationView's default selection
+            // is already the first menu item (nav_home), so setting it
+            // again doesn't fire the OnItemSelectedListener and switchTo
+            // never runs — the home fragment was never added until the
+            // user manually tab-swapped. Explicitly invoke switchTo here.
+            switchTo(TAG_HOME)
         }
     }
 
