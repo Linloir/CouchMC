@@ -194,18 +194,11 @@
                 </StackPanel>
             </tk:SettingsCard>
 
-            <!-- Save row -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                        Margin="0,28,0,0" Spacing="12">
-                <TextBlock x:Name="SaveStatus" VerticalAlignment="Center"
-                           Opacity="0.7" FontSize="12"/>
-                <Button Click="Save_Click" Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74E;" FontSize="14"/>
-                        <TextBlock Text="保存到磁盘"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+            <!-- Transient auto-save indicator. Sliders/inputs schedule a
+                 debounced save 500 ms after the last change; this label
+                 briefly shows "已保存" when the write hits disk. -->
+            <TextBlock x:Name="SaveStatus" HorizontalAlignment="Right"
+                       Margin="0,16,0,0" Opacity="0.6" FontSize="12"/>
 
         </StackPanel>
         </Grid>

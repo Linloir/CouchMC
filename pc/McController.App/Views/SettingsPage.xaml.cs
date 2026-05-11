@@ -28,12 +28,20 @@ public sealed partial class SettingsPage : Page
     // Start in loading state so handlers fired by XAML coercion of
     // Slider.Value (when Minimum/Maximum are set) early-out cleanly.
     private bool _loading = true;
+    private readonly DispatcherQueueTimer _autoSaveTimer;
     private readonly DispatcherQueueTimer _saveStatusTimer;
 
     public SettingsPage()
     {
         _profiles = new ProfileManager(_host);
         InitializeComponent();
+
+        // Debounced auto-save: 500 ms after the last setting change, write
+        // config.json. The "已保存" status text fades out after 2 s.
+        _autoSaveTimer = DispatcherQueue.CreateTimer();
+        _autoSaveTimer.Interval = TimeSpan.FromMilliseconds(500);
+        _autoSaveTimer.IsRepeating = false;
+        _autoSaveTimer.Tick += (_, _) => DoAutoSave();
 
         _saveStatusTimer = DispatcherQueue.CreateTimer();
         _saveStatusTimer.Interval = TimeSpan.FromSeconds(2);
@@ -42,6 +50,31 @@ public sealed partial class SettingsPage : Page
 
         ConfigureNumberFormatters();
         Loaded += OnLoaded;
+    }
+
+    /// <summary>
+    /// Restart the 500 ms debounce timer. Called from every user-initiated
+    /// change. Suppressed while <see cref="_loading"/> is true (so refresh
+    /// passes and XAML init don't trigger phantom saves).
+    /// </summary>
+    private void ScheduleAutoSave()
+    {
+        if (_loading) return;
+        _autoSaveTimer.Stop();
+        _autoSaveTimer.Start();
+    }
+
+    private void DoAutoSave()
+    {
+        try
+        {
+            _host.SaveConfig();
+            ShowStatus("已保存");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus("保存失败: " + ex.Message);
+        }
     }
 
     /// <summary>
@@ -130,6 +163,7 @@ public sealed partial class SettingsPage : Page
         if (!double.IsNaN(args.NewValue) && args.NewValue >= 1024 && args.NewValue <= 65535)
         {
             _host.Config.Port = (int)args.NewValue;
+            ScheduleAutoSave();
         }
     }
 
@@ -141,6 +175,7 @@ public sealed partial class SettingsPage : Page
         {
             _profiles.SetActive(p);
             RefreshFromProfile(p);
+            ScheduleAutoSave();
         }
     }
 
@@ -159,18 +194,21 @@ public sealed partial class SettingsPage : Page
             ProfileCombo.SelectedItem = current;
         }
         finally { _loading = false; }
+        ScheduleAutoSave();
     }
 
     private void NewProfile_Click(object sender, RoutedEventArgs e)
     {
         var p = _profiles.AddNew("新方案 " + (_profiles.Profiles.Count + 1));
         ProfileCombo.SelectedItem = p;
+        ScheduleAutoSave();
     }
 
     private void DuplicateProfile_Click(object sender, RoutedEventArgs e)
     {
         var p = _profiles.Duplicate(Active);
         ProfileCombo.SelectedItem = p;
+        ScheduleAutoSave();
     }
 
     private async void DeleteProfile_Click(object sender, RoutedEventArgs e)
@@ -185,6 +223,7 @@ public sealed partial class SettingsPage : Page
         _profiles.Delete(Active);
         ProfileCombo.SelectedItem = _profiles.ActiveProfile;
         RefreshFromProfile(_profiles.ActiveProfile);
+        ScheduleAutoSave();
     }
 
     private async Task<bool> ConfirmAsync(string message, string title)
@@ -209,6 +248,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.UserSensitivity = (float)e.NewValue;
         Sync(SensitivityNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     private void SensitivityNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -217,6 +257,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.UserSensitivity = (float)args.NewValue;
         Sync(SensitivitySlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     // ===== Curve type =====
@@ -232,6 +273,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.CurveType = CurvePower.IsChecked == true ? CurveType.Power : CurveType.Linear;
         UpdatePowerControlsEnabled();
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     /// <summary>
@@ -257,6 +299,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.AccelFactor = (float)e.NewValue;
         Sync(AccelFactorNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     private void AccelFactorNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -265,6 +308,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.AccelFactor = (float)args.NewValue;
         Sync(AccelFactorSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     // ===== Accel exp =====
@@ -274,6 +318,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.AccelExp = (float)e.NewValue;
         Sync(AccelExpNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     private void AccelExpNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -282,6 +327,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.AccelExp = (float)args.NewValue;
         Sync(AccelExpSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     // ===== Max multiplier =====
@@ -291,6 +337,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.MaxAccelMultiplier = (float)e.NewValue;
         Sync(MaxMulNumber, e.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     private void MaxMulNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -299,6 +346,7 @@ public sealed partial class SettingsPage : Page
         Active.Camera.MaxAccelMultiplier = (float)args.NewValue;
         Sync(MaxMulSlider, args.NewValue);
         CurvePreview.SetCamera(Active.Camera);
+        ScheduleAutoSave();
     }
 
     // ===== Movement =====
@@ -307,6 +355,7 @@ public sealed partial class SettingsPage : Page
         if (_loading) return;
         Active.Movement.DeadZone = (float)e.NewValue;
         Sync(DeadZoneNumber, e.NewValue);
+        ScheduleAutoSave();
     }
 
     private void DeadZoneNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -314,6 +363,7 @@ public sealed partial class SettingsPage : Page
         if (_loading || double.IsNaN(args.NewValue)) return;
         Active.Movement.DeadZone = (float)args.NewValue;
         Sync(DeadZoneSlider, args.NewValue);
+        ScheduleAutoSave();
     }
 
     private void EnterSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -321,6 +371,7 @@ public sealed partial class SettingsPage : Page
         if (_loading) return;
         Active.Movement.EnterThreshold = (float)e.NewValue;
         Sync(EnterNumber, e.NewValue);
+        ScheduleAutoSave();
     }
 
     private void EnterNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -328,6 +379,7 @@ public sealed partial class SettingsPage : Page
         if (_loading || double.IsNaN(args.NewValue)) return;
         Active.Movement.EnterThreshold = (float)args.NewValue;
         Sync(EnterSlider, args.NewValue);
+        ScheduleAutoSave();
     }
 
     private void ExitSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -335,6 +387,7 @@ public sealed partial class SettingsPage : Page
         if (_loading) return;
         Active.Movement.ExitThreshold = (float)e.NewValue;
         Sync(ExitNumber, e.NewValue);
+        ScheduleAutoSave();
     }
 
     private void ExitNumber_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -342,6 +395,7 @@ public sealed partial class SettingsPage : Page
         if (_loading || double.IsNaN(args.NewValue)) return;
         Active.Movement.ExitThreshold = (float)args.NewValue;
         Sync(ExitSlider, args.NewValue);
+        ScheduleAutoSave();
     }
 
     // ===== Slider <-> NumberBox sync =====
@@ -355,20 +409,6 @@ public sealed partial class SettingsPage : Page
     {
         _loading = true;
         try { slider.Value = v; } finally { _loading = false; }
-    }
-
-    // ===== Save =====
-    private void Save_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            _host.SaveConfig();
-            ShowStatus("已保存到 config.json");
-        }
-        catch (Exception ex)
-        {
-            ShowStatus("保存失败: " + ex.Message);
-        }
     }
 
     private void ShowStatus(string msg)
