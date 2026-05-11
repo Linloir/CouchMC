@@ -8,6 +8,8 @@ Traditional gamepads handle PC Minecraft poorly because the right stick is a bad
 
 The solution is to make a phone act as a touchscreen-native controller for PC MC. The phone runs a custom Kotlin app, the PC runs a .NET 8 server that translates input packets into native keyboard/mouse events.
 
+**Current shipping target**: Android phone → Windows PC. **Planned**: iPhone → macOS PC. The wire protocol and the bulk of `McController.Core` are platform-agnostic by design; see [porting.md](porting.md) for the migration plan.
+
 ## 2. The 3-state mode system (the key insight)
 
 Trying to mirror MC's inventory/chest/crafting UIs over the wire would require a custom mod and a ton of UI work. The simpler insight: **let the user interact with MC's own UIs by driving the system cursor instead of building parallel UIs on the phone**.
@@ -109,62 +111,96 @@ android/app/src/main/java/com/mccontroller/
 
 ## 5. PC module map
 
+The PC side is a **two-project solution**:
+
+- `McController.Core` — protocol codec, input mapping, config, server lifecycle. **All platform-agnostic in spirit**, but currently TFM-pinned to `net8.0-windows` because four files use Win32 P/Invoke (see [porting.md](porting.md) for the planned split).
+- `McController.App` — WinUI 3 desktop shell that hosts `Core`. Windows-only.
+
 ```
-pc/McController.Server/
-├── Program.cs                    Top-level entrypoint, wires everything;
-│                                 `--selftest` arg runs Diag/SelfTest
-├── Net/
-│   ├── Protocol.cs               MsgType / HelloAckStatus / ControllerMode /
-│   │                             ButtonId constants — MIRROR of Android's
-│   ├── Messages.cs               record ControlMessage hierarchy
-│   ├── PacketCodec.cs            EncodeXxx + TryReadFrame + TryParseUdp
-│   ├── TcpServer.cs              Single-client listener; events fired on
-│   │                             read-loop thread; sync ProcessAndCompact
-│   │                             helper because async can't hold ref-struct
-│   │                             locals in C# 12
-│   └── UdpServer.cs              UdpClient + per-client seq dedup
+pc/
+├── McController.sln
+├── McController.Core/                 (TFM net8.0-windows; the planned port
+│   │                                   would re-pin to net8.0 and move the
+│   │                                   four Win32 files into a separate
+│   │                                   McController.Platform.Windows project)
+│   ├── Net/
+│   │   ├── Protocol.cs               MsgType / HelloAckStatus / ControllerMode /
+│   │   │                             ButtonId constants — MIRROR of Android's
+│   │   ├── Messages.cs               record ControlMessage hierarchy
+│   │   ├── PacketCodec.cs            EncodeXxx + TryReadFrame + TryParseUdp
+│   │   ├── TcpServer.cs              Single-client listener (+ PROBE handler);
+│   │   │                             sync ProcessAndCompact helper because
+│   │   │                             async can't hold ref-struct locals in C# 12
+│   │   ├── UdpServer.cs              UdpClient + per-client seq dedup
+│   │   └── LanDiscoveryAdvertiser.cs Broadcasts ANNOUNCE on UDP 34556 every ~1s
+│   │
+│   ├── Input/
+│   │   ├── IInputInjector.cs         interface (for FakeInjector in tests)
+│   │   ├── Win32InputInjector.cs     ⚠ Win32: SendInput P/Invoke
+│   │   ├── CursorInjector.cs         ⚠ Win32: SetCursorPos clamped to MC rect
+│   │   ├── InputLanguageManager.cs   ⚠ Win32: LoadKeyboardLayout (not wired)
+│   │   ├── Scancodes.cs              Windows scancode constants
+│   │   ├── JoystickToWasdMapper.cs   Dead zone + enter/exit hysteresis;
+│   │   │                             uses `<=` so abs=0 always releases
+│   │   ├── ButtonRouter.cs           Resolves Bindings → key/mouse actions;
+│   │   │                             tracks _down for ReleaseAll
+│   │   └── CameraCurve.cs            Sensitivity × accel (Linear or Power);
+│   │                                 residual carry-over; takes float now
+│   │
+│   ├── Config/
+│   │   ├── ServerConfig.cs           Port + Camera + Movement + Bindings + Profiles
+│   │   └── ConfigStore.cs            System.Text.Json load/save with camelCase
+│   │
+│   └── Diag/
+│       ├── WindowStateMonitor.cs     ⚠ Win32: 100 ms poll on GetForegroundWindow
+│       │                             + GetCursorInfo; 1-tick debounce
+│       ├── ConnectionStats.cs        Atomic counters + RTT window
+│       ├── PrecisionTimer.cs         ⚠ Win32: timeBeginPeriod(1) + PreciseSleep
+│       │                             (only used by SelfTest)
+│       └── SelfTest.cs               Step 1 validation routine for SendInput
 │
-├── Input/
-│   ├── IInputInjector.cs         interface (for FakeInjector in tests)
-│   ├── Win32InputInjector.cs     SendInput P/Invoke (relative mouse, scancodes)
-│   ├── Scancodes.cs              Windows scancode constants (W/A/S/D/Space/...)
-│   ├── JoystickToWasdMapper.cs   Dead zone + enter/exit hysteresis;
-│   │                             uses `<=` so abs=0 always releases
-│   ├── ButtonRouter.cs           Resolves Bindings → key/mouse actions;
-│   │                             tracks _down for ReleaseAll
-│   ├── CameraCurve.cs            Sensitivity × accel (Linear or Power);
-│   │                             residual carry-over; takes float now
-│   ├── CursorInjector.cs         SetCursorPos clamped to MC client rect
-│   └── InputLanguageManager.cs   LoadKeyboardLayout("00000409") +
-│                                 PostMessage(WM_INPUTLANGCHANGEREQUEST);
-│                                 currently NOT wired (see caveats)
-│
-├── Config/
-│   ├── ServerConfig.cs           Port + Camera + Movement + Bindings
-│   └── ConfigStore.cs            System.Text.Json load/save with camelCase
-│
-├── Diag/
-│   ├── WindowStateMonitor.cs     100 ms poll loop, 1-tick debounce,
-│   │                             exposes CurrentMode + CurrentClientRect
-│   ├── ConnectionStats.cs        Atomic counters + RTT window
-│   ├── PrecisionTimer.cs         timeBeginPeriod(1) + PreciseSleep
-│   │                             (only used by SelfTest)
-│   └── SelfTest.cs               Step 1 validation routine for SendInput
-│
-└── Tuner/
-    └── TuningForm.cs             WinForms sliders + status panel;
-                                  live-edits ServerConfig (atomic field reads)
+└── McController.App/                  WinUI 3 shell — WindowsAppSDK 1.7
+    │                                  (self-contained; `WindowsPackageType=None`)
+    ├── App.xaml(.cs)                 Application bootstrap; owns ServerHost +
+    │                                  TrayService; unhandled-exception → errors.log
+    ├── MainWindow.xaml(.cs)          NavigationView root (sidebar + footer items);
+    │                                  custom title bar + DesktopAcrylicBackdrop;
+    │                                  AppearancePreferences listener applies the
+    │                                  chrome/content tint brushes
+    ├── Views/
+    │   ├── DeviceDiscoveryPage       USB + LAN device list, status pill
+    │   ├── SettingsPage              Controller tuning (profile picker, curve,
+    │   │                              dead-zone) — replaces the old WinForms TuningForm
+    │   ├── GlobalSettingsPage        通用 + 外观 (run-at-startup, transparency)
+    │   └── AboutPage                 Version + author + notes
+    ├── Controls/
+    │   └── CurveCanvas.xaml          Camera-curve live preview (Polyline)
+    ├── Services/
+    │   ├── ServerHost.cs             Owns the Core lifecycle (TCP/UDP/monitor/
+    │   │                              advertiser + handlers). Singleton in App.
+    │   ├── TrayService.cs            H.NotifyIcon — "打开面板" / "退出服务" menu
+    │   ├── AdbDiscovery.cs           `adb devices` poll @ 3 s; auto-runs
+    │   │                              `adb reverse` per device; tracks
+    │   │                              forwarded serials to dedupe
+    │   ├── StartupRegistration.cs    HKCU\…\Run\McController toggle
+    │   └── AppearancePreferences.cs  Transparency prefs JSON +
+    │                                  Changed event for live MainWindow updates
+    └── Util/
+        └── L.cs                      i18n lookup (ZH-Hans + EN, picked at startup)
 ```
 
 ### PC-side specifics worth knowing
 
-- **Top-level program** drives everything from `Program.cs`. The `[STAThread]` is implicit because `<UseWindowsForms>true</UseWindowsForms>` adds it.
-- **Outputs `Exe` (not WinExe)** so a console window stays open alongside the Form. Demo-mode convenience; switch to WinExe + in-form log view for production.
-- **Mapper / Curve / Router** all share a reference to `ServerConfig`. The TuningForm slider's `ValueChanged` mutates ServerConfig in place; atomic float/enum reads make this lock-free.
+- **Two-project split** isolates the WinUI 3 shell (`McController.App`) from the protocol + injection layer (`McController.Core`). The split exists today *partly* for organization and *partly* in anticipation of porting — `Core` is where you can swap `Win32InputInjector` for a `MacInputInjector` (or stub for testing) without touching the App.
+- **WinUI 3 (not WinForms)**. The README and an older revision of this doc mentioned a WinForms `TuningForm`; that was Step 3's transitional UI. The current shell is a NavigationView-based WinUI 3 app with proper Settings/Discovery/About pages. The `Tuner/TuningForm` files are gone.
+- **`McController.App` builds via MSBuild**, not `dotnet build`. The Windows App SDK's `Pri.Tasks.dll` only loads under MSBuild + the VS BuildTools "Windows App SDK C# Templates" component. Use the path in [development.md](development.md). Plain `dotnet build` is fine for `Core` + tests.
+- **Output is `WinExe`** (no console window) — errors go to `%LOCALAPPDATA%\McController\errors.log` instead.
+- **Mapper / Curve / Router** all share a reference to `ServerConfig`. Settings page slider edits mutate `ServerConfig` in place; atomic float/enum reads make this lock-free.
 - **CameraCurve takes float** as of the SUBPIXEL_SCALE change — `Apply(float, float) → (int sdx, int sdy)`. Existing tests still pass because integer args auto-widen.
 - **WindowStateMonitor.OnModeChanged** fires the `STATE_CHANGE` push + clears held buttons on AntiMistouch.
 - **InputLanguageManager.EnsureEnglishLayout()** exists but is disabled — `PostMessage(WM_INPUTLANGCHANGEREQUEST)` causes MC to briefly toggle cursor capture, which the monitor mis-reads. Reintroduce via a non-foreground-disrupting path.
-- **PC server holds its own `.exe` open** while running; rebuilding requires killing the process first (`Stop-Process -Name McController.Server -Force`).
+- **App holds its own EXE open** while running; rebuilding requires killing the process first (`Stop-Process -Name McController.App -Force`).
+- **AppearancePreferences** is a static class with a `Changed` event; `MainWindow.OnAppearanceChanged` listens and mutates the `Opacity` on two pre-created `SolidColorBrush` instances (chrome + content). Updating brush-instance opacity triggers a redraw without rebuilding the visual tree.
 
 ## 6. Wire protocol summary
 
@@ -247,13 +283,67 @@ Steps refer to the original plan file (`~/.claude/plans/app-mc-zesty-starlight.m
 - LMB/RMB drag-while-held nudges camera (gated by `LookPad.isDragging`)
 - Custom gesture FSM (zero-latency in-game taps + chained LMB hold; 200 ms UI double-tap window)
 - en-US keyboard layout helper (built; **not currently wired** — see caveats)
+- **WinForms → WinUI 3 rewrite** of the PC shell — NavigationView with Discovery/Settings/全局设置/关于 pages, tray icon, hide-to-tray, `%APPDATA%` config, Inno Setup installer, ZH/EN i18n
+- **LAN discovery** end-to-end: PC `LanDiscoveryAdvertiser` broadcasts `ANNOUNCE` on UDP 34556; Android lists hosts on the connect screen; PROBE/PROBE_ACK reachability check separate from full sessions (see [discovery.md](discovery.md) + [protocol.md](protocol.md))
+- **USB auto-config (~Step 12)**: PC's `AdbDiscovery` polls `adb devices` every 3 s and fires `adb reverse tcp:34555 tcp:34555` per detected device; Android "USB connect" auto-fills 127.0.0.1
+- **Window transparency prefs**: GlobalSettings → 外观 lets the user toggle the Acrylic backdrop and dial sidebar+titlebar / content opacities; persists in `appearance.json`; live updates via the `AppearancePreferences.Changed` event
 
 **In progress / pending:**
 - **Hotbar swipe modes (~Step 11)**: `HotbarSwipeMode` enum added to `LayoutSpec`. `HotbarView.swipeMode` field present. `Relative` mode logic in HotbarView is partial — accumulator + 32 dp threshold scroll-wheel-style cycling with wrap. **Outstanding: hook through `LayoutProfile.hotbarSwipeMode`, expose toggle in the editor UI, possibly tune the per-step distance.**
-- **Step 12**: USB-mode auto-config. PC server starts `adb reverse tcp:34555 tcp:34555` on launch (best-effort; warn if `adb` missing). Android "Connect (USB)" button auto-fills 127.0.0.1.
-- **Step 13**: Latency visualization polish. Form shows P50/P99 RTT, UDP loss rate (computed from seq gaps), per-second packet counts. Android HUD shows the same.
+- **Step 13**: Latency visualization polish. Settings page shows P50/P99 RTT, UDP loss rate (computed from seq gaps), per-second packet counts. Android HUD shows the same.
+- **macOS server + iOS client port**: see [porting.md](porting.md). Not started; the path of least resistance is splitting `McController.Core` into a pure-`net8.0` library + `Platform.Windows` / `Platform.Mac` shims, plus a Swift/SwiftUI iOS client mirroring the Android architecture.
 
-## 9. Caveats / gotchas
+## 9. Platform support
+
+Today's matrix:
+
+| Side | Platform | Status |
+|---|---|---|
+| Server | Windows 10/11 | ✅ Shipping (WinUI 3 + Win32 SendInput) |
+| Server | macOS | Planned ([porting.md](porting.md)) |
+| Server | Linux | Out of scope |
+| Client | Android 8.0+ | ✅ Shipping |
+| Client | iOS | Planned ([porting.md](porting.md)) |
+| Client | Other | Out of scope |
+
+Things the wire-protocol decision deliberately gets right for cross-platform:
+
+- **All multi-byte fields are big-endian.** Both ends use explicit `ByteBuffer` / `BinaryPrimitives` calls; no struct-layout assumptions.
+- **No HOSTNAME-style payloads** in the hot path. Discovery uses raw IPv4 in the datagram envelope, not the payload; sessions don't transmit any platform-leaking strings.
+- **No platform-specific encodings**. UTF-8 only (and the `name` field in discovery is the lone string field).
+- **Sub-pixel scaling is fixed-point integer** (×10). No `float` exchange, so no NaN/denormal hazards across architectures.
+- **Single TCP + optional UDP socket model** — works identically on POSIX (BSD sockets) and Win32 (Winsock). No platform-specific socket options used; `TCP_NODELAY` is the one option set, and that's portable.
+
+What's *not* portable today, and where it lives:
+
+| Concern | Where (today) | Notes for the port |
+|---|---|---|
+| Mouse + keyboard injection | `McController.Core/Input/Win32InputInjector.cs` | macOS equivalent: `CGEventCreateMouseEvent` / `CGEventPost`. Same `IInputInjector` shape. |
+| Cursor positioning (UI mode) | `McController.Core/Input/CursorInjector.cs` | macOS: `CGWarpMouseCursorPosition`, with clip-to-client-rect handled by reading the MC window via `CGWindowListCopyWindowInfo`. |
+| Foreground-window + cursor-visibility detection | `McController.Core/Diag/WindowStateMonitor.cs` | macOS: `NSWorkspace.shared.frontmostApplication` for foreground; cursor visibility via `CGEventTap` or polling `NSCursor` state. |
+| Keyboard scancode constants | `McController.Core/Input/Scancodes.cs` | macOS uses different virtual key codes (`kVK_*`). Either: keep the wire payload (ButtonId) and remap inside the platform layer, or split the constants out. |
+| Sub-millisecond sleep | `McController.Core/Diag/PrecisionTimer.cs` | Used only by `SelfTest`. Optional on macOS. |
+| Run-at-login | `McController.App/Services/StartupRegistration.cs` | macOS: write a `LaunchAgent` plist in `~/Library/LaunchAgents`. |
+| Tray icon | `McController.App/Services/TrayService.cs` (via H.NotifyIcon.WinUI) | macOS: `NSStatusItem`. |
+| App shell | `McController.App` (WinUI 3) | macOS options: Avalonia (most code reuse), .NET MAUI desktop, or a native Swift app driving a headless .NET Core via XPC. See [porting.md](porting.md) for the recommendation. |
+| Installer | `installer/McController.iss` (Inno Setup) | macOS: `.app` bundle + DMG, optionally signed/notarized. |
+
+The Android-side equivalents that need re-implementation for iOS:
+
+| Concern | Where (today) | Notes for iOS port |
+|---|---|---|
+| Touch capture | Android `View.onTouchEvent` (joystick / lookpad / buttons / hotbar) | UIKit `touchesBegan/Moved/Ended/Cancelled` on a custom `UIView`. SwiftUI's `DragGesture` is too high-level for this. |
+| Gesture FSM | `LookPadView.kt` (~10 states, mode-aware) | Translate states 1:1 in Swift. The 200 ms double-tap discrimination is the only timing constant. |
+| Layout editor | `LayoutEditorActivity` + `EditorCanvas` | Same selection-model approach in UIKit. `UIView.transform` for free placement, `UIGestureRecognizer` subclasses for the pinch-anywhere resize. |
+| Profiles persistence | `ProfileStore` (JSON in SharedPreferences) | `UserDefaults` for JSON; or store in `Documents/profiles/<name>.json` if you want file-system export. |
+| TCP + UDP | Plain `Socket` / `DatagramSocket` | Apple's `Network` framework (`NWConnection` for TCP, `NWConnectionGroup`-flavored for UDP). The C-socket API also works if simpler. |
+| LAN discovery | UDP receiver + Bonjour | `NetService` / `NetServiceBrowser` for mDNS is excellent on iOS — Channel B is more native than Channel A there. |
+| USB tether | `adb reverse` | iOS has no equivalent. Options: WiFi-only, USB tethering ("Personal Hotspot over USB" makes the iPhone appear as a network adapter on the host), MFi External Accessory (paid program). See [porting.md](porting.md) for the trade-offs. |
+| HUD / system UI | View overlays + `WindowInsets` | SwiftUI overlay views; `safeAreaInsets` for notch/dynamic-island handling. |
+
+See [porting.md](porting.md) for the project-structure recommendations and a step-by-step migration order.
+
+## 10. Caveats / gotchas
 
 | Item | What to remember |
 |---|---|
