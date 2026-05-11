@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Sandbox is deliberately DISABLED. CGEventPost + Accessibility
+	  trust + bundled adb (Process.run) all need the unsandboxed
+	  environment. Distribution is direct-download (Developer ID +
+	  notarization), not the Mac App Store.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<!--
+	  Local-network access is gated on macOS 15+ — the bundled adb
+	  server, plus our own LAN discovery + UDP/TCP listeners, all need
+	  this to function on a fresh install.
+	-->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

@@ -21,8 +21,8 @@ The clever bit is the **3-state mode system**: the PC server detects whether MC 
 | Target | Status |
 |---|---|
 | **Windows 10/11** (server) | ✅ Shipping — WinUI 3 app with installer |
+| **macOS 14+** (server) | ✅ Shipping — native SwiftUI app, see [docs/macos.md](docs/macos.md) |
 | **Android 8.0+** (client) | ✅ Shipping — Kotlin app |
-| **macOS** (server) | Planned — see [docs/porting.md](docs/porting.md) |
 | **iOS** (client) | Planned — see [docs/porting.md](docs/porting.md) |
 
 The wire protocol (`docs/protocol.md`) and the LAN discovery spec (`docs/discovery.md`) are deliberately platform-agnostic: an iOS client talking to a macOS server, or any cross-pair, is correct by construction once both implementations exist. The bulk of `McController.Core` is portable .NET; the Windows-specific layer is small enough to swap out cleanly. See `docs/porting.md` for the playbook.
@@ -45,6 +45,7 @@ See [docs/architecture.md § Implementation status](docs/architecture.md#8-imple
 ```
 mc_controller/
 ├── pc/          .NET 8 solution: Core library + WinUI 3 shell + xUnit tests
+├── mac/         Native macOS app: SwiftUI + CGEvent input + bundled adb
 ├── android/     Android Kotlin client
 ├── installer/   Inno Setup script for the Windows installer
 └── docs/        Wire spec, design rationale, porting plan

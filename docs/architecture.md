@@ -288,10 +288,13 @@ Steps refer to the original plan file (`~/.claude/plans/app-mc-zesty-starlight.m
 - **USB auto-config (~Step 12)**: PC's `AdbDiscovery` polls `adb devices` every 3 s and fires `adb reverse tcp:34555 tcp:34555` per detected device; Android "USB connect" auto-fills 127.0.0.1
 - **Window transparency prefs**: GlobalSettings → 外观 lets the user toggle the Acrylic backdrop and dial sidebar+titlebar / content opacities; persists in `appearance.json`; live updates via the `AppearancePreferences.Changed` event
 
+**Done (recent — macOS port):**
+- **macOS server** ✅ — native Swift / SwiftUI app under `mac/` (see [macos.md](macos.md)). Mirrors the WinUI 3 page model (设备发现 / 设置 / 全局设置 / 关于) with feature parity except for the Acrylic-tint sliders. New: Liquid Glass tri-state (跟随系统 / 开启 / 关闭) in 全局设置, guarded by `#if compiler(>=6.2)` so the project still builds with Xcode 16. Bundled adb in `Resources/adb/adb`. Launch-at-login via `SMAppService.mainApp`. Configuration at `~/Library/Application Support/McController/`.
+
 **In progress / pending:**
 - **Hotbar swipe modes (~Step 11)**: `HotbarSwipeMode` enum added to `LayoutSpec`. `HotbarView.swipeMode` field present. `Relative` mode logic in HotbarView is partial — accumulator + 32 dp threshold scroll-wheel-style cycling with wrap. **Outstanding: hook through `LayoutProfile.hotbarSwipeMode`, expose toggle in the editor UI, possibly tune the per-step distance.**
 - **Step 13**: Latency visualization polish. Settings page shows P50/P99 RTT, UDP loss rate (computed from seq gaps), per-second packet counts. Android HUD shows the same.
-- **macOS server + iOS client port**: see [porting.md](porting.md). Not started; the path of least resistance is splitting `McController.Core` into a pure-`net8.0` library + `Platform.Windows` / `Platform.Mac` shims, plus a Swift/SwiftUI iOS client mirroring the Android architecture.
+- **iOS client**: see [porting.md](porting.md). Not started; the wire is unchanged so iOS-talks-to-macOS or iOS-talks-to-Windows are both valid pairings the moment an iOS client exists.
 
 ## 9. Platform support
 
@@ -300,7 +303,7 @@ Today's matrix:
 | Side | Platform | Status |
 |---|---|---|
 | Server | Windows 10/11 | ✅ Shipping (WinUI 3 + Win32 SendInput) |
-| Server | macOS | Planned ([porting.md](porting.md)) |
+| Server | macOS 14+ | ✅ Shipping (SwiftUI + CGEventPost) — see [macos.md](macos.md) |
 | Server | Linux | Out of scope |
 | Client | Android 8.0+ | ✅ Shipping |
 | Client | iOS | Planned ([porting.md](porting.md)) |

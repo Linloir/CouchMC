@@ -1,6 +1,6 @@
 # Porting plan — macOS server + iOS client
 
-> A practical playbook for bringing MC Controller to the Apple ecosystem. **Not yet started.** This doc is intended to keep the existing codebase honest about its platform assumptions and to lay out the cleanest migration path so that when the work begins, the early steps don't waste effort.
+> **macOS server: shipping** as of 2026-05 — native Swift / SwiftUI app under `mac/`. See [docs/macos.md](macos.md) for the actual architecture + operating notes. The discussion below is preserved for two reasons: (1) it documents the design alternatives we considered before settling on native Swift, and (2) the iOS-client section is still the active plan. The "Suggested migration order" section is now historical — the actual order taken is reflected in git history.
 
 The fundamental observation is that **the wire format and the LAN-discovery spec are platform-neutral** (see [protocol.md](protocol.md) and [discovery.md](discovery.md)), and **the bulk of `McController.Core` is also platform-neutral C# code**. The Windows-specific surface area is small and well-isolated. This means a cross-platform port doesn't need a rewrite — it needs a refactor of one project plus two new platform-specific projects.
 
@@ -86,7 +86,19 @@ public interface IStartupRegistration { … }          // new
 
 Three viable options, in descending order of code reuse:
 
-### Option A: Avalonia (recommended)
+### What we actually picked (post-decision)
+
+**Native Swift / SwiftUI.** Zero source reuse from `McController.Core`,
+but the user wanted Apple's official paradigm (SwiftUI, `MenuBarExtra`,
+`SMAppService`, Liquid Glass) and that ruled the Avalonia + .NET MAUI
+options out. The wire protocol does the same job as a shared library
+would: keep the two implementations honest. See [docs/macos.md](macos.md)
+for the resulting architecture.
+
+The Avalonia / MAUI / "Swift driving headless .NET" trade-off summary
+below remains useful as reference for anyone re-evaluating later.
+
+### Option A: Avalonia (originally recommended)
 
 **Pros**:
 - XAML-based, similar enough to WinUI 3 that the `Views/*.xaml` files port with mechanical search/replace (different namespace URIs, slightly different control names, `tk:SettingsCard` → custom or `Card` etc.).
