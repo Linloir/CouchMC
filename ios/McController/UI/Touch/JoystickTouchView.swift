@@ -79,7 +79,14 @@ final class JoystickTouchView: UIView, EditableWidgetView {
         // (matches Android — the editor doesn't draw the activation zone).
         guard alphaProgress > 0.005 else { return }
 
-        let center = activeTouch != nil ? basePoint : CGPoint(x: bounds.midX, y: bounds.midY)
+        // Use the last touch's base position even during the post-release
+        // fade-out. The knob itself snaps back to that base centre on release
+        // (`knobOffset = .zero` in `finishTouch`), but the base must stay put
+        // — falling back to `bounds.midX/midY` made the whole joystick teleport
+        // to the view centre before fading, which looks like the joystick ran
+        // away from the finger. `alphaProgress > 0` already guards against
+        // drawing before there's been any touch.
+        let center = basePoint
         let knobCenter = CGPoint(x: center.x + knobOffset.width, y: center.y + knobOffset.height)
         let a = alphaProgress
 
