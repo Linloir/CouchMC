@@ -20,7 +20,11 @@ namespace McController.App.Services;
 /// </summary>
 public sealed class AdbDiscovery : IDisposable
 {
-    public record Device(string Serial, string Model, string State, bool HasControllerApp);
+    public record Device(string Serial, string Model, string State, bool HasControllerApp)
+    {
+        /// <summary>Single-line "serial · state" subtitle for SettingsCard binding.</summary>
+        public string Subtitle => $"{Serial} · {State}";
+    }
 
     public event Action<IReadOnlyList<Device>>? OnUpdate;
 

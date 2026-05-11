@@ -66,39 +66,23 @@
                      Visibility="Collapsed"
                      Margin="0,8,0,0"/>
 
-            <ItemsControl x:Name="UsbDeviceList" Margin="0,4,0,0">
+            <!-- Each device row is itself a SettingsCard so the spacing,
+                 chrome, and padding match the header card above pixel-for-pixel.
+                 Custom Border template had slightly different padding which
+                 created a visible gap. -->
+            <ItemsControl x:Name="UsbDeviceList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="16,12,16,12"
-                                Margin="0,2,0,2"
-                                CornerRadius="4"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1">
-                            <Grid ColumnSpacing="14">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Width="36" Height="36" CornerRadius="6"
-                                        Background="{ThemeResource SubtleFillColorTertiaryBrush}"
-                                        VerticalAlignment="Center">
-                                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;" FontSize="18"/>
-                                </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                    <TextBlock Text="{Binding Model}" FontWeight="SemiBold"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{Binding Serial}" Opacity="0.55" FontSize="12"/>
-                                        <TextBlock Text="·" Opacity="0.4" FontSize="12"/>
-                                        <TextBlock Text="{Binding State}" Opacity="0.55" FontSize="12"/>
-                                        <TextBlock Text="·" Opacity="0.4" FontSize="12"
-                                                   Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
-                                        <TextBlock Text="已安装 App" Foreground="#34D8B8" FontSize="12"
-                                                   Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
+                        <tk:SettingsCard Header="{Binding Model}"
+                                         Description="{Binding Subtitle}">
+                            <tk:SettingsCard.HeaderIcon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;"/>
+                            </tk:SettingsCard.HeaderIcon>
+                            <TextBlock Text="已安装 App"
+                                       Foreground="#34D8B8" FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding HasControllerApp, Converter={StaticResource BoolToVisibility}}"/>
+                        </tk:SettingsCard>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
