@@ -287,30 +287,41 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
                 MotionEvent.ACTION_MOVE -> {
                     val rawDx = event.rawX - startRawX
                     val rawDy = event.rawY - startRawY
-                    val moved = (rawDx * rawDx + rawDy * rawDy) > (touchSlop * touchSlop)
-                    if (moved) {
-                        if (!didMove) {
-                            didMove = true
-                            // First movement → also select this widget
-                            if (selectedId != id) setSelectedWidget(id)
+                    if (!didMove) {
+                        // Still inside the tap-vs-drag slop region. Wait
+                        // until the finger has moved enough to be
+                        // unambiguously a drag.
+                        if ((rawDx * rawDx + rawDy * rawDy) <= (touchSlop * touchSlop)) {
+                            return@setOnTouchListener true
                         }
-                        val spec = currentSpec(id) ?: return@setOnTouchListener true
-                        // Horizontally-centered anchors (Top/BottomCenter) are
-                        // always centered horizontally — drag the widget up/down
-                        // only; horizontal drag is a no-op for them.
-                        val edgeSign = when {
-                            spec.anchor.isHorizontalCenter() -> 0f
-                            spec.anchor.isStart() -> 1f
-                            else -> -1f
-                        }
-                        val vertSign = if (spec.anchor.isTop()) 1f else -1f
-                        val dxDp = rawDx / density
-                        val dyDp = rawDy / density
-                        val newEdge = (startEdge + dxDp * edgeSign).coerceAtLeast(0f)
-                        val newVert = (startVert + dyDp * vertSign).coerceAtLeast(0f)
-                        updateSpec(id) {
-                            it.copy(edgeMarginDp = newEdge, verticalMarginDp = newVert)
-                        }
+                        didMove = true
+                        if (selectedId != id) setSelectedWidget(id)
+                        // Re-anchor at the slop-crossing point so the
+                        // widget doesn't jump by `touchSlop` pixels the
+                        // moment we transition out of tap territory.
+                        // Without this, a slow drag pauses for several
+                        // hundred ms (slop accumulates), then teleports —
+                        // which read as "stuttery / hard to fine-adjust".
+                        startRawX = event.rawX
+                        startRawY = event.rawY
+                        return@setOnTouchListener true
+                    }
+                    val spec = currentSpec(id) ?: return@setOnTouchListener true
+                    // Horizontally-centered anchors (Top/BottomCenter) are
+                    // always centered horizontally — drag the widget up/down
+                    // only; horizontal drag is a no-op for them.
+                    val edgeSign = when {
+                        spec.anchor.isHorizontalCenter() -> 0f
+                        spec.anchor.isStart() -> 1f
+                        else -> -1f
+                    }
+                    val vertSign = if (spec.anchor.isTop()) 1f else -1f
+                    val dxDp = rawDx / density
+                    val dyDp = rawDy / density
+                    val newEdge = (startEdge + dxDp * edgeSign).coerceAtLeast(0f)
+                    val newVert = (startVert + dyDp * vertSign).coerceAtLeast(0f)
+                    updateSpec(id) {
+                        it.copy(edgeMarginDp = newEdge, verticalMarginDp = newVert)
                     }
                 }
                 MotionEvent.ACTION_UP -> {

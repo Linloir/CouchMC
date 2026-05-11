@@ -324,13 +324,15 @@
 
     </FrameLayout>
 
-    <!-- ==== Hint banner ==== -->
+    <!--
+        Hint banner — centred in the screen so it floats over an empty
+        area of the canvas rather than crowding the top toolbar.
+    -->
     <TextView
         android:id="@+id/txt_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="68dp"
+        android:layout_gravity="center"
         android:paddingHorizontal="14dp"
         android:paddingVertical="6dp"
         android:background="@drawable/editor_hint_pill"
