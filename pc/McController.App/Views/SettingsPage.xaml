@@ -58,13 +58,14 @@
                 <TextBox x:Name="ProfileNameBox" Width="280"
                          TextChanged="ProfileNameBox_TextChanged"/>
             </tk:SettingsCard>
-            <tk:SettingsCard Header="方案管理" Description="新建、复制或删除当前方案">
+            <tk:SettingsCard Header="方案管理" Description="新建、复制、删除或恢复当前方案">
                 <tk:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8FD;"/>
                 </tk:SettingsCard.HeaderIcon>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <Button Content="新建" Click="NewProfile_Click" MinWidth="84"/>
                     <Button Content="复制" Click="DuplicateProfile_Click" MinWidth="84"/>
+                    <Button Content="恢复默认" Click="RestoreDefaults_Click" MinWidth="84"/>
                     <Button Content="删除" Click="DeleteProfile_Click" MinWidth="84"/>
                 </StackPanel>
             </tk:SettingsCard>

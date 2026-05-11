@@ -139,4 +139,42 @@ public class PacketCodecTests
         Assert.False(PacketCodec.TryParseUdp(bytes, out var msg));
         Assert.Null(msg);
     }
+
+    [Fact]
+    public void Probe_EncodesToThreeBytesMatchingSpec()
+    {
+        // docs/protocol.md §PROBE: 3 bytes total — 00 01 FE
+        var bytes = PacketCodec.EncodeProbe();
+        Assert.Equal(new byte[] { 0x00, 0x01, 0xFE }, bytes);
+    }
+
+    [Fact]
+    public void Probe_RoundTrip()
+    {
+        var bytes = PacketCodec.EncodeProbe();
+        Assert.True(PacketCodec.TryReadFrame(bytes, out var consumed, out var msg));
+        Assert.Equal(bytes.Length, consumed);
+        Assert.IsType<ProbeMsg>(msg);
+    }
+
+    [Fact]
+    public void ProbeAck_EncodesToFourBytesMatchingSpec()
+    {
+        // docs/protocol.md §PROBE_ACK: 4 bytes total — 00 02 FF <status>
+        Assert.Equal(new byte[] { 0x00, 0x02, 0xFF, 0x00 },
+            PacketCodec.EncodeProbeAck(Protocol.ProbeAckStatus.Alive));
+        Assert.Equal(new byte[] { 0x00, 0x02, 0xFF, 0x01 },
+            PacketCodec.EncodeProbeAck(Protocol.ProbeAckStatus.Busy));
+        Assert.Equal(new byte[] { 0x00, 0x02, 0xFF, 0x02 },
+            PacketCodec.EncodeProbeAck(Protocol.ProbeAckStatus.ProtocolIncompatible));
+    }
+
+    [Fact]
+    public void ProbeAck_RoundTrip()
+    {
+        var bytes = PacketCodec.EncodeProbeAck(Protocol.ProbeAckStatus.Busy);
+        Assert.True(PacketCodec.TryReadFrame(bytes, out _, out var msg));
+        var ack = Assert.IsType<ProbeAckMsg>(msg);
+        Assert.Equal(Protocol.ProbeAckStatus.Busy, ack.Status);
+    }
 }

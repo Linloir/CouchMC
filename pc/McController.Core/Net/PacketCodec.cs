@@ -48,6 +48,13 @@ public static class PacketCodec
         return buf;
     }
 
+    /// <summary>PROBE — no payload. Total 3 bytes: 00 01 FE.</summary>
+    public static byte[] EncodeProbe() => new byte[] { 0x00, 0x01, Protocol.MsgType.Probe };
+
+    /// <summary>PROBE_ACK with the given status. Total 4 bytes: 00 02 FF status.</summary>
+    public static byte[] EncodeProbeAck(byte status) =>
+        new byte[] { 0x00, 0x02, Protocol.MsgType.ProbeAck, status };
+
     // ===== TCP framing (incoming) =====
 
     /// <summary>
@@ -94,6 +101,10 @@ public static class PacketCodec
                 => new ButtonMsg(p[0], p[1] != 0),
             Protocol.MsgType.Ping when p.Length >= 4
                 => new PingMsg(BinaryPrimitives.ReadUInt32BigEndian(p[..4])),
+            Protocol.MsgType.Probe
+                => new ProbeMsg(),
+            Protocol.MsgType.ProbeAck when p.Length >= 1
+                => new ProbeAckMsg(p[0]),
             _ => new UnknownMsg(type, p.Length),
         };
     }

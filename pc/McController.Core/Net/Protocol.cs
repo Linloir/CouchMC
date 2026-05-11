@@ -20,6 +20,8 @@ public static class Protocol
         public const byte Button        = 0x20;
         public const byte Ping          = 0xF0;
         public const byte Pong          = 0xF1;
+        public const byte Probe         = 0xFE;  // C->S: session-less reachability check
+        public const byte ProbeAck      = 0xFF;  // S->C: response to Probe with status
     }
 
     public static class HelloAckStatus
@@ -27,6 +29,17 @@ public static class Protocol
         public const byte Ok                   = 0;
         public const byte ProtocolMismatch     = 1;
         public const byte ServerBusy           = 2;
+    }
+
+    /// <summary>
+    /// Status byte carried in a PROBE_ACK payload. See
+    /// docs/protocol.md § "PROBE / PROBE_ACK".
+    /// </summary>
+    public static class ProbeAckStatus
+    {
+        public const byte Alive                = 0;
+        public const byte Busy                 = 1;
+        public const byte ProtocolIncompatible = 2;
     }
 
     /// <summary>

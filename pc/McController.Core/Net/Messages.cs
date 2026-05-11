@@ -12,6 +12,11 @@ public sealed record LookDeltaTcpMsg(uint Seq, short Dx, short Dy) : ControlMess
 public sealed record ButtonMsg(byte ButtonId, bool Down) : ControlMessage;
 public sealed record PingMsg(uint Seq) : ControlMessage;
 
+/// <summary>Session-less reachability check from client to server.</summary>
+public sealed record ProbeMsg : ControlMessage;
+/// <summary>Reply to <see cref="ProbeMsg"/>; status is one of <see cref="Protocol.ProbeAckStatus"/>.</summary>
+public sealed record ProbeAckMsg(byte Status) : ControlMessage;
+
 /// <summary>Unrecognized type byte — caller can log and ignore.</summary>
 public sealed record UnknownMsg(byte Type, int PayloadLength) : ControlMessage;
 

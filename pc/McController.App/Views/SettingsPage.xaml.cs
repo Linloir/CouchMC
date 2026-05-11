@@ -211,6 +211,21 @@ public sealed partial class SettingsPage : Page
         ScheduleAutoSave();
     }
 
+    private async void RestoreDefaults_Click(object sender, RoutedEventArgs e)
+    {
+        var ok = await ConfirmAsync(
+            $"将当前方案「{Active.Name}」的灵敏度、曲线与死区参数重置为默认值？",
+            "恢复默认设置");
+        if (!ok) return;
+        // Reset only the tunable parameters on the active profile. Keep the
+        // profile's id and name (it's still "this" profile, just with
+        // factory values) and don't touch other profiles or the port.
+        Active.Camera = new CameraConfig();
+        Active.Movement = new MovementConfig();
+        RefreshFromProfile(Active);
+        ScheduleAutoSave();
+    }
+
     private async void DeleteProfile_Click(object sender, RoutedEventArgs e)
     {
         if (_profiles.Profiles.Count <= 1)
