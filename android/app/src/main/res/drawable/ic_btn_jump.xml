@@ -1,22 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Jump glyph — a stylised "leap" arc with an upward chevron above and
-    a small ground line below. Reads as "spring up off the ground"
-    rather than the previous Shift-key shape that the user said was
-    confusing.
+    Jump glyph — small person mid-leap. Round head at the very top,
+    short torso, arms raised in a V, knees bent up with feet tucked
+    inward (cannonball pose). A faint ground line at the bottom
+    anchors the leap visually. Strokes are rounded so the stick
+    figure reads cleanly even at the smallest button size.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Solid filled triangle pointing up (the "jump arrow") -->
+
+    <!-- Head -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 12,3 L 21,17 L 15,17 L 15,19 L 9,19 L 9,17 L 3,17 Z" />
-    <!-- Ground line below -->
+        android:pathData="M 12,3.2 m -2.1,0 a 2.1,2.1 0 1,0 4.2,0 a 2.1,2.1 0 1,0 -4.2,0" />
+
+    <!-- Torso -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 12,5.6 L 12,11.5" />
+
+    <!-- Left arm raised -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 12,7.2 L 7.2,3.4" />
+
+    <!-- Right arm raised -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M 12,7.2 L 16.8,3.4" />
+
+    <!-- Left leg bent (hip → knee out → foot tucked back under body) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 12,11.5 L 7.6,13.6 L 10.2,17.2" />
+
+    <!-- Right leg bent -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 12,11.5 L 16.4,13.6 L 13.8,17.2" />
+
+    <!-- Ground line (the surface they jumped off, faint) -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillAlpha="0.7"
-        android:pathData="M 4,21 L 20,21 L 20,22.5 L 4,22.5 Z" />
+        android:fillAlpha="0.5"
+        android:pathData="M 3.5,21 L 20.5,21 L 20.5,22.4 L 3.5,22.4 Z" />
+
 </vector>
