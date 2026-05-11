@@ -1,0 +1,552 @@
+{
+  "sourceLanguage" : "en",
+  "version" : "1.0",
+  "strings" : {
+    "tab.home" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hosts" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "宿主机" } }
+      }
+    },
+    "tab.settings" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
+      }
+    },
+    "home.title" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hosts" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "宿主机" } }
+      }
+    },
+    "home.section.saved" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Saved" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已保存" } }
+      }
+    },
+    "home.section.discovered" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Discovered on LAN" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局域网发现" } }
+      }
+    },
+    "home.empty.saved" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "No saved hosts yet" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "暂无已保存宿主机" } }
+      }
+    },
+    "home.empty.discovered" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Scanning…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在搜索…" } }
+      }
+    },
+    "home.discovered.hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Make sure the PC server is running on the same Wi-Fi network." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请确保 PC 端服务已在同一 Wi-Fi 网络下启动。" } }
+      }
+    },
+    "host.add.title" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Add Host" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "添加宿主机" } }
+      }
+    },
+    "host.field.name" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Name" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "名称" } }
+      }
+    },
+    "host.field.ip" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "IP Address" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "IP 地址" } }
+      }
+    },
+    "host.field.port" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Port" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "端口" } }
+      }
+    },
+    "host.rename" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名" } }
+      }
+    },
+    "host.remove" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Remove" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除" } }
+      }
+    },
+    "host.edit_port" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit Port" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "修改端口" } }
+      }
+    },
+    "common.cancel" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消" } }
+      }
+    },
+    "common.save" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } }
+      }
+    },
+    "common.done" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "完成" } }
+      }
+    },
+    "common.delete" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除" } }
+      }
+    },
+    "common.create" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Create" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "创建" } }
+      }
+    },
+    "error.connect.title" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cannot connect" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法连接" } }
+      }
+    },
+    "error.connect.busy" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "The server is already serving another client." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "服务器已有客户端连接。" } }
+      }
+    },
+    "error.connect.incompatible" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Protocol version mismatch — please upgrade either app." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "协议版本不匹配，请升级双端 App。" } }
+      }
+    },
+    "error.connect.failed" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Connection failed: %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "连接失败：%@" } }
+      }
+    },
+    "settings.title" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
+      }
+    },
+    "settings.section.profile" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置文件" } }
+      }
+    },
+    "settings.profile.active" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Active profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前配置" } }
+      }
+    },
+    "settings.profile.row" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置" } }
+      }
+    },
+    "settings.profile.list_footer" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap a profile to make it active. Swipe a row to rename or delete." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "点按配置以激活；左滑配置可重命名或删除。" } }
+      }
+    },
+    "settings.profile.duplicate_name" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "A profile with this name already exists." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已存在同名配置。" } }
+      }
+    },
+    "common.rename" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名" } }
+      }
+    },
+    "settings.profile.pick" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Select a profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "选择配置文件" } }
+      }
+    },
+    "settings.profile.new" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "New profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新建配置" } }
+      }
+    },
+    "settings.profile.rename" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名配置" } }
+      }
+    },
+    "settings.profile.delete" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete profile" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除配置" } }
+      }
+    },
+    "settings.profile.cannot_delete_last" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cannot delete the last profile." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法删除最后一个配置。" } }
+      }
+    },
+    "settings.profile.invalid_name" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Name is empty or already in use." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "名称为空或已存在。" } }
+      }
+    },
+    "settings.profile.delete_confirm_title" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete profile?" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "确认删除配置？" } }
+      }
+    },
+    "settings.profile.delete_confirm_msg" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "“%@” will be removed. This cannot be undone." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "“%@”将被删除，且无法撤销。" } }
+      }
+    },
+    "settings.profile.field.name" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile name" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置名称" } }
+      }
+    },
+    "settings.section.gameplay" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Gameplay" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "游戏体验" } }
+      }
+    },
+    "settings.section.layout" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Layout" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "布局" } }
+      }
+    },
+    "settings.layout.edit_in_game" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit in-game layout" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑游戏内布局" } }
+      }
+    },
+    "settings.layout.edit_in_game_sub" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Joystick, action buttons, hotbar" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆 · 操作按钮 · 物品栏" } }
+      }
+    },
+    "settings.layout.edit_ui" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit UI layout" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑 UI 模式布局" } }
+      }
+    },
+    "settings.layout.edit_ui_sub" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Side buttons used while a Minecraft UI is open" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 打开界面时使用的侧栏按钮" } }
+      }
+    },
+    "settings.section.feedback" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Feedback" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "反馈" } }
+      }
+    },
+    "settings.section.appearance" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Appearance" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "外观" } }
+      }
+    },
+    "settings.section.about" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于" } }
+      }
+    },
+    "settings.in_game_quick_clicks" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Lookpad quick taps (in-game)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板快捷点击 (游戏中)" } }
+      }
+    },
+    "settings.ui_quick_clicks" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Lookpad quick taps (UI mode)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板快捷点击 (UI 模式)" } }
+      }
+    },
+    "settings.hotbar_swipe" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar swipe" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏滑动" } }
+      }
+    },
+    "settings.hotbar_swipe.precise" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Precise (position)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "精准 (位置)" } }
+      }
+    },
+    "settings.hotbar_swipe.relative" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Relative (wheel)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "相对 (滚轮)" } }
+      }
+    },
+    "settings.left_margin_offset" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left edge offset (pt)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左侧边距偏移 (pt)" } }
+      }
+    },
+    "settings.right_margin_offset" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right edge offset (pt)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右侧边距偏移 (pt)" } }
+      }
+    },
+    "settings.haptics" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Haptic feedback" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "触觉反馈" } }
+      }
+    },
+    "settings.design_language" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Design language" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设计风格" } }
+      }
+    },
+    "settings.design.standard" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Standard (iOS 18)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "标准 (iOS 18)" } }
+      }
+    },
+    "settings.design.liquid_glass" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Liquid Glass" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "液态玻璃" } }
+      }
+    },
+    "settings.design.liquid_glass_hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Liquid Glass surfaces appear on iOS 26 and later; on earlier versions the standard look is used." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "液态玻璃效果在 iOS 26 及更新系统上可用；旧系统会自动回退到标准外观。" } }
+      }
+    },
+    "settings.about.open" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About MC Controller" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于 MC Controller" } }
+      }
+    },
+    "about.subtitle" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Touch controller for PC Minecraft" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "PC 端 Minecraft 的触屏控制器" } }
+      }
+    },
+    "about.section.info" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Info" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "信息" } }
+      }
+    },
+    "about.section.notes" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "说明" } }
+      }
+    },
+    "about.version" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Version" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "版本" } }
+      }
+    },
+    "about.build" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Build" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "构建号" } }
+      }
+    },
+    "about.notes.body" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Connect over your local Wi-Fi network. USB tethering is not yet supported on iOS." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请通过本地 Wi-Fi 网络连接。iOS 端暂不支持 USB 直连。" } }
+      }
+    },
+    "controller.lock.message" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Minecraft is not in the foreground" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 未处于前台" } }
+      }
+    },
+    "controller.disconnected" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Disconnected from server" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已与服务器断开连接" } }
+      }
+    },
+    "editor.title_in_game" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "In-game layout" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局内布局" } }
+      }
+    },
+    "editor.title_ui" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "UI layout" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "UI 布局" } }
+      }
+    },
+    "editor.reset" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "恢复默认" } }
+      }
+    },
+    "editor.reset_position" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset position" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重置位置" } }
+      }
+    },
+    "editor.reset_size" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset size" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重置尺寸" } }
+      }
+    },
+    "editor.hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap to select  ·  Drag to move  ·  Pinch anywhere to resize  ·  Tap empty area to deselect" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "单击选中 · 拖动移动 · 双指任意位置缩放 · 空白处取消选中" } }
+      }
+    },
+    "widget.lmb" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left click" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键" } }
+      }
+    },
+    "widget.rmb" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right click" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右键" } }
+      }
+    },
+    "widget.jump" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Jump" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "跳跃" } }
+      }
+    },
+    "widget.sneak" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sneak" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "潜行" } }
+      }
+    },
+    "widget.sprint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sprint" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "冲刺" } }
+      }
+    },
+    "widget.inv" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Inventory" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+      }
+    },
+    "widget.swap" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Swap hand" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换主手" } }
+      }
+    },
+    "widget.esc" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Esc / pause" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Esc / 暂停" } }
+      }
+    },
+    "widget.ui_lmb" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left click (UI)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键 (UI)" } }
+      }
+    },
+    "widget.ui_rmb" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right click (UI)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右键 (UI)" } }
+      }
+    },
+    "widget.ui_q" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Drop (Q)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "丢弃 (Q)" } }
+      }
+    },
+    "widget.ui_shift" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Shift" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Shift" } }
+      }
+    },
+    "widget.ui_esc" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Esc / close UI" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Esc / 关闭界面" } }
+      }
+    },
+    "widget.joystick" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Joystick" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆" } }
+      }
+    },
+    "widget.hotbar" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+      }
+    }
+  }
+}

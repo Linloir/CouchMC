@@ -32,6 +32,10 @@ mc_controller/
 ├── android/                         Gradle / Kotlin Android app
 │   ├── settings.gradle.kts
 │   └── app/src/main/...
+├── ios/                             Swift / SwiftUI + UIKit iOS app
+│   ├── project.yml                  xcodegen spec → McController.xcodeproj
+│   ├── scripts/generate_app_icon.swift
+│   └── McController/                App/, Core/, Net/, Input/, UI/, Resources/
 ├── installer/                       Inno Setup script for Windows distribution
 └── docs/                            spec + design + workflow
 ```

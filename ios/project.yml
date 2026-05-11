@@ -1,0 +1,86 @@
+# XcodeGen project spec.
+#
+# Generate the Xcode project with:
+#   brew install xcodegen
+#   cd ios && xcodegen generate
+#
+# That writes McController.xcodeproj which you then open in Xcode.
+
+name: McController
+options:
+  bundleIdPrefix: com.linloir
+  deploymentTarget:
+    iOS: "18.0"
+  developmentLanguage: zh-Hans
+  groupSortPosition: top
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 9886C6X23N
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    GCC_OPTIMIZATION_LEVEL: s
+    SWIFT_OPTIMIZATION_LEVEL: "-O"
+    ENABLE_BITCODE: NO
+
+targets:
+  McController:
+    type: application
+    platform: iOS
+    sources:
+      - path: McController
+        excludes:
+          - "Resources/Localizable.xcstrings.preview.md"
+    resources:
+      - McController/Resources/Assets.xcassets
+      - McController/Resources/Localizable.xcstrings
+    info:
+      path: McController/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: MC Controller
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleLocalizations:
+          - zh-Hans
+          - en
+        UILaunchScreen:
+          UIColorName: ""
+          UIImageRespectsSafeAreaInsets: true
+        UIApplicationSupportsIndirectInputEvents: true
+        UIRequiresFullScreen: false
+        UIStatusBarHidden: false
+        UIViewControllerBasedStatusBarAppearance: true
+        # All orientations enabled at the app level; per-VC orientation
+        # locking is dynamically driven by AppDelegate.allowedOrientations
+        # (see App/AppDelegate.swift). Home/Settings restrict to portrait
+        # in their VCs; LayoutEditor/Controller restrict to landscape.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Bonjour service for LAN discovery (Channel B)
+        NSBonjourServices:
+          - _mccontroller._tcp
+        # Local network usage description (required for any UDP/Bonjour on iOS 14+)
+        NSLocalNetworkUsageDescription: 用于在局域网中发现并连接到您的 PC 服务器。MC Controller will use the local network to find and connect to your PC server.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.linloir.mccontroller
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleDefault
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Network framework needs entitlement-style declarations only for system
+        # extensions; for a normal app the Info.plist Bonjour entry above suffices.
