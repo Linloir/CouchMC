@@ -31,12 +31,16 @@ public sealed class ServerHost : IDisposable
     public CursorInjector CursorInjector { get; }
     public TcpServer Tcp { get; }
     public UdpServer Udp { get; }
+    public LanDiscoveryAdvertiser DiscoveryAdvertiser { get; }
 
     public IReadOnlyList<string> LocalIPv4s => CollectLocalIPv4s();
 
     /// <summary>Fires after the server attempts a port bind. Null = success.</summary>
     public event Action<Exception?>? StartResult;
 
+    // Used by the discovery advertiser's Busy flag — set to true while a
+    // phone is connected over TCP, cleared on disconnect.
+    private volatile bool _clientConnected;
     private bool _disposed;
 
     public ServerHost(string configPath = "config.json")
@@ -54,13 +58,18 @@ public sealed class ServerHost : IDisposable
         Udp = new UdpServer(Stats);
 
         Tcp.OnPacket += HandlePacket;
-        Tcp.OnClientConnected += ep => Stats.Mode ??= "TCP";
+        Tcp.OnClientConnected += ep =>
+        {
+            Stats.Mode ??= "TCP";
+            _clientConnected = true;
+        };
         Tcp.OnClientDisconnected += () =>
         {
             Mapper.ReleaseAll();
             Router.ReleaseAll();
             Stats.OnDisconnect();
             Udp.ResetSequence();
+            _clientConnected = false;
         };
         Udp.OnLookDelta += HandleLookDelta;
         WindowMonitor.OnModeChanged += newMode =>
@@ -72,6 +81,31 @@ public sealed class ServerHost : IDisposable
                 Router.ReleaseAll();
             }
         };
+
+        // LAN discovery advertiser — broadcasts an ANNOUNCE packet on UDP
+        // 34556 every ~1s with jitter so phones can pick up the server
+        // without manual IP entry. See docs/discovery.md §Channel A.
+        DiscoveryAdvertiser = new LanDiscoveryAdvertiser(
+            name: Environment.MachineName,
+            tcpPortProvider: () => Config.Port,
+            flagsProvider: ComputeDiscoveryFlags);
+    }
+
+    private LanDiscoveryAdvertiser.AnnounceFlags ComputeDiscoveryFlags()
+    {
+        var flags = LanDiscoveryAdvertiser.AnnounceFlags.None;
+        // McForeground: any mode other than AntiMistouch means MC is the
+        // foreground window (InGame = focused+captured cursor,
+        // UiInteract = focused+visible cursor).
+        if (WindowMonitor.CurrentMode != Protocol.ControllerMode.AntiMistouch)
+            flags |= LanDiscoveryAdvertiser.AnnounceFlags.McForeground;
+        // We always run a UDP listener alongside TCP, so UDP is always
+        // accepted on the WiFi path. (USB mode is the client's choice
+        // via HELLO.wantsUdp, not a server capability.)
+        flags |= LanDiscoveryAdvertiser.AnnounceFlags.AcceptsUdp;
+        if (_clientConnected)
+            flags |= LanDiscoveryAdvertiser.AnnounceFlags.Busy;
+        return flags;
     }
 
     public void Start()
@@ -81,6 +115,7 @@ public sealed class ServerHost : IDisposable
             Tcp.Start(Config.Port);
             Udp.Start(Config.Port);
             WindowMonitor.Start();
+            DiscoveryAdvertiser.Start();
             StartResult?.Invoke(null);
         }
         catch (Exception ex)
@@ -110,6 +145,7 @@ public sealed class ServerHost : IDisposable
         _disposed = true;
         try { Mapper.ReleaseAll(); } catch { }
         try { Router.ReleaseAll(); } catch { }
+        try { DiscoveryAdvertiser.Stop(); } catch { }
         try { WindowMonitor.Stop(); } catch { }
         try { Tcp.Stop(); } catch { }
         try { Udp.Stop(); } catch { }

@@ -107,12 +107,12 @@ A server named "JonDesk" with TCP port `34555`, MC foregrounded, accepts
 UDP, not busy:
 
 ```
-4D 43 43 54  01  01  03  87 0B  00 07  4A 6F 6E 44 65 73 6B
+4D 43 43 54  01  01  03  86 FB  00 07  4A 6F 6E 44 65 73 6B
 ^^^^^^^^^^^ MCCT
             ^^ ver=1
                ^^ msg=ANNOUNCE
                   ^^ flags = 0b0000_0011 (mc_foreground + accepts_udp)
-                     ^^^^^ tcpPort = 0x870B = 34555
+                     ^^^^^ tcpPort = 0x86FB = 34555
                            ^^^^^ nameLen = 7
                                  ^^^^^^^^^^^^^^^^^^^^ "JonDesk"
 ```
