@@ -120,6 +120,18 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         uiModeWidgetMap().values.forEach {
             it.visibility = if (!showInGame) View.VISIBLE else View.GONE
         }
+        // Joystick + look-pad are intentionally hidden in the editor.
+        // Both are full-area touch surfaces in the real controller:
+        // joystick claims the left half, look-pad covers the entire
+        // canvas (match_parent). When visible, their native onTouchEvent
+        // consumes every tap before EditorCanvas can see it, which
+        // breaks the tap-empty-to-deselect detection — there would
+        // effectively be no "empty area" anywhere on the canvas. They
+        // also aren't user-editable here (attachWidgetEditListeners
+        // skips them for the same reason), so hiding them is purely
+        // an editor-time concern.
+        binding.joystick.visibility = View.GONE
+        binding.lookPad.visibility = View.GONE
     }
 
     // ===== EditorCanvas.Callback =====
