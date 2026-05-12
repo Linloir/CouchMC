@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Graphics;
 using Windows.UI;
 using WinRT.Interop;
@@ -33,10 +35,34 @@ public sealed partial class MainWindow : Window
     private readonly SolidColorBrush _contentBrush;
     private readonly SolidColorBrush _windowBgBrush;
 
+    /// <summary>
+    /// Bound to <c>TaskbarIcon.LeftClickCommand</c> / <c>DoubleClickCommand</c>
+    /// in MainWindow.xaml. Defined here rather than in TrayService because
+    /// x:Bind needs the binding source visible on the page class.
+    /// </summary>
+    public ICommand ShowWindowCommand { get; }
+
     public MainWindow()
     {
+        ShowWindowCommand = new RelayCommand(() =>
+            (Application.Current as App)?.ShowMainWindow());
+
         InitializeComponent();
         Title = Util.L.Get("app.title", "MC Controller");
+
+        // Tray strings + icon are runtime values; XAML defaults cover the
+        // first paint, this pass applies the user's locale + the path-
+        // resolved app.ico.
+        TrayIcon.ToolTipText = Util.L.Get("app.tooltip", TrayIcon.ToolTipText ?? "MC Controller");
+        TrayOpenItem.Text    = Util.L.Get("tray.open",   TrayOpenItem.Text);
+        TrayExitItem.Text    = Util.L.Get("tray.exit",   TrayExitItem.Text);
+        try
+        {
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
+            if (File.Exists(iconPath))
+                TrayIcon.IconSource = new BitmapImage(new Uri(iconPath));
+        }
+        catch { /* fall back to library default tray glyph */ }
 
         NavRoot.Content        = Util.L.Get("nav.root",        NavRoot.Content?.ToString() ?? "");
         NavDiscovery.Content   = Util.L.Get("nav.discovery",   NavDiscovery.Content?.ToString() ?? "");
@@ -151,8 +177,28 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private void TrayOpenItem_Click(object sender, RoutedEventArgs e)
+    {
+        (Application.Current as App)?.ShowMainWindow();
+    }
+
+    private void TrayExitItem_Click(object sender, RoutedEventArgs e)
+    {
+        (Application.Current as App)?.ExitApplication();
+    }
+
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+    /// <summary>Minimal ICommand used for the tray icon's LeftClick / DoubleClick.</summary>
+    private sealed class RelayCommand : ICommand
+    {
+        private readonly Action _action;
+        public RelayCommand(Action action) { _action = action; }
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => _action();
+    }
 
     /// <summary>
     /// Pull focus to the invisible FocusSink button when the user clicks

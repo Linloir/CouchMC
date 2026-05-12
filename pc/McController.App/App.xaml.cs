@@ -1,21 +1,25 @@
 using System;
-using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 
 namespace McController.App;
 
 /// <summary>
 /// WinUI 3 entry point. Owns the singleton <see cref="Services.ServerHost"/>
-/// and <see cref="Services.TrayService"/> for the lifetime of the app.
-/// The main window's close button hides to tray instead of exiting; the
-/// real shutdown path is the tray menu's 退出服务 item, which calls
-/// <see cref="ExitApp"/>.
+/// for the lifetime of the app. The main window's close button hides to
+/// tray instead of exiting; the only real shutdown path is the tray
+/// menu's 退出服务 item, which the MainWindow code-behind routes back
+/// here via <see cref="ExitApplication"/>.
+///
+/// The TaskbarIcon itself now lives in MainWindow.xaml (not constructed
+/// in code) because a programmatically-created MenuFlyout never picks
+/// up a XamlRoot and its MenuFlyoutItem.Click events never fire — a
+/// well-documented WinUI 3 + H.NotifyIcon trap that caused early
+/// "退出服务 doesn't work" reports.
 /// </summary>
 public partial class App : Application
 {
     public static Services.ServerHost Host { get; private set; } = null!;
     public static Window MainAppWindow { get; private set; } = null!;
-    public static Services.TrayService Tray { get; private set; } = null!;
 
     private bool _exiting;
 
@@ -55,14 +59,14 @@ public partial class App : Application
         // close before it propagates; AppWindow.Hide() then drops the
         // window from the taskbar without destroying it. The server
         // listeners and tray icon stay alive — the only path that tears
-        // those down is ExitApp(), triggered exclusively by the tray
-        // menu's "退出服务" item.
+        // those down is ExitApplication(), triggered by the tray menu's
+        // "退出服务" item.
         //
         // Crucially we DON'T subscribe to Window.Closed for cleanup —
-        // an earlier version disposed Host + Tray there, which killed
-        // both the moment the window hid. Now all teardown lives in
-        // ExitApp(), so accidental Closed firings can't strand the app
-        // with no listeners and no tray.
+        // an earlier version disposed Host there, which killed the
+        // listener the moment the window hid. Now all teardown lives in
+        // ExitApplication(), so accidental Closed firings can't strand
+        // the app with no listener and an orphan tray icon.
         MainAppWindow.AppWindow.Closing += (sender, ev) =>
         {
             if (_exiting) return;
@@ -70,13 +74,11 @@ public partial class App : Application
             try { MainAppWindow.AppWindow.Hide(); } catch { }
         };
 
-        Tray = new Services.TrayService(ShowWindow, ExitApp);
-        Tray.Initialize();
-
         MainAppWindow.Activate();
     }
 
-    private void ShowWindow()
+    /// <summary>Brings the main window to the foreground.</summary>
+    public void ShowMainWindow()
     {
         if (MainAppWindow is null) return;
         try
@@ -91,27 +93,25 @@ public partial class App : Application
         catch { }
     }
 
-    private void ExitApp()
+    /// <summary>
+    /// Tears down the server and forcibly exits the process. Called
+    /// from MainWindow's tray-menu click handlers.
+    ///
+    /// Environment.Exit(0) (= Win32 ExitProcess) is used instead of
+    /// the cooperative Application.Exit(). The latter queues a
+    /// shutdown signal but won't terminate the process while any
+    /// non-background threads or pending dispatcher work survive,
+    /// which we can't guarantee from a third-party tray library plus
+    /// our own listeners. ExitProcess always wins; we just Dispose
+    /// Host first so the TCP/UDP listeners shut down cleanly before
+    /// the process drops dead.
+    /// </summary>
+    public void ExitApplication()
     {
-        // Tray menu clicks coming through H.NotifyIcon's context-popup
-        // window on WinUI 3 do NOT arrive on the main dispatcher thread.
-        // Window.Close() and Application.Exit() both no-op silently when
-        // called off the UI thread — which is why right-click "退出服务"
-        // appeared to do nothing in v0.1.0. Marshal back to the main
-        // dispatcher (and re-enter ExitApp once we're there) so the
-        // teardown actually runs.
-        var dispatcher = MainAppWindow?.DispatcherQueue;
-        if (dispatcher != null && !dispatcher.HasThreadAccess)
-        {
-            dispatcher.TryEnqueue(ExitApp);
-            return;
-        }
-        if (_exiting) return;   // idempotent guard
+        if (_exiting) return;
         _exiting = true;
         try { Host?.Dispose(); } catch { }
-        try { Tray?.Dispose(); } catch { }
-        try { MainAppWindow?.Close(); } catch { }
-        Exit();
+        Environment.Exit(0);
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
