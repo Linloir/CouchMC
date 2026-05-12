@@ -75,10 +75,10 @@
                 </tk:SettingsCard.HeaderIcon>
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Slider x:Name="SensitivitySlider" Width="220"
-                            Minimum="0.5" Maximum="3.0" StepFrequency="0.05"
+                            Minimum="0.1" Maximum="10.0" StepFrequency="0.05"
                             ValueChanged="SensitivitySlider_ValueChanged"/>
                     <NumberBox x:Name="SensitivityNumber" Width="120"
-                               Minimum="0.5" Maximum="3.0" SmallChange="0.05"
+                               Minimum="0.1" Maximum="10.0" SmallChange="0.05"
                                SpinButtonPlacementMode="Compact"
                                ValueChanged="SensitivityNumber_ValueChanged"/>
                 </StackPanel>
