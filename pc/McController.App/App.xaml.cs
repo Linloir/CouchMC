@@ -93,6 +93,20 @@ public partial class App : Application
 
     private void ExitApp()
     {
+        // Tray menu clicks coming through H.NotifyIcon's context-popup
+        // window on WinUI 3 do NOT arrive on the main dispatcher thread.
+        // Window.Close() and Application.Exit() both no-op silently when
+        // called off the UI thread — which is why right-click "退出服务"
+        // appeared to do nothing in v0.1.0. Marshal back to the main
+        // dispatcher (and re-enter ExitApp once we're there) so the
+        // teardown actually runs.
+        var dispatcher = MainAppWindow?.DispatcherQueue;
+        if (dispatcher != null && !dispatcher.HasThreadAccess)
+        {
+            dispatcher.TryEnqueue(ExitApp);
+            return;
+        }
+        if (_exiting) return;   // idempotent guard
         _exiting = true;
         try { Host?.Dispose(); } catch { }
         try { Tray?.Dispose(); } catch { }
