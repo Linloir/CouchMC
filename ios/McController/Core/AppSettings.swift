@@ -39,6 +39,16 @@ struct AppSettings: Codable, Equatable, Sendable {
     /// Distance multiplier (×baseRadius) at which the joystick triggers
     /// sprint. Hysteresis on disengage is fixed at 1.0.
     var sprintEngageFactor: CGFloat = 1.20
+
+    // MARK: - Layout editor snapping
+
+    /// Snap a widget's edge / centre to align with another widget when the
+    /// distance is within tolerance. Renders a dashed grey alignment line.
+    var editorEdgeSnap: Bool = true
+    /// Snap the gap between the dragged widget and another widget when it
+    /// matches the gap of another pair on screen — i.e. equal-spacing
+    /// alignment, with arrow indicators on the matching pairs.
+    var editorSpacingSnap: Bool = true
 }
 
 enum DesignLanguage: String, Codable, CaseIterable, Sendable {

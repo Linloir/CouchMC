@@ -308,6 +308,24 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开启后，将摇杆推出此倍数的边缘半径时自动开启疾跑。无论本开关如何，操作界面上的疾跑按钮始终可用。" } }
       }
     },
+    "settings.editor.edge_snap" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Snap to edges" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动边缘吸附" } }
+      }
+    },
+    "settings.editor.spacing_snap" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Snap to equal spacing" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动间距吸附" } }
+      }
+    },
+    "settings.editor.snap_hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "While dragging a widget in the layout editor, a grey dashed line appears when its edge or centre is about to align with another widget's, and amber arrows mark equal spacing. After selecting a widget you can also swipe on empty canvas to fine-tune position (axis-locked, slower than your finger)." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在编辑器中拖动控件时，若边缘或中线即将与其他控件对齐会出现灰色虚线；琥珀色箭头则标示等距吸附。选中某控件后还可在空白区域滑动以进行轴向锁定的微调（按钮移动速度低于手指）。" } }
+      }
+    },
     "settings.section.layout" : {
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Layout" } },
@@ -514,8 +532,8 @@
     },
     "editor.hint" : {
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap to select  ·  Drag to move  ·  Pinch anywhere to resize  ·  Tap empty area to deselect" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "单击选中 · 拖动移动 · 双指任意位置缩放 · 空白处取消选中" } }
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap to select  ·  Drag to move  ·  Pinch to resize  ·  Swipe empty to fine-tune  ·  Tap empty to deselect" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "单击选中 · 拖动移动 · 双指缩放 · 空白处滑动微调 · 空白处单击取消选中" } }
       }
     },
     "widget.lmb" : {

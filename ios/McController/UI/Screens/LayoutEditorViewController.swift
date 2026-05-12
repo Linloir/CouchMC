@@ -46,6 +46,14 @@ final class LayoutEditorViewController: UIViewController {
     // Gestures
     private var pinchRecognizer: UIPinchGestureRecognizer!
     private var canvasTapRecognizer: UITapGestureRecognizer!
+    /// Pan on the *canvas* (not on a widget) when something is already
+    /// selected → precision drag of the selected widget with axis-lock
+    /// and PowerPoint-style alignment snapping.
+    private var canvasPanRecognizer: UIPanGestureRecognizer!
+
+    /// Alignment guides overlay — sits above all widgets in `canvas`, never
+    /// captures touches. Cleared on every drag-end.
+    private let alignmentGuides = AlignmentGuideOverlay()
 
     // Drag state
     private var dragStartLocation: CGPoint?
@@ -56,6 +64,15 @@ final class LayoutEditorViewController: UIViewController {
     /// that land on OTHER widgets mid-drag so a stray cross-finger doesn't
     /// transfer the selection or scramble the move.
     private var panningWidget: EditableWidgetView?
+
+    // Canvas-pan precision-drag state
+    private enum DragAxis { case horizontal, vertical }
+    private var canvasPanStartSpec: WidgetSpec?
+    private var canvasPanAxis: DragAxis?
+    /// Movement ratio for canvas-pan precision drag. 1pt of finger movement
+    /// nudges the widget by `canvasPanPrecision` pt — gives the user fine
+    /// control while keeping the gesture obvious.
+    private let canvasPanPrecision: CGFloat = 0.3
 
     // MARK: - Init
 
@@ -102,16 +119,35 @@ final class LayoutEditorViewController: UIViewController {
         buildWidgetsForMode()
         buildToolbars()
 
+        // Alignment guides overlay — added LAST so it draws above every
+        // widget. Never captures touches so all gestures pass through.
+        alignmentGuides.frame = canvas.bounds
+        alignmentGuides.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        canvas.addSubview(alignmentGuides)
+
         // Pinch anywhere on the screen to resize the selected widget.
         pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
         pinchRecognizer.delegate = self
         view.addGestureRecognizer(pinchRecognizer)
 
-        // Tap on empty canvas → deselect.
+        // Tap on empty canvas → deselect. (Tap requires the canvas-pan to
+        // fail first, so a swipe on the canvas while something is selected
+        // becomes precision drag rather than a deselect.)
         canvasTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onCanvasTap(_:)))
         canvasTapRecognizer.delegate = self
         canvasTapRecognizer.cancelsTouchesInView = false
         canvas.addGestureRecognizer(canvasTapRecognizer)
+
+        // Pan on the canvas with something selected → axis-locked
+        // precision drag of the selected widget. Only fires when the touch
+        // actually lands on the canvas (not on a widget) thanks to the
+        // delegate `shouldReceive` check.
+        canvasPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(onCanvasPan(_:)))
+        canvasPanRecognizer.delegate = self
+        canvasPanRecognizer.minimumNumberOfTouches = 1
+        canvasPanRecognizer.maximumNumberOfTouches = 1
+        canvas.addGestureRecognizer(canvasPanRecognizer)
+        canvasTapRecognizer.require(toFail: canvasPanRecognizer)
 
         updateSelectionUI()
     }
@@ -465,44 +501,143 @@ final class LayoutEditorViewController: UIViewController {
                 recognizer.setTranslation(.zero, in: view)
                 return
             }
-
-            let edgeSign: CGFloat
-            switch startSpec.anchor {
-            case .topStart, .bottomStart, .centerStart:  edgeSign = 1
-            case .topEnd, .bottomEnd, .centerEnd:        edgeSign = -1
-            // Centre anchors treat `edge` as a signed offset from the canvas
-            // centre (see LayoutApplier), so dragging right is positive.
-            case .topCenter, .bottomCenter:              edgeSign = 1
-            }
-            let vertSign: CGFloat
-            switch startSpec.anchor {
-            case .topStart, .topCenter, .topEnd:               vertSign = 1
-            case .bottomStart, .bottomCenter, .bottomEnd:      vertSign = -1
-            case .centerStart, .centerEnd:                     vertSign = 1
-            }
-            // Edge-anchored widgets clamp to ≥ 0 (no off-screen).
-            // Centre-anchored widgets allow negative (left of centre).
-            let rawEdge = startSpec.edge + translation.x * edgeSign
-            let newEdge = startSpec.anchor.isHorizontallyCentered ? rawEdge : max(0, rawEdge)
-            let newVert = max(0, startSpec.vertical + translation.y * vertSign)
-
-            mutateLayout { layout in
-                var spec = startSpec
-                spec.edge = newEdge
-                spec.vertical = newVert
-                layout.widgets[widget.widgetID] = spec
-            }
-            reapplyWidget(widget.widgetID)
+            applyDragMovement(
+                startSpec: startSpec,
+                screenDelta: CGSize(width: translation.x, height: translation.y),
+                axis: .both
+            )
 
         case .ended, .cancelled, .failed:
             dragStartSpec = nil
             dragStartLocation = nil
             didCrossSlop = false
             panningWidget = nil
+            alignmentGuides.clear()
 
         default:
             break
         }
+    }
+
+    // MARK: - Canvas pan: axis-locked precision drag of the selected widget
+
+    @objc private func onCanvasPan(_ recognizer: UIPanGestureRecognizer) {
+        // Selection-gated: a canvas pan with nothing selected is just an
+        // ignored swipe (tap-to-deselect still works for taps because
+        // `canvasTapRecognizer.require(toFail: canvasPanRecognizer)` lets
+        // the tap through when the pan fails on no-movement).
+        guard let id = selectedID, id != "joystick" else { return }
+
+        let translation = recognizer.translation(in: view)
+
+        switch recognizer.state {
+        case .began:
+            canvasPanStartSpec = currentLayout().widgets[id]
+            canvasPanAxis = nil
+            didCrossSlop = false
+
+        case .changed:
+            guard let startSpec = canvasPanStartSpec else { return }
+            if canvasPanAxis == nil {
+                let distance = hypot(translation.x, translation.y)
+                guard distance > 8 else { return }
+                // Lock to whichever axis dominated the slop-crossing swipe.
+                // Once locked, the orthogonal component is ignored — gives
+                // the user clean, one-axis precision adjustments.
+                canvasPanAxis = abs(translation.x) >= abs(translation.y) ? .horizontal : .vertical
+                recognizer.setTranslation(.zero, in: view)
+                return
+            }
+            guard let axis = canvasPanAxis else { return }
+            // Precision factor — finger moves N pt, widget shifts N×0.3 pt.
+            let dx: CGFloat = axis == .horizontal ? translation.x * canvasPanPrecision : 0
+            let dy: CGFloat = axis == .vertical   ? translation.y * canvasPanPrecision : 0
+            applyDragMovement(
+                startSpec: startSpec,
+                screenDelta: CGSize(width: dx, height: dy),
+                axis: axis == .horizontal ? .horizontal : .vertical
+            )
+
+        case .ended, .cancelled, .failed:
+            canvasPanStartSpec = nil
+            canvasPanAxis = nil
+            didCrossSlop = false
+            alignmentGuides.clear()
+
+        default:
+            break
+        }
+    }
+
+    // MARK: - Shared drag movement + snap pipeline
+
+    /// Apply a screen-space drag translation to `startSpec`, optionally
+    /// snapping the result to nearby widgets and rendering alignment
+    /// guides. Used by BOTH the per-widget pan and the canvas precision
+    /// pan so snap + guide rendering is consistent across both paths.
+    private func applyDragMovement(startSpec: WidgetSpec,
+                                   screenDelta: CGSize,
+                                   axis: AlignmentSnapper.Axis) {
+        // Anchor → screen-to-spec sign conversion.
+        let edgeSign: CGFloat
+        switch startSpec.anchor {
+        case .topStart, .bottomStart, .centerStart:  edgeSign = 1
+        case .topEnd, .bottomEnd, .centerEnd:        edgeSign = -1
+        case .topCenter, .bottomCenter:              edgeSign = 1
+        }
+        let vertSign: CGFloat
+        switch startSpec.anchor {
+        case .topStart, .topCenter, .topEnd:               vertSign = 1
+        case .bottomStart, .bottomCenter, .bottomEnd:      vertSign = -1
+        case .centerStart, .centerEnd:                     vertSign = 1
+        }
+
+        // 1) Compute pre-snap spec from raw translation.
+        let rawEdge = startSpec.edge + screenDelta.width * edgeSign
+        let preEdge = startSpec.anchor.isHorizontallyCentered ? rawEdge : max(0, rawEdge)
+        let preVert = max(0, startSpec.vertical + screenDelta.height * vertSign)
+
+        var preSpec = startSpec
+        preSpec.edge = preEdge
+        preSpec.vertical = preVert
+        let layout = currentLayout()
+        let bounds = widgetBounds
+        let preSnapFrame = LayoutApplier.frame(for: preSpec, in: layout, bounds: bounds)
+
+        // 2) Ask the snapper if the pre-snap frame is close to anything.
+        let otherFrames: [CGRect] = widgetViews.compactMap { id, view in
+            id == startSpec.id ? nil : view.frame
+        }
+        let s = settings.settings
+        let result = AlignmentSnapper.snap(
+            candidate: preSnapFrame,
+            others: otherFrames,
+            axis: axis,
+            edgeEnabled: s.editorEdgeSnap,
+            spacingEnabled: s.editorSpacingSnap
+        )
+
+        // 3) Convert the screen-space snap delta back into spec deltas.
+        let snapEdgeDelta = result.snapDelta.width * edgeSign
+        let snapVertDelta = result.snapDelta.height * vertSign
+        let snappedEdgeRaw = preEdge + snapEdgeDelta
+        let snappedEdge = startSpec.anchor.isHorizontallyCentered ? snappedEdgeRaw : max(0, snappedEdgeRaw)
+        let snappedVert = max(0, preVert + snapVertDelta)
+
+        // 4) Persist + repaint.
+        mutateLayout { layout in
+            var spec = startSpec
+            spec.edge = snappedEdge
+            spec.vertical = snappedVert
+            layout.widgets[startSpec.id] = spec
+        }
+        reapplyWidget(startSpec.id)
+
+        // Keep the guides overlay on top of widgets — repainting may have
+        // re-ordered subviews (no, addSubview reuses the existing slot,
+        // but defensively bringSubviewToFront).
+        canvas.bringSubviewToFront(alignmentGuides)
+        alignmentGuides.setGuides(result.guides)
     }
 
     // MARK: - Tap: select widget / deselect on empty
@@ -545,9 +680,10 @@ final class LayoutEditorViewController: UIViewController {
         reapplyWidget(id)
     }
 
-    /// Toggle the `isEnabled` of every widget's pan recognizer off-then-on,
-    /// which cancels any in-progress pan immediately. Called when pinch
-    /// transitions to `.began` so pan + pinch can't run on the same finger.
+    /// Toggle the `isEnabled` of every widget's pan recognizer AND the
+    /// canvas-level precision pan off-then-on, which cancels any
+    /// in-progress pan immediately. Called when pinch transitions to
+    /// `.began` so pan + pinch can't run on the same finger.
     private func cancelActiveWidgetPans() {
         for widget in widgetViews.values {
             for r in widget.gestureRecognizers ?? [] where r is UIPanGestureRecognizer {
@@ -555,9 +691,14 @@ final class LayoutEditorViewController: UIViewController {
                 r.isEnabled = true
             }
         }
+        canvasPanRecognizer.isEnabled = false
+        canvasPanRecognizer.isEnabled = true
         panningWidget = nil
         dragStartLocation = nil
         didCrossSlop = false
+        canvasPanStartSpec = nil
+        canvasPanAxis = nil
+        alignmentGuides.clear()
     }
 
     // MARK: - Toolbar actions
@@ -678,10 +819,20 @@ extension LayoutEditorViewController: UIGestureRecognizerDelegate {
                 return false
             }
         }
-        // Canvas tap should only fire if the touch landed on the canvas itself
-        // (not on a widget) — otherwise widget taps would also deselect.
+        // Canvas tap should only fire if the touch landed on the canvas
+        // itself (not on a widget) — otherwise widget taps would also
+        // deselect. The `require(toFail: canvasPanRecognizer)` chain still
+        // lets the tap through for stationary releases.
         if gestureRecognizer === canvasTapRecognizer {
             return touch.view === canvas
+        }
+        // Canvas pan only matters when there's a selected widget to nudge,
+        // and only when the touch genuinely landed on the canvas (not on a
+        // widget — widget pans live in their own recognizers).
+        if gestureRecognizer === canvasPanRecognizer {
+            return selectedID != nil
+                && selectedID != "joystick"
+                && touch.view === canvas
         }
         return true
     }

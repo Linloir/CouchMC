@@ -81,8 +81,16 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    Toggle(L.key("settings.editor.edge_snap"),
+                           isOn: $settings.settings.editorEdgeSnap)
+                    Toggle(L.key("settings.editor.spacing_snap"),
+                           isOn: $settings.settings.editorSpacingSnap)
                 } header: {
                     Text(L.key("settings.section.layout"))
+                } footer: {
+                    if settings.settings.editorEdgeSnap || settings.settings.editorSpacingSnap {
+                        Text(L.key("settings.editor.snap_hint"))
+                    }
                 }
 
                 // === Hotbar ===
