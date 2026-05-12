@@ -266,13 +266,25 @@ struct ProfileListView: View {
         List {
             Section {
                 ForEach(profileStore.allNames, id: \.self) { name in
+                    let isActive = name == profileStore.snapshot.active
                     HStack(spacing: 8) {
-                        Image(systemName: name == profileStore.snapshot.active
-                              ? "checkmark"
-                              : "circle.dashed")
-                            .foregroundStyle(name == profileStore.snapshot.active ? Color.accentColor : .secondary)
-                            .frame(width: 22)
-                            .opacity(editMode?.wrappedValue.isEditing == true ? 0 : 1)
+                        // Reserve the slot with an empty 22pt-wide
+                        // box even on inactive rows so the profile
+                        // titles line up vertically — only the
+                        // checkmark glyph renders on the active row,
+                        // matching the visual cleanliness of iOS
+                        // Settings > Wi-Fi (the unselected networks
+                        // have no leading indicator at all).
+                        Group {
+                            if isActive {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(Color.accentColor)
+                            } else {
+                                Color.clear
+                            }
+                        }
+                        .frame(width: 22)
+                        .opacity(editMode?.wrappedValue.isEditing == true ? 0 : 1)
                         Text(name)
                             .foregroundStyle(.primary)
                         Spacer()
