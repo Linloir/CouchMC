@@ -30,11 +30,12 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         Title = Util.L.Get("app.title", "MC Controller");
 
-        NavRoot.Content      = Util.L.Get("nav.root",      NavRoot.Content?.ToString() ?? "");
-        NavDiscovery.Content = Util.L.Get("nav.discovery", NavDiscovery.Content?.ToString() ?? "");
-        NavSettings.Content  = Util.L.Get("nav.settings",  NavSettings.Content?.ToString() ?? "");
-        NavGlobal.Content    = Util.L.Get("nav.global",    NavGlobal.Content?.ToString() ?? "");
-        NavAbout.Content     = Util.L.Get("nav.about",     NavAbout.Content?.ToString() ?? "");
+        NavRoot.Content        = Util.L.Get("nav.root",        NavRoot.Content?.ToString() ?? "");
+        NavDiscovery.Content   = Util.L.Get("nav.discovery",   NavDiscovery.Content?.ToString() ?? "");
+        NavKeyBindings.Content = Util.L.Get("nav.keybindings", NavKeyBindings.Content?.ToString() ?? "");
+        NavSettings.Content    = Util.L.Get("nav.settings",    NavSettings.Content?.ToString() ?? "");
+        NavGlobal.Content      = Util.L.Get("nav.global",      NavGlobal.Content?.ToString() ?? "");
+        NavAbout.Content       = Util.L.Get("nav.about",       NavAbout.Content?.ToString() ?? "");
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -202,10 +203,11 @@ public sealed partial class MainWindow : Window
         if (args.SelectedItem is not NavigationViewItem item) return;
         Type? target = (item.Tag as string) switch
         {
-            "discovery" => typeof(Views.DeviceDiscoveryPage),
-            "settings"  => typeof(Views.SettingsPage),
-            "global"    => typeof(Views.GlobalSettingsPage),
-            "about"     => typeof(Views.AboutPage),
+            "discovery"   => typeof(Views.DeviceDiscoveryPage),
+            "keybindings" => typeof(Views.KeyBindingsPage),
+            "settings"    => typeof(Views.SettingsPage),
+            "global"      => typeof(Views.GlobalSettingsPage),
+            "about"       => typeof(Views.AboutPage),
             _ => null,
         };
         if (target is null) return;

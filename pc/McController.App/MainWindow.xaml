@@ -74,6 +74,11 @@
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8EA;"/>
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
+                        <NavigationViewItem x:Name="NavKeyBindings" Content="键位绑定" Tag="keybindings">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE92E;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
                         <NavigationViewItem x:Name="NavSettings" Content="设置" Tag="settings">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;"/>

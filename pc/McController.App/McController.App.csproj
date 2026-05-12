@@ -41,6 +41,9 @@
     <Page Include="Views\DeviceDiscoveryPage.xaml" SubType="Designer">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\KeyBindingsPage.xaml" SubType="Designer">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\GlobalSettingsPage.xaml" SubType="Designer">
       <Generator>MSBuild:Compile</Generator>
     </Page>

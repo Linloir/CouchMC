@@ -29,8 +29,8 @@ public sealed class JoystickToWasdMapper
     {
         lock (_lock)
         {
-            UpdateAxis(y, Scancodes.W, Scancodes.S, ref _w, ref _s);
-            UpdateAxis(x, Scancodes.D, Scancodes.A, ref _d, ref _a);
+            UpdateAxis(y, ForwardKey(), BackKey(), ref _w, ref _s);
+            UpdateAxis(x, RightKey(), LeftKey(), ref _d, ref _a);
         }
     }
 
@@ -38,11 +38,31 @@ public sealed class JoystickToWasdMapper
     {
         lock (_lock)
         {
-            if (_w) { _injector.Key(Scancodes.W, false); _w = false; }
-            if (_a) { _injector.Key(Scancodes.A, false); _a = false; }
-            if (_s) { _injector.Key(Scancodes.S, false); _s = false; }
-            if (_d) { _injector.Key(Scancodes.D, false); _d = false; }
+            if (_w) { _injector.Key(ForwardKey(), false); _w = false; }
+            if (_a) { _injector.Key(LeftKey(),    false); _a = false; }
+            if (_s) { _injector.Key(BackKey(),    false); _s = false; }
+            if (_d) { _injector.Key(RightKey(),   false); _d = false; }
         }
+    }
+
+    // The four direction scancodes are resolved on every call rather than
+    // cached, because the Key Bindings page edits ServerConfig.Movement_Keys
+    // in place and we want the next sample to honour the new mapping
+    // without forcing a profile reload. ParseScancode tolerates the user
+    // typing values with or without the 0x prefix and falls back to the
+    // hard-coded WASD defaults if the field is somehow blank.
+    private ushort ForwardKey() => ParseScancode(_config.Movement_Keys.Forward, Scancodes.W);
+    private ushort BackKey()    => ParseScancode(_config.Movement_Keys.Back,    Scancodes.S);
+    private ushort LeftKey()    => ParseScancode(_config.Movement_Keys.Left,    Scancodes.A);
+    private ushort RightKey()   => ParseScancode(_config.Movement_Keys.Right,   Scancodes.D);
+
+    private static ushort ParseScancode(string? s, ushort fallback)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return fallback;
+        s = s.Trim();
+        var span = s.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? s[2..] : s;
+        return ushort.TryParse(span, System.Globalization.NumberStyles.HexNumber,
+            System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : fallback;
     }
 
     private void UpdateAxis(

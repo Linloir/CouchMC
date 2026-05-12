@@ -72,6 +72,7 @@ public static class L
         // Navigation
         ["nav.root"] = "移动控制器",
         ["nav.discovery"] = "设备发现",
+        ["nav.keybindings"] = "键位绑定",
         ["nav.settings"] = "设置",
         ["nav.global"] = "全局设置",
         ["nav.about"] = "关于",
@@ -181,6 +182,7 @@ public static class L
 
         ["nav.root"] = "Mobile Controller",
         ["nav.discovery"] = "Devices",
+        ["nav.keybindings"] = "Key Bindings",
         ["nav.settings"] = "Settings",
         ["nav.global"] = "Preferences",
         ["nav.about"] = "About",

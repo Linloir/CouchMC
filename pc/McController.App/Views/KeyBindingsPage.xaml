@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="McController.App.Views.KeyBindingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tk="using:CommunityToolkit.WinUI.Controls">
+
+    <!--
+        Keycap-style chip: the bound key's name on a tinted rounded
+        rectangle. WinUI 3 TextBlock includes ascent/internal-leading
+        space above the glyphs by default, which makes a row of "W"/"S"
+        sit visibly higher than the centre of its surrounding Border.
+        TextLineBounds=TrimToCapHeight removes that upper leading and the
+        slightly-larger top padding (5 vs. bottom 4) finishes balancing
+        the cap height vs. descender region.
+    -->
+    <!--
+        Keycap chip styles. Two reasons it ended up looking different
+        from a regular Button next door:
+          1. Border height was sized to content (Consolas 13 + tiny
+             padding) and came out shorter than the 32-dp WinUI default
+             Button. Pinning Height=32 makes them visually match.
+          2. WinUI 3 TextBlocks include ascent + internal-leading above
+             the cap height, which made the glyph sit visibly high
+             inside the box. TextLineBounds=TrimToCapHeight trims that
+             upper leading; with VerticalAlignment=Center the cap
+             height ends up centred.
+    -->
+    <Page.Resources>
+        <Style x:Key="KeyCapBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource ControlFillColorTertiaryBrush}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,0,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="76"/>
+        </Style>
+        <Style x:Key="KeyCapTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="TextLineBounds" Value="TrimToCapHeight"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer x:Name="Scroller"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  Padding="40,8,40,40">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="200*" MaxWidth="1100"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Spacing="0">
+
+                <TextBlock x:Name="HeaderTitle"
+                           Text="键位绑定"
+                           FontSize="30" FontWeight="SemiBold"
+                           Margin="0,16,0,2"/>
+                <TextBlock x:Name="HeaderSubtitle"
+                           Text="按下任意手机按钮被转发到 PC 时执行的实际按键。点击「编辑」用键盘录入新的绑定。"
+                           Opacity="0.6" FontSize="14" TextWrapping="Wrap"
+                           Margin="0,0,0,24"/>
+
+                <!-- ===== Movement (WASD) ===== -->
+                <TextBlock x:Name="SectionMovement"
+                           Text="移动" FontSize="14" FontWeight="SemiBold"
+                           Margin="0,8,0,8"/>
+
+                <tk:SettingsCard x:Name="RowForward" Header="前进" Description="摇杆向前">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Style="{StaticResource KeyCapBorderStyle}">
+                            <TextBlock x:Name="ValForward" Style="{StaticResource KeyCapTextStyle}"/>
+                        </Border>
+                        <Button x:Name="BtnForwardEdit" Content="编辑" Click="OnEditClicked" Tag="forward"/>
+                    </StackPanel>
+                </tk:SettingsCard>
+
+                <tk:SettingsCard x:Name="RowBack" Header="后退" Description="摇杆向后">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Style="{StaticResource KeyCapBorderStyle}">
+                            <TextBlock x:Name="ValBack" Style="{StaticResource KeyCapTextStyle}"/>
+                        </Border>
+                        <Button x:Name="BtnBackEdit" Content="编辑" Click="OnEditClicked" Tag="back"/>
+                    </StackPanel>
+                </tk:SettingsCard>
+
+                <tk:SettingsCard x:Name="RowLeft" Header="左移" Description="摇杆向左">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Style="{StaticResource KeyCapBorderStyle}">
+                            <TextBlock x:Name="ValLeft" Style="{StaticResource KeyCapTextStyle}"/>
+                        </Border>
+                        <Button x:Name="BtnLeftEdit" Content="编辑" Click="OnEditClicked" Tag="left"/>
+                    </StackPanel>
+                </tk:SettingsCard>
+
+                <tk:SettingsCard x:Name="RowRight" Header="右移" Description="摇杆向右">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Style="{StaticResource KeyCapBorderStyle}">
+                            <TextBlock x:Name="ValRight" Style="{StaticResource KeyCapTextStyle}"/>
+                        </Border>
+                        <Button x:Name="BtnRightEdit" Content="编辑" Click="OnEditClicked" Tag="right"/>
+                    </StackPanel>
+                </tk:SettingsCard>
+
+                <!-- ===== Action buttons (existing ButtonId bindings) ===== -->
+                <TextBlock x:Name="SectionActions"
+                           Text="动作按钮" FontSize="14" FontWeight="SemiBold"
+                           Margin="0,24,0,8"/>
+
+                <ItemsControl x:Name="ActionList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <tk:SettingsCard Header="{Binding Label}"
+                                             Description="{Binding HelpText}">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border Style="{StaticResource KeyCapBorderStyle}">
+                                        <TextBlock Text="{Binding ValueText}"
+                                                   Style="{StaticResource KeyCapTextStyle}"/>
+                                    </Border>
+                                    <Button Content="编辑" Click="OnActionEditClicked"
+                                            Tag="{Binding ButtonIdHex}"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

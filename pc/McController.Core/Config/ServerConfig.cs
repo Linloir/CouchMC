@@ -27,6 +27,14 @@ public sealed class ServerConfig
     public Dictionary<string, ButtonBinding> Bindings { get; set; } = DefaultBindings();
 
     /// <summary>
+    /// Joystick → keyboard movement key bindings. Defaults to W / S / A / D
+    /// (MC's standard movement). User can rebind to e.g. arrow keys or
+    /// a custom layout via the Key Bindings page. The mapper
+    /// (<see cref="Input.JoystickToWasdMapper"/>) reads these on every poll.
+    /// </summary>
+    public MovementBindings Movement_Keys { get; set; } = new();
+
+    /// <summary>
     /// Returns the active profile, or falls back to the first profile if
     /// <see cref="ActiveProfileId"/> doesn't match anything (recovers from
     /// edits that orphan the active id). Never null at runtime — the
@@ -132,6 +140,24 @@ public sealed class ButtonBinding
 
     /// <summary>"left" / "right" / "middle". Used when Type == "mouse".</summary>
     public string? Button { get; set; }
+}
+
+/// <summary>
+/// Joystick-direction → scancode mapping. Defaults to the classic W/S/A/D
+/// MC layout. Stored as hex-strings so the JSON is readable and so values
+/// round-trip cleanly across save / reload cycles (no integer
+/// JSON-precision surprises).
+/// </summary>
+public sealed class MovementBindings
+{
+    /// <summary>Forward — joystick y &gt; 0. Default W (0x11).</summary>
+    public string Forward { get; set; } = "0x11";
+    /// <summary>Back — joystick y &lt; 0. Default S (0x1F).</summary>
+    public string Back { get; set; } = "0x1F";
+    /// <summary>Strafe-left — joystick x &lt; 0. Default A (0x1E).</summary>
+    public string Left { get; set; } = "0x1E";
+    /// <summary>Strafe-right — joystick x &gt; 0. Default D (0x20).</summary>
+    public string Right { get; set; } = "0x20";
 }
 
 public enum CurveType
