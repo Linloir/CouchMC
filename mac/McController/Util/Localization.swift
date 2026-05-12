@@ -32,8 +32,8 @@ enum L {
 
     private static let zhHans: [String: String] = [
         // App
-        "app.title": "MC Controller",
-        "app.tooltip": "MC Controller",
+        "app.title": "CouchMC",
+        "app.tooltip": "CouchMC",
 
         // Menu bar
         "tray.open": "打开面板",
@@ -75,7 +75,7 @@ enum L {
         "discovery.lan.emptyDesc": "应用已向局域网公告，手机连接界面会自动列出本机",
         "discovery.menubar.section": "菜单栏",
         "discovery.menubar.hiddenTitle": "菜单栏图标已被隐藏",
-        "discovery.menubar.hiddenDesc": "%@ 正在隐藏 MC Controller 的菜单栏图标。请点击它自己的折叠箭头展开，或在它的偏好里把 MC Controller 移到「常显」分组。",
+        "discovery.menubar.hiddenDesc": "%@ 正在隐藏 CouchMC 的菜单栏图标。请点击它自己的折叠箭头展开，或在它的偏好里把 CouchMC 移到「常显」分组。",
         "discovery.menubar.unknownManager": "某个菜单栏管理工具",
         "discovery.lan.desc": "每秒向 UDP 34556 广播 ANNOUNCE 包，手机端连接界面会自动列出本机。",
         "discovery.net.section": "本机网络",
@@ -84,7 +84,7 @@ enum L {
         "discovery.permission.section": "权限",
         "discovery.permission.header": "辅助功能权限",
         "discovery.permission.desc": "macOS 需要授予「辅助功能」权限才能向系统注入键盘与鼠标事件。",
-        "discovery.permission.descStale": "若系统设置里已勾选但应用仍提示未授权：点「重置」清空旧的 TCC 记录（开发构建每次重新编译 cdhash 都会变，让旧授权失效），然后在系统设置里重新允许 MC Controller。",
+        "discovery.permission.descStale": "若系统设置里已勾选但应用仍提示未授权：点「重置」清空旧的 TCC 记录（开发构建每次重新编译 cdhash 都会变，让旧授权失效），然后在系统设置里重新允许 CouchMC。",
         "discovery.permission.granted": "已授权",
         "discovery.permission.missing": "未授权 · 点击「打开系统设置」前往",
         "discovery.permission.open": "打开系统设置",
@@ -236,7 +236,7 @@ enum L {
         // About
         "about.title": "关于",
         "about.subtitle": "应用信息",
-        "about.app.header": "MC Controller",
+        "about.app.header": "CouchMC",
         "about.app.tagline": "把手机变成 Java 版 Minecraft 的触屏控制器",
         "about.version.header": "版本",
         "about.author.header": "开发者",
@@ -248,8 +248,8 @@ enum L {
     // MARK: - EN-US
 
     private static let enUs: [String: String] = [
-        "app.title": "MC Controller",
-        "app.tooltip": "MC Controller",
+        "app.title": "CouchMC",
+        "app.tooltip": "CouchMC",
 
         "tray.open": "Open Panel",
         "tray.exit": "Quit Service",
@@ -287,7 +287,7 @@ enum L {
         "discovery.lan.emptyDesc": "We're broadcasting on the local network; the phone's connect screen will list this Mac.",
         "discovery.menubar.section": "Menu bar",
         "discovery.menubar.hiddenTitle": "Menu bar icon hidden",
-        "discovery.menubar.hiddenDesc": "%@ is hiding MC Controller's menu bar icon. Reveal it by clicking the manager's overflow chevron, or open the manager's preferences and move MC Controller into the always-visible group.",
+        "discovery.menubar.hiddenDesc": "%@ is hiding CouchMC's menu bar icon. Reveal it by clicking the manager's overflow chevron, or open the manager's preferences and move CouchMC into the always-visible group.",
         "discovery.menubar.unknownManager": "A menu bar manager",
         "discovery.lan.desc": "We send an ANNOUNCE packet to UDP 34556 every second.",
         "discovery.net.section": "This computer",
@@ -296,7 +296,7 @@ enum L {
         "discovery.permission.section": "Permission",
         "discovery.permission.header": "Accessibility permission",
         "discovery.permission.desc": "macOS requires Accessibility permission for the app to post keyboard and mouse events.",
-        "discovery.permission.descStale": "If System Settings shows MC Controller as allowed but this prompt still appears, click Reset to clear the stale TCC entry — rebuilds change the binary's cdhash and invalidate the previous grant. After reset, re-authorize MC Controller in System Settings.",
+        "discovery.permission.descStale": "If System Settings shows CouchMC as allowed but this prompt still appears, click Reset to clear the stale TCC entry — rebuilds change the binary's cdhash and invalidate the previous grant. After reset, re-authorize CouchMC in System Settings.",
         "discovery.permission.granted": "Granted",
         "discovery.permission.missing": "Not granted · open System Settings to allow",
         "discovery.permission.open": "Open System Settings",
@@ -439,7 +439,7 @@ enum L {
 
         "about.title": "About",
         "about.subtitle": "App info",
-        "about.app.header": "MC Controller",
+        "about.app.header": "CouchMC",
         "about.app.tagline": "Turn your phone into a touchscreen controller for Java Edition Minecraft",
         "about.version.header": "Version",
         "about.author.header": "Author",

@@ -26,7 +26,7 @@ struct AboutView: View {
                     .interpolation(.high)
                     .frame(width: 64, height: 64)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L.get("about.app.header", fallback: "MC Controller"))
+                    Text(L.get("about.app.header", fallback: "CouchMC"))
                         .font(.title2.weight(.semibold))
                     Text(L.get("about.app.tagline",
                                fallback: "Turn your phone into a touchscreen controller for Java Edition Minecraft"))

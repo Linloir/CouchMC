@@ -44,7 +44,13 @@ targets:
     info:
       path: McController/Resources/Info.plist
       properties:
-        CFBundleDisplayName: MC Controller
+        # Branded names — what shows under the icon, in Settings →
+        # General → iPhone Storage, in the multitasking carousel, etc.
+        # CFBundleName otherwise defaults to $(PRODUCT_NAME) which is
+        # the internal Xcode target name "McController" — we override
+        # so the public-facing short name matches the display name.
+        CFBundleDisplayName: CouchMC
+        CFBundleName: CouchMC
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         # Tells iOS 18+ to treat this as a game — opts into Game Mode (CPU/
@@ -82,7 +88,7 @@ targets:
         NSBonjourServices:
           - _mccontroller._tcp
         # Local network usage description (required for any UDP/Bonjour on iOS 14+)
-        NSLocalNetworkUsageDescription: 用于在局域网中发现并连接到您的 PC 服务器。MC Controller will use the local network to find and connect to your PC server.
+        NSLocalNetworkUsageDescription: 用于在局域网中发现并连接到您的 PC 服务器。CouchMC will use the local network to find and connect to your PC server.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cn.linloir.couchmc.ios

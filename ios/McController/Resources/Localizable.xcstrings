@@ -448,8 +448,8 @@
     },
     "settings.about.open" : {
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About MC Controller" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于 MC Controller" } }
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About CouchMC" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于 CouchMC" } }
       }
     },
     "about.subtitle" : {

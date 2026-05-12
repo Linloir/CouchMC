@@ -478,7 +478,7 @@ struct AboutView: View {
                                 .stroke(.white.opacity(0.1), lineWidth: 1)
                         )
                     VStack(alignment: .leading) {
-                        Text("MC Controller").font(.headline)
+                        Text("CouchMC").font(.headline)
                         Text(L.key("about.subtitle"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)

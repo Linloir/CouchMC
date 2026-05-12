@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MC Controller</string>
+	<string>CouchMC</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -18,7 +18,7 @@
 		<string>en</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>CouchMC</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -32,7 +32,7 @@
 		<string>_mccontroller._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>用于在局域网中发现并连接到您的 PC 服务器。MC Controller will use the local network to find and connect to your PC server.</string>
+	<string>用于在局域网中发现并连接到您的 PC 服务器。CouchMC will use the local network to find and connect to your PC server.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchScreen</key>

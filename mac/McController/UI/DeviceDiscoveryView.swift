@@ -137,7 +137,7 @@ struct DeviceDiscoveryView: View {
                 description: String(
                     format: L.get(
                         "discovery.menubar.hiddenDesc",
-                        fallback: "%@ is hiding MC Controller's menu bar icon. Reveal it by clicking the manager's overflow chevron, or open the manager's preferences and move MC Controller into the always-visible group."),
+                        fallback: "%@ is hiding CouchMC's menu bar icon. Reveal it by clicking the manager's overflow chevron, or open the manager's preferences and move CouchMC into the always-visible group."),
                     manager))
                 .frame(maxWidth: .infinity, alignment: .leading)
         } header: {

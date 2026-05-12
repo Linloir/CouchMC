@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>MC Controller</string>
+	<string>CouchMC</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconFile</key>
@@ -16,8 +16,15 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<!--
+	  Branded short name shown in the Apple menu (Apple → CouchMC),
+	  Spotlight results, Activity Monitor, etc. Otherwise this would
+	  default to $(PRODUCT_NAME) which is the internal target name
+	  "McController" — we override so the menu-bar reading matches
+	  the public display name.
+	-->
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>CouchMC</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -33,7 +40,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>© Linloir</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>MC Controller broadcasts its address on the local network so your phone can find it without you typing an IP.</string>
+	<string>CouchMC broadcasts its address on the local network so your phone can find it without you typing an IP.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_mccontroller._tcp</string>

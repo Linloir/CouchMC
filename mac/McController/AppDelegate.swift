@@ -101,7 +101,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.target = self
             button.action = #selector(statusItemClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.toolTip = L.get("app.tooltip", fallback: "MC Controller")
+            button.toolTip = L.get("app.tooltip", fallback: "CouchMC")
         }
         statusItem = item
     }
