@@ -210,9 +210,23 @@ final class ServerHost: ObservableObject {
         saveNow()
     }
 
-    /// Restore the factory defaults from `ServerConfig.defaultBindings()`.
-    /// Convenience for the Reset button on the Key Bindings page.
+    /// Replace the joystick → keyboard movement mapping. Releases any
+    /// currently-held WASD-style key first so a switch (e.g. W → arrow-up
+    /// mid-stride) can't strand a key down.
+    func updateMovementKeys(_ keys: MovementBindings) {
+        objectWillChange.send()
+        mapper.releaseAll()
+        config.movementKeys = keys
+        saveNow()
+    }
+
+    /// Restore both the action-button bindings and the joystick movement
+    /// keys to their factory defaults. Triggered by the Reset button on
+    /// the Key Bindings page.
     func resetBindingsToDefaults() {
+        objectWillChange.send()
+        mapper.releaseAll()
+        config.movementKeys = ServerConfig.defaultMovementKeys()
         updateBindings(ServerConfig.defaultBindings())
     }
 

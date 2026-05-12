@@ -15,6 +15,13 @@ enum KeyCodes {
     static let s: UInt16 = UInt16(kVK_ANSI_S)
     static let d: UInt16 = UInt16(kVK_ANSI_D)
 
+    // Alternative movement layouts exposed in the Key Bindings page
+    // (IJKL is a common right-hand alternative to WASD).
+    static let i: UInt16 = UInt16(kVK_ANSI_I)
+    static let j: UInt16 = UInt16(kVK_ANSI_J)
+    static let k: UInt16 = UInt16(kVK_ANSI_K)
+    static let l: UInt16 = UInt16(kVK_ANSI_L)
+
     // Modifiers + movement-modifier keys
     static let space: UInt16 = UInt16(kVK_Space)
     static let lshift: UInt16 = UInt16(kVK_Shift)
@@ -44,6 +51,7 @@ enum KeyCodes {
     /// from Windows.
     static let symbolic: [String: UInt16] = [
         "w": w, "a": a, "s": s, "d": d,
+        "i": i, "j": j, "k": k, "l": l,
         "space": space, "jump": space,
         "shift": lshift, "lshift": lshift, "sneak": lshift,
         "ctrl": lctrl, "lctrl": lctrl, "sprint": lctrl,

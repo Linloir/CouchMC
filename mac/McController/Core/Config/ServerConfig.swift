@@ -10,6 +10,12 @@ final class ServerConfig: Codable {
     var activeProfileId: String = "default"
     var profiles: [ControllerProfile] = [ControllerProfile()]
     var bindings: [String: ButtonBinding] = ServerConfig.defaultBindings()
+    /// Joystick → keyboard mapping for the 4 movement directions.
+    /// Read every poll by `JoystickToWasdMapper`, so edits from the Key
+    /// Bindings page take effect without a profile reload. Stored under
+    /// the same `Movement_Keys` JSON name as the Windows config so the
+    /// two files round-trip cleanly.
+    var movementKeys: MovementBindings = MovementBindings()
 
     var activeProfile: ControllerProfile {
         get {
@@ -30,6 +36,7 @@ final class ServerConfig: Codable {
 
     enum CodingKeys: String, CodingKey {
         case port, activeProfileId, profiles, bindings
+        case movementKeys = "Movement_Keys"
     }
 
     init() {}
@@ -42,6 +49,12 @@ final class ServerConfig: Codable {
             ?? [ControllerProfile()]
         bindings = try c.decodeIfPresent([String: ButtonBinding].self, forKey: .bindings)
             ?? ServerConfig.defaultBindings()
+        movementKeys = try c.decodeIfPresent(MovementBindings.self, forKey: .movementKeys)
+            ?? MovementBindings()
+    }
+
+    static func defaultMovementKeys() -> MovementBindings {
+        MovementBindings()
     }
 
     static func defaultBindings() -> [String: ButtonBinding] {
@@ -193,4 +206,47 @@ struct ButtonBinding: Codable, Equatable {
 
 enum CurveType: String, Codable, CaseIterable {
     case linear, power
+}
+
+/// Joystick-direction → key mapping for the four movement axes. Defaults
+/// to the classic W / S / A / D MC layout (stored as symbolic names so
+/// the mac config is human-readable; the Windows config file uses hex
+/// scancodes for the same field and `KeyCodes.resolve` accepts either).
+/// Mirrors `MovementBindings` on the Windows side, JSON-key-compatible.
+struct MovementBindings: Codable, Equatable {
+    /// Forward — joystick y > 0. Default W.
+    var forward: String = "w"
+    /// Back — joystick y < 0. Default S.
+    var back: String = "s"
+    /// Strafe-left — joystick x < 0. Default A.
+    var left: String = "a"
+    /// Strafe-right — joystick x > 0. Default D.
+    var right: String = "d"
+
+    init() {}
+
+    init(forward: String = "w", back: String = "s",
+         left: String = "a", right: String = "d") {
+        self.forward = forward
+        self.back = back
+        self.left = left
+        self.right = right
+    }
+
+    enum CodingKeys: String, CodingKey {
+        // Capitalised to match the Windows JSON field names so a
+        // hand-migrated config from the Windows side decodes cleanly.
+        case forward = "Forward"
+        case back    = "Back"
+        case left    = "Left"
+        case right   = "Right"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        forward = try c.decodeIfPresent(String.self, forKey: .forward) ?? "w"
+        back    = try c.decodeIfPresent(String.self, forKey: .back)    ?? "s"
+        left    = try c.decodeIfPresent(String.self, forKey: .left)    ?? "a"
+        right   = try c.decodeIfPresent(String.self, forKey: .right)   ?? "d"
+    }
 }

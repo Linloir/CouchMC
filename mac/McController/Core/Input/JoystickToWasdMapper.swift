@@ -31,18 +31,37 @@ final class JoystickToWasdMapper {
 
     func update(x: Float, y: Float) {
         lock.lock(); defer { lock.unlock() }
-        updateAxis(value: y, posKey: KeyCodes.w, negKey: KeyCodes.s,
+        updateAxis(value: y, posKey: forwardKey(), negKey: backKey(),
                    posDown: &wDown, negDown: &sDown)
-        updateAxis(value: x, posKey: KeyCodes.d, negKey: KeyCodes.a,
+        updateAxis(value: x, posKey: rightKey(), negKey: leftKey(),
                    posDown: &dDown, negDown: &aDown)
     }
 
     func releaseAll() {
         lock.lock(); defer { lock.unlock() }
-        if wDown { injector.key(KeyCodes.w, down: false); wDown = false }
-        if aDown { injector.key(KeyCodes.a, down: false); aDown = false }
-        if sDown { injector.key(KeyCodes.s, down: false); sDown = false }
-        if dDown { injector.key(KeyCodes.d, down: false); dDown = false }
+        if wDown { injector.key(forwardKey(), down: false); wDown = false }
+        if aDown { injector.key(leftKey(),    down: false); aDown = false }
+        if sDown { injector.key(backKey(),    down: false); sDown = false }
+        if dDown { injector.key(rightKey(),   down: false); dDown = false }
+    }
+
+    // Resolved on every call instead of cached: the Key Bindings page
+    // edits `config.movementKeys` in place and the next joystick sample
+    // should already honour the new mapping, no profile reload needed.
+    // `KeyCodes.resolve` accepts symbolic names ("w", "jump"), Windows
+    // hex scancodes ("0x11"), and decimal scancodes. If somehow blank or
+    // invalid we fall back to the matching WASD direction.
+    private func forwardKey() -> UInt16 {
+        KeyCodes.resolve(config.movementKeys.forward) ?? KeyCodes.w
+    }
+    private func backKey() -> UInt16 {
+        KeyCodes.resolve(config.movementKeys.back) ?? KeyCodes.s
+    }
+    private func leftKey() -> UInt16 {
+        KeyCodes.resolve(config.movementKeys.left) ?? KeyCodes.a
+    }
+    private func rightKey() -> UInt16 {
+        KeyCodes.resolve(config.movementKeys.right) ?? KeyCodes.d
     }
 
     private func updateAxis(value v: Float, posKey: UInt16, negKey: UInt16,
