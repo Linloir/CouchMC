@@ -247,21 +247,17 @@ private let dropSubpaths: [WidgetIcon.Subpath] = [
           style: .fill(alpha: 1, evenOdd: true)),
 ]
 
-// Close — bold filled X. Geometry tuned so the visual stroke weight
-// matches the esc back-arrow at the same display size (user asked for
-// "same size + thickness as esc"). Built from two filled parallelograms
-// rather than two stroked lines so the centre overlap reads as a solid
-// node (matching the esc arrow's solid character) instead of as a thin
-// crossed-line glyph.
+// Close — clean stroked X. Both diagonals are *exactly* symmetric about
+// the (12, 12) viewport centre so the icon renders centred in any
+// square button regardless of size (the previous filled-parallelogram
+// version sat visibly off-centre because its corner geometry wasn't
+// symmetric around the midpoint). Stroke width 2.8 + round caps match
+// the visual weight of the sneak / jump icons at typical button sizes.
 private let closeSubpaths: [WidgetIcon.Subpath] = [
-    // Top-left ↘ bottom-right diagonal
-    .init(pathData:
-          "M 5.6,4.2 L 7.5,4.2 L 19.8,16.5 L 19.8,18.4 L 17.9,18.4 " +
-          "L 5.6,6.1 Z",
-          style: .fill(alpha: 1, evenOdd: false)),
-    // Top-right ↙ bottom-left diagonal
-    .init(pathData:
-          "M 16.5,4.2 L 18.4,4.2 L 18.4,6.1 L 6.1,18.4 L 4.2,18.4 " +
-          "L 4.2,16.5 Z",
-          style: .fill(alpha: 1, evenOdd: false)),
+    // ↘ diagonal: top-left → bottom-right.
+    .init(pathData: "M 6,6 L 18,18",
+          style: .stroke(width: 2.8, alpha: 1, lineCap: .round, lineJoin: .round)),
+    // ↙ diagonal: top-right → bottom-left.
+    .init(pathData: "M 18,6 L 6,18",
+          style: .stroke(width: 2.8, alpha: 1, lineCap: .round, lineJoin: .round)),
 ]

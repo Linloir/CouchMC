@@ -30,10 +30,32 @@ final class ProfileStore {
 
     func load() -> Snapshot {
         guard let data = try? Data(contentsOf: url),
-              let snap = try? JSONDecoder().decode(Snapshot.self, from: data) else {
+              var snap = try? JSONDecoder().decode(Snapshot.self, from: data) else {
             return seed()
         }
+        // Backfill widgets that newer app versions added but older saved
+        // profiles don't carry yet (e.g. `btn_close`, introduced after
+        // the first iOS release). Without this, opening an old profile
+        // in the editor would silently lose access to those widgets:
+        // the controller registers a view for the missing ID, but the
+        // layout pass skips it (no spec → no frame), so the icon never
+        // appears on-screen or in the editor's hit-testing.
+        for name in snap.profiles.keys {
+            guard var p = snap.profiles[name] else { continue }
+            Self.backfill(&p.inGame, with: DefaultLayouts.inGame)
+            Self.backfill(&p.uiMode, with: DefaultLayouts.uiMode)
+            snap.profiles[name] = p
+        }
         return snap
+    }
+
+    /// Insert any widgets present in `defaults` but missing from
+    /// `mode.widgets`, preserving the user's existing positions for
+    /// every widget that is present.
+    private static func backfill(_ mode: inout ModeLayout, with defaults: ModeLayout) {
+        for (id, spec) in defaults.widgets where mode.widgets[id] == nil {
+            mode.widgets[id] = spec
+        }
     }
 
     func save(_ snapshot: Snapshot) {

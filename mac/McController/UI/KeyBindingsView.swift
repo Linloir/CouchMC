@@ -166,74 +166,66 @@ struct KeyBindingsView: View {
 
     // MARK: - Action row
 
-    /// Static description of one action button. The full list mirrors
-    /// the Windows `ActionRow.AllSpecs` so the two pages stay in sync.
+    /// Static description of one action button. Every row supports
+    /// keyboard OR mouse-button bindings — the L/R/M mini chips appear
+    /// during capture for all rows so e.g. "Hotbar 1" can be rebound to
+    /// "middle mouse" if the user wants.
     private struct ActionSpec {
         let buttonId: String
         let labelKey: String
         let labelFallback: String
         let descKey: String
         let descFallback: String
-        let allowMouse: Bool
 
         static let all: [ActionSpec] = [
             .init(buttonId: "0x01",
                   labelKey: "bindings.btn.mouse_left",  labelFallback: "Left click (LMB)",
-                  descKey:  "bindings.btn.mouse_left.desc",  descFallback: "Triggered by the phone's LMB button",
-                  allowMouse: true),
+                  descKey:  "bindings.btn.mouse_left.desc",  descFallback: "Triggered by the phone's LMB button"),
             .init(buttonId: "0x02",
                   labelKey: "bindings.btn.mouse_right", labelFallback: "Right click (RMB)",
-                  descKey:  "bindings.btn.mouse_right.desc", descFallback: "Triggered by the phone's RMB button",
-                  allowMouse: true),
+                  descKey:  "bindings.btn.mouse_right.desc", descFallback: "Triggered by the phone's RMB button"),
 
             .init(buttonId: "0x10",
                   labelKey: "bindings.btn.jump",   labelFallback: "Jump",
-                  descKey:  "bindings.btn.jump.desc",   descFallback: "Default Space",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.jump.desc",   descFallback: "Default Space"),
             .init(buttonId: "0x11",
                   labelKey: "bindings.btn.sneak",  labelFallback: "Sneak",
-                  descKey:  "bindings.btn.sneak.desc",  descFallback: "Default Left Shift",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.sneak.desc",  descFallback: "Default Left Shift"),
             .init(buttonId: "0x12",
                   labelKey: "bindings.btn.sprint", labelFallback: "Sprint",
-                  descKey:  "bindings.btn.sprint.desc", descFallback: "Default Left Ctrl",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.sprint.desc", descFallback: "Default Left Ctrl"),
 
             .init(buttonId: "0x20",
                   labelKey: "bindings.btn.inventory", labelFallback: "Inventory",
-                  descKey:  "bindings.btn.inventory.desc", descFallback: "Default E",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.inventory.desc", descFallback: "Default E"),
             .init(buttonId: "0x21",
                   labelKey: "bindings.btn.drop",      labelFallback: "Drop item",
-                  descKey:  "bindings.btn.drop.desc",      descFallback: "Default Q",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.drop.desc",      descFallback: "Default Q"),
             .init(buttonId: "0x22",
                   labelKey: "bindings.btn.swap_hand", labelFallback: "Swap hand",
-                  descKey:  "bindings.btn.swap_hand.desc", descFallback: "Default F",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.swap_hand.desc", descFallback: "Default F"),
             .init(buttonId: "0x30",
                   labelKey: "bindings.btn.esc",       labelFallback: "Esc / Pause",
-                  descKey:  "bindings.btn.esc.desc",       descFallback: "Default Esc",
-                  allowMouse: false),
+                  descKey:  "bindings.btn.esc.desc",       descFallback: "Default Esc"),
 
             .init(buttonId: "0x40", labelKey: "bindings.btn.hotbar1", labelFallback: "Hotbar 1",
-                  descKey: "bindings.btn.hotbar1.desc", descFallback: "Default 1", allowMouse: false),
+                  descKey: "bindings.btn.hotbar1.desc", descFallback: "Default 1"),
             .init(buttonId: "0x41", labelKey: "bindings.btn.hotbar2", labelFallback: "Hotbar 2",
-                  descKey: "bindings.btn.hotbar2.desc", descFallback: "Default 2", allowMouse: false),
+                  descKey: "bindings.btn.hotbar2.desc", descFallback: "Default 2"),
             .init(buttonId: "0x42", labelKey: "bindings.btn.hotbar3", labelFallback: "Hotbar 3",
-                  descKey: "bindings.btn.hotbar3.desc", descFallback: "Default 3", allowMouse: false),
+                  descKey: "bindings.btn.hotbar3.desc", descFallback: "Default 3"),
             .init(buttonId: "0x43", labelKey: "bindings.btn.hotbar4", labelFallback: "Hotbar 4",
-                  descKey: "bindings.btn.hotbar4.desc", descFallback: "Default 4", allowMouse: false),
+                  descKey: "bindings.btn.hotbar4.desc", descFallback: "Default 4"),
             .init(buttonId: "0x44", labelKey: "bindings.btn.hotbar5", labelFallback: "Hotbar 5",
-                  descKey: "bindings.btn.hotbar5.desc", descFallback: "Default 5", allowMouse: false),
+                  descKey: "bindings.btn.hotbar5.desc", descFallback: "Default 5"),
             .init(buttonId: "0x45", labelKey: "bindings.btn.hotbar6", labelFallback: "Hotbar 6",
-                  descKey: "bindings.btn.hotbar6.desc", descFallback: "Default 6", allowMouse: false),
+                  descKey: "bindings.btn.hotbar6.desc", descFallback: "Default 6"),
             .init(buttonId: "0x46", labelKey: "bindings.btn.hotbar7", labelFallback: "Hotbar 7",
-                  descKey: "bindings.btn.hotbar7.desc", descFallback: "Default 7", allowMouse: false),
+                  descKey: "bindings.btn.hotbar7.desc", descFallback: "Default 7"),
             .init(buttonId: "0x47", labelKey: "bindings.btn.hotbar8", labelFallback: "Hotbar 8",
-                  descKey: "bindings.btn.hotbar8.desc", descFallback: "Default 8", allowMouse: false),
+                  descKey: "bindings.btn.hotbar8.desc", descFallback: "Default 8"),
             .init(buttonId: "0x48", labelKey: "bindings.btn.hotbar9", labelFallback: "Hotbar 9",
-                  descKey: "bindings.btn.hotbar9.desc", descFallback: "Default 9", allowMouse: false),
+                  descKey: "bindings.btn.hotbar9.desc", descFallback: "Default 9"),
         ]
     }
 
@@ -244,11 +236,15 @@ struct KeyBindingsView: View {
         rowShell(label: L.get(spec.labelKey, fallback: spec.labelFallback),
                  description: L.get(spec.descKey, fallback: spec.descFallback)) {
             HStack(spacing: 6) {
-                // For mouse-allowed rows, only show the 3 mini buttons
-                // while in capture mode — they'd otherwise clutter the
-                // common (keyboard-bound) rows and the user can already
-                // record a keyboard key with the main chip.
-                if isCapturing && spec.allowMouse {
+                // Every action row supports binding to a mouse button.
+                // The L/R/M mini chips only show while in capture mode —
+                // they'd otherwise clutter the dominant keyboard-bound
+                // rows. A real mouse-down can't be captured (it would
+                // steal the dismiss-click before the monitor sees it),
+                // so on-screen mini buttons are the only sensible
+                // affordance for "I want this row to fire a mouse
+                // button when the phone button is pressed."
+                if isCapturing {
                     mouseMiniButton(spec.buttonId, button: "left",
                                     glyph: "L",
                                     current: current)
@@ -394,25 +390,18 @@ struct KeyBindingsView: View {
         capturing = nil
     }
 
-    /// Apply a captured `NSEvent.keyDown` to the active row. Esc
-    /// cancels without committing; everything else looks up the
-    /// canonical symbolic name and saves.
+    /// Apply a captured `NSEvent.keyDown` to the active row. Every
+    /// recognised key — *including Esc* — commits to the binding;
+    /// cancelling is done by clicking the active chip again (which
+    /// `toggleCapture` handles) or by clicking a different chip.
     private func handleCapturedKey(_ ev: NSEvent) {
         guard let target = capturing else { return }
         let code = UInt16(ev.keyCode)
 
-        if Int(code) == kVK_Escape {
-            // Esc always cancels capture, even on the Esc-action row —
-            // matches the Windows page behaviour, and the row's default
-            // is already Esc so there's nothing to recover from.
-            stopCapture()
-            return
-        }
-
         guard let symbol = KeyCodes.canonicalByKeyCode[code] else {
-            // Unknown VK code (rare — caps lock, fn key, media keys).
-            // End capture without committing so the user can try
-            // another key without an extra click.
+            // Unknown VK code (rare — fn key, media keys, …). End
+            // capture without committing so the user can try another
+            // key without an extra click.
             stopCapture()
             return
         }

@@ -216,7 +216,7 @@ enum L {
 
         // Capture mode
         "bindings.capture.prompt":      "请按键…",
-        "bindings.section.movement.footer": "点击右侧的按键卡片后按下任意物理按键即可录入；Esc 取消，鼠标按键行可通过右侧 L/R/M 选择。",
+        "bindings.section.movement.footer": "点击右侧的按键卡片后按下任意物理按键即可录入（含修饰键与 Esc）。再次点击卡片可取消；鼠标按键可点击 L/R/M 选择。",
 
         "bindings.reset":             "全部恢复默认",
         "bindings.reset.confirm":     "确定要把所有键位恢复成默认吗？",
@@ -421,7 +421,7 @@ enum L {
         "bindings.key.esc":          "Esc",
 
         "bindings.capture.prompt":      "Press a key…",
-        "bindings.section.movement.footer": "Click the chip on the right and press a physical key to record. Esc cancels; mouse-button rows show L/R/M chips for picking a mouse button.",
+        "bindings.section.movement.footer": "Click the chip on the right and press a physical key to record (modifiers and Esc included). Click the chip again to cancel; mouse buttons can be picked from the L/R/M chips.",
 
         "bindings.reset":             "Reset all to defaults",
         "bindings.reset.confirm":     "Reset all key bindings?",
