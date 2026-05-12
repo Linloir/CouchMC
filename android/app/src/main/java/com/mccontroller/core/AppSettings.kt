@@ -44,10 +44,13 @@ data class AppSettings(
      * Sprint engagement radius as a multiple of the joystick's `baseRadius`.
      * 1.0 means the knob has to reach the rim; 1.5 means it has to be
      * pushed half a base-radius further past the rim. Used symmetrically
-     * for engage AND disengage (no hysteresis band) — matches existing
-     * behaviour where the engage / disengage factors were both 1.2.
+     * for engage AND disengage (no hysteresis band).
+     *
+     * Default 1.5 keeps casual stick wobble from triggering sprint while
+     * staying easy to reach intentionally. Range exposed in the settings
+     * slider is 1.05 .. 2.0.
      */
-    val sprintEngageFactor: Float = 1.2f,
+    val sprintEngageFactor: Float = 1.5f,
 
     /** Extra horizontal offset applied to widgets anchored to the left edge. */
     val leftMarginOffsetDp: Int = 0,
@@ -110,8 +113,8 @@ class SettingsStore private constructor(ctx: Context) {
                 hotbarRelativeStepDp = o.optDouble("hotbar_rel_step_dp", 32.0).toFloat()
                     .coerceIn(8f, 128f),
                 quickSprintEnabled = o.optBoolean("quick_sprint_enabled", true),
-                sprintEngageFactor = o.optDouble("sprint_engage_factor", 1.2).toFloat()
-                    .coerceIn(1.0f, 2.5f),
+                sprintEngageFactor = o.optDouble("sprint_engage_factor", 1.5).toFloat()
+                    .coerceIn(1.05f, 2.0f),
                 leftMarginOffsetDp = o.optInt("l_margin", 0),
                 rightMarginOffsetDp = o.optInt("r_margin", 0),
                 editorEdgeSnap = o.optBoolean("editor_edge_snap", true),

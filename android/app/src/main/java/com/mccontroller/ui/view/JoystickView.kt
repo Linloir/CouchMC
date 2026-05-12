@@ -278,9 +278,10 @@ class JoystickView @JvmOverloads constructor(
         private const val MAX_INTERVAL_MS = 16L
         private const val FADE_IN_MS = 120L
         private const val FADE_OUT_MS = 180L
-        // Push past 1.2× the rim engages sprint; pull back inside 1.2×
-        // disengages. Symmetric (no hysteresis band) — but tunable per
-        // user, see AppSettings.sprintEngageFactor.
-        const val DEFAULT_SPRINT_FACTOR = 1.2f
+        // Symmetric engage / disengage threshold (no hysteresis band).
+        // Default 1.5× the base radius — comfortable headroom over casual
+        // stick wobble. Tunable per-user via AppSettings.sprintEngageFactor
+        // through the settings slider (1.05× .. 2.0×).
+        const val DEFAULT_SPRINT_FACTOR = 1.5f
     }
 }

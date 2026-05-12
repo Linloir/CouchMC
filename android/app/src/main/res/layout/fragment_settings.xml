@@ -400,7 +400,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:valueFrom="1.00"
+                            android:valueFrom="1.05"
                             android:valueTo="2.00"
                             android:stepSize="0.05" />
 
