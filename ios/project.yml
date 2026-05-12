@@ -47,6 +47,14 @@ targets:
         CFBundleDisplayName: MC Controller
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Tells iOS 18+ to treat this as a game — opts into Game Mode (CPU/
+        # GPU prioritisation, reduced background tasks) and tightens the
+        # home-indicator edge-swipe behaviour so the user can't fat-finger
+        # the hotbar into a system gesture. Combined with the VC's
+        # `preferredScreenEdgesDeferringSystemGestures = .all`, the first
+        # bottom swipe is captured by the app — only the second swipe
+        # actually triggers Home.
+        LSApplicationCategoryType: public.app-category.games
         CFBundleLocalizations:
           - zh-Hans
           - en

@@ -15,7 +15,9 @@ final class ButtonRouter {
     }
 
     private let injector: InputInjector
-    private let resolved: [UInt8: Kind]
+    /// Mutable so the Settings → Key Bindings page can rewire keys
+    /// without restarting the server. Reads + writes go through `lock`.
+    private var resolved: [UInt8: Kind]
     private var down: Set<UInt8> = []
     private let lock = NSLock()
 
@@ -48,6 +50,24 @@ final class ButtonRouter {
             }
         }
         down.removeAll()
+    }
+
+    /// Re-resolve from a fresh `[String: ButtonBinding]` map. Any keys
+    /// currently held under the OLD bindings are released first — without
+    /// that, the OS would have a stuck `W` (or whatever) after a rebind
+    /// because we'd lose track of the down-key from the previous table.
+    func applyBindings(_ raw: [String: ButtonBinding]) {
+        lock.lock(); defer { lock.unlock() }
+        // Release everything currently down using the OLD table.
+        for id in down {
+            guard let kind = resolved[id] else { continue }
+            switch kind {
+            case .key(let kc):    injector.key(kc, down: false)
+            case .mouse(let mb):  injector.setMouseButton(mb, down: false)
+            }
+        }
+        down.removeAll()
+        resolved = Self.resolveBindings(raw)
     }
 
     private static func resolveBindings(_ raw: [String: ButtonBinding]) -> [UInt8: Kind] {

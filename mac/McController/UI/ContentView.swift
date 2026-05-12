@@ -45,6 +45,7 @@ struct ContentView: View {
         switch selection ?? .discovery {
         case .discovery: DeviceDiscoveryView()
         case .settings:  ControllerSettingsView()
+        case .bindings:  KeyBindingsView()
         case .global:    GlobalSettingsView()
         case .about:     AboutView()
         }

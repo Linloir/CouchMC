@@ -3,6 +3,7 @@ import SwiftUI
 enum SidebarPage: String, Hashable, CaseIterable, Identifiable {
     case discovery
     case settings
+    case bindings
     case global
     case about
 
@@ -12,6 +13,7 @@ enum SidebarPage: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .discovery: return L.get("nav.discovery", fallback: "Devices")
         case .settings:  return L.get("nav.settings",  fallback: "Settings")
+        case .bindings:  return L.get("nav.bindings",  fallback: "Key Bindings")
         case .global:    return L.get("nav.global",    fallback: "Preferences")
         case .about:     return L.get("about.title",   fallback: "About")
         }
@@ -21,6 +23,7 @@ enum SidebarPage: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .discovery: return L.get("discovery.subtitle", fallback: "Pick a USB or LAN device")
         case .settings:  return L.get("settings.subtitle",  fallback: "Service, profiles, and curve")
+        case .bindings:  return L.get("bindings.subtitle",  fallback: "Map each controller button to a PC key")
         case .global:    return L.get("global.subtitle",    fallback: "App-wide preferences")
         case .about:     return L.get("about.subtitle",     fallback: "App info")
         }
@@ -30,6 +33,7 @@ enum SidebarPage: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .discovery: return "iphone.gen2"
         case .settings:  return "slider.horizontal.3"
+        case .bindings:  return "keyboard"
         case .global:    return "gearshape"
         case .about:     return "info.bubble"
         }
@@ -66,6 +70,7 @@ struct SidebarView: View {
             Section {
                 row(.discovery)
                 row(.settings)
+                row(.bindings)
             } header: {
                 Text(L.get("nav.root", fallback: "Mobile Controller"))
             }

@@ -39,6 +39,7 @@
 	CA88033D7C464552A7F7DCBF /* CurveCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE833A63BEDA03018C0B34E6 /* CurveCanvasView.swift */; };
 	69128A79B7373FDCB1458559 /* DeviceDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F225EB948AB8998905ECFB8C /* DeviceDiscoveryView.swift */; };
 	D8ED2CDDD09801D77554FF39 /* GlobalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF9C9C4401A115C06F7EC45 /* GlobalSettingsView.swift */; };
+	FB1D09599FAC0C35F75768A5 /* KeyBindingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D10C3E7F197019EC43A7ED /* KeyBindingsView.swift */; };
 	4B6055012817690AD4B3175B /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B2143175E21DD9E081416B /* Sidebar.swift */; };
 	61B518F68800FF2DB64C81AA /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A11405D02FD05766B7AEABE /* Localization.swift */; };
 	1CB595CD0AE0DD97E2F4B976 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEF890FCC1F61C66B8C218DF /* Assets.xcassets */; };
@@ -80,6 +81,7 @@
 	FE833A63BEDA03018C0B34E6 /* CurveCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveCanvasView.swift; sourceTree = "<group>"; };
 	F225EB948AB8998905ECFB8C /* DeviceDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDiscoveryView.swift; sourceTree = "<group>"; };
 	5FF9C9C4401A115C06F7EC45 /* GlobalSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSettingsView.swift; sourceTree = "<group>"; };
+	F4D10C3E7F197019EC43A7ED /* KeyBindingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyBindingsView.swift; sourceTree = "<group>"; };
 	E5B2143175E21DD9E081416B /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
 	3A11405D02FD05766B7AEABE /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 	BEF890FCC1F61C66B8C218DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 			FE833A63BEDA03018C0B34E6 /* CurveCanvasView.swift */,
 			F225EB948AB8998905ECFB8C /* DeviceDiscoveryView.swift */,
 			5FF9C9C4401A115C06F7EC45 /* GlobalSettingsView.swift */,
+			F4D10C3E7F197019EC43A7ED /* KeyBindingsView.swift */,
 			E5B2143175E21DD9E081416B /* Sidebar.swift */,
 		);
 		path = UI;
@@ -265,6 +268,7 @@
 			CA88033D7C464552A7F7DCBF /* CurveCanvasView.swift in Sources */,
 			69128A79B7373FDCB1458559 /* DeviceDiscoveryView.swift in Sources */,
 			D8ED2CDDD09801D77554FF39 /* GlobalSettingsView.swift in Sources */,
+			FB1D09599FAC0C35F75768A5 /* KeyBindingsView.swift in Sources */,
 			4B6055012817690AD4B3175B /* Sidebar.swift in Sources */,
 			61B518F68800FF2DB64C81AA /* Localization.swift in Sources */,
 		);

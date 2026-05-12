@@ -194,6 +194,28 @@ final class ServerHost: ObservableObject {
         router.releaseAll()
     }
 
+    /// Replace the current ButtonId → key/mouse mapping. Called from the
+    /// Key Bindings page when the user rebinds an action. Updates the
+    /// router (which releases any currently-held key under the old
+    /// mapping), mutates the persisted config, and saves immediately so
+    /// the rebind survives a relaunch.
+    ///
+    /// `config` is a nonisolated reference type so direct mutations don't
+    /// fire `objectWillChange` automatically — we publish manually so the
+    /// Key Bindings view re-renders with the new label.
+    func updateBindings(_ raw: [String: ButtonBinding]) {
+        objectWillChange.send()
+        config.bindings = raw
+        router.applyBindings(raw)
+        saveNow()
+    }
+
+    /// Restore the factory defaults from `ServerConfig.defaultBindings()`.
+    /// Convenience for the Reset button on the Key Bindings page.
+    func resetBindingsToDefaults() {
+        updateBindings(ServerConfig.defaultBindings())
+    }
+
     /// Rebind to a new TCP/UDP port. Stops the old listeners, restarts
     /// on the new port, and fires a discovery burst so phones still on
     /// the old advertisement learn the new port within ~300 ms.

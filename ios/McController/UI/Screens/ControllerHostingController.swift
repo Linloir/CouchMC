@@ -130,6 +130,18 @@ final class ControllerHostingController: UIViewController {
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { .all }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Nudge UIKit to re-query `prefersHomeIndicatorAutoHidden` +
+        // `preferredScreenEdgesDeferringSystemGestures` once we're on
+        // screen. Without an explicit need-update, the cached values from
+        // the cross-fade insertion sometimes don't apply until the user
+        // first interacts with the screen, which is exactly when they're
+        // mid-swipe on the hotbar and get yanked out to Home.
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+        setNeedsUpdateOfScreenEdgesDeferringSystemGestures()
+    }
+
     // No `supportedInterfaceOrientations` override — the AppDelegate is the
     // single source of truth, switched dynamically by `OrientationHelper`.
     // Hardcoding `.landscape` here would block `requestGeometryUpdate(.portrait)`
