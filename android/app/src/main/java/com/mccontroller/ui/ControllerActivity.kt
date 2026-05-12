@@ -357,8 +357,11 @@ class ControllerActivity : AppCompatActivity() {
      */
     private fun applyAppSettings(s: AppSettings) {
         binding.hotbar.swipeMode = s.hotbarSwipeMode
+        binding.hotbar.relativeStepDp = s.hotbarRelativeStepDp
         binding.lookPad.inGameQuickClicks = s.inGameQuickClicks
         binding.lookPad.uiQuickClicks = s.uiQuickClicks
+        binding.joystick.quickSprintEnabled = s.quickSprintEnabled
+        binding.joystick.sprintEngageFactor = s.sprintEngageFactor
     }
 
     private fun updateLayerVisibility(mode: ControllerMode) {

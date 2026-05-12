@@ -152,6 +152,147 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         setSelectedWidget(null)
     }
 
+    // ===== Empty-area nudge (fine-adjust selected widget) =====
+    //
+    // Empty-area swipe in the editor canvas micro-nudges the SELECTED
+    // widget along the dominant gesture axis. The user's finger travels
+    // ~NUDGE_DIVISOR× the distance the widget moves, so a long sweep
+    // produces a few-pixel adjustment — exactly the "I just want to
+    // touch this thing up" use case. Snap engine sits on top of the
+    // raw nudge: edge alignment + spacing alignment, each independently
+    // toggleable via Settings.
+
+    /** Captured at NudgeStart for the selected widget; reset on End. */
+    private data class NudgeAnchor(
+        val edgeMarginDp: Float,
+        val verticalMarginDp: Float,
+        val anchor: Anchor,
+    )
+    private var nudgeAnchor: NudgeAnchor? = null
+
+    override fun onNudgeStart() {
+        val id = selectedId ?: return
+        val spec = currentSpec(id) ?: return
+        nudgeAnchor = NudgeAnchor(
+            edgeMarginDp = spec.edgeMarginDp,
+            verticalMarginDp = spec.verticalMarginDp,
+            anchor = spec.anchor,
+        )
+    }
+
+    override fun onNudgeDelta(axis: com.mccontroller.ui.view.EditorCanvas.NudgeAxis, deltaPx: Float) {
+        val id = selectedId ?: return
+        val anchor = nudgeAnchor ?: return
+        val density = resources.displayMetrics.density
+
+        // Scale the finger travel down by NUDGE_DIVISOR so the user gets
+        // sub-px precision over a sane swipe distance.
+        val effectivePx = deltaPx / com.mccontroller.ui.view.EditorCanvas.NUDGE_DIVISOR
+        val effectiveDp = effectivePx / density
+
+        val (proposedEdge, proposedVert) = when (axis) {
+            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Horizontal -> {
+                val sign = when {
+                    anchor.anchor.isHorizontalCenter() -> 0f      // center-anchored = no horizontal adjust
+                    anchor.anchor.isStart() -> 1f                  // start: finger right = bigger edge
+                    else -> -1f                                    // end: finger right = smaller edge
+                }
+                (anchor.edgeMarginDp + effectiveDp * sign).coerceAtLeast(0f) to anchor.verticalMarginDp
+            }
+            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Vertical -> {
+                val sign = if (anchor.anchor.isTop()) 1f else -1f
+                anchor.edgeMarginDp to (anchor.verticalMarginDp + effectiveDp * sign).coerceAtLeast(0f)
+            }
+        }
+        updateSpec(id) { it.copy(edgeMarginDp = proposedEdge, verticalMarginDp = proposedVert) }
+
+        // After applying the proposed move, run the snap pass and (if it
+        // matches) re-apply with the corrective offset. We snap in screen
+        // pixels — that's where alignment visually means something — then
+        // translate the px delta back into dp-space spec adjustments.
+        runSnapPass(id, axis)
+    }
+
+    override fun onNudgeEnd() {
+        nudgeAnchor = null
+        binding.canvas.setGuides(emptyList())
+    }
+
+    /**
+     * Read the rects of every other in-mode widget, run the snap engine,
+     * and apply any returned correction to the moving widget's spec.
+     * Sets the canvas overlay guides as a side effect.
+     */
+    private fun runSnapPass(id: String, axis: com.mccontroller.ui.view.EditorCanvas.NudgeAxis) {
+        val s = SettingsStore.get(this).current
+        if (!s.editorEdgeSnap && !s.editorSpacingSnap) {
+            binding.canvas.setGuides(emptyList())
+            return
+        }
+        val movingView = allWidgetMap()[id] ?: return
+        if (movingView.width == 0 || movingView.height == 0) return
+
+        val canvas = binding.canvas
+        // Build rects in canvas-local pixel coords. Use the views' .left /
+        // .top etc. directly — those are already in canvas-local space
+        // since the views are direct children of the canvas FrameLayout.
+        val moving = android.graphics.RectF(
+            movingView.left.toFloat(), movingView.top.toFloat(),
+            movingView.right.toFloat(), movingView.bottom.toFloat(),
+        )
+        val others = activeModeWidgetMap().entries
+            .asSequence()
+            .filter { it.key != id }
+            .map { it.value }
+            .filter { it.width > 0 && it.height > 0 && it.visibility == View.VISIBLE }
+            .map {
+                android.graphics.RectF(
+                    it.left.toFloat(), it.top.toFloat(),
+                    it.right.toFloat(), it.bottom.toFloat(),
+                )
+            }
+            .toList()
+
+        val threshold = SNAP_THRESHOLD_DP * resources.displayMetrics.density
+        val result = com.mccontroller.ui.editor.SnapEngine.compute(
+            moving = moving,
+            others = others,
+            axis = axis,
+            edgeSnap = s.editorEdgeSnap,
+            spacingSnap = s.editorSpacingSnap,
+            thresholdPx = threshold,
+        )
+        canvas.setGuides(result.guides)
+        if (result.snappedDx == 0f) return
+
+        val density = resources.displayMetrics.density
+        val snappedDp = result.snappedDx / density
+        // Translate the px-space snap correction back into dp-space spec
+        // edits respecting the active anchor's sign.
+        val spec = currentSpec(id) ?: return
+        val newSpec = when (axis) {
+            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Horizontal -> {
+                val sign = when {
+                    spec.anchor.isHorizontalCenter() -> 0f
+                    spec.anchor.isStart() -> 1f
+                    else -> -1f
+                }
+                spec.copy(edgeMarginDp = (spec.edgeMarginDp + snappedDp * sign).coerceAtLeast(0f))
+            }
+            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Vertical -> {
+                val sign = if (spec.anchor.isTop()) 1f else -1f
+                spec.copy(verticalMarginDp = (spec.verticalMarginDp + snappedDp * sign).coerceAtLeast(0f))
+            }
+        }
+        updateSpec(id) { newSpec }
+    }
+
+    /** Returns the widgets visible in the currently-edited mode. */
+    private fun activeModeWidgetMap(): Map<String, View> = when (currentEditMode) {
+        EditMode.InGame -> inGameWidgetMap()
+        EditMode.UiInteract -> uiModeWidgetMap()
+    }
+
     // ===== Save / cancel / reset-all =====
 
     private fun setupActions() {
@@ -427,5 +568,8 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         const val MODE_IN_GAME = "in_game"
         /** Value for [EXTRA_MODE] — open the UI-mode layout. */
         const val MODE_UI = "ui"
+
+        /** Distance (dp) within which an alignment counts as a snap candidate. */
+        private const val SNAP_THRESHOLD_DP = 6f
     }
 }

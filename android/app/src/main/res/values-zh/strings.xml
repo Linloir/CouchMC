@@ -92,12 +92,28 @@
     <string name="settings_hotbar_mode_precise_summary">选中手指当前所在的格子</string>
     <string name="settings_hotbar_mode_relative">相对</string>
     <string name="settings_hotbar_mode_relative_summary">滚轮手感：每滑动约 32dp 切换一格，到达两端后循环</string>
+    <string name="settings_hotbar_relative_step">滑动灵敏度</string>
+    <string name="settings_hotbar_relative_step_summary">切换一格所需的滑动距离。数值越小越灵敏。</string>
+    <string name="settings_hotbar_relative_step_value">%1$d dp</string>
+
+    <string name="settings_section_sprint">疾跑触发</string>
+    <string name="settings_sprint_enable">推到顶继续推 = 疾跑</string>
+    <string name="settings_sprint_enable_summary">摇杆推过外圈即触发疾跑。关闭后只能用专属的疾跑按钮开关。</string>
+    <string name="settings_sprint_factor">触发距离</string>
+    <string name="settings_sprint_factor_summary">摇杆需要推到外圈外多远才触发。1.0 = 推到外圈即可，2.0 = 需要再多推一个基础半径。</string>
+    <string name="settings_sprint_factor_value">%1$.2f×</string>
 
     <string name="settings_section_gestures">触控板手势</string>
     <string name="settings_in_game_quick_clicks">局内快捷点击</string>
     <string name="settings_in_game_quick_clicks_summary">单击 = LMB 点击；单击后再次按下滑动 = 按住 LMB 移动视角。关闭后触控板仅控制视角。</string>
     <string name="settings_ui_quick_clicks">UI 操作快捷点击</string>
     <string name="settings_ui_quick_clicks_summary">单击 = LMB、双击 = RMB、单击 + 按下滑动 = 按住 LMB、双击 + 按下滑动 = 按住 RMB。关闭后触控板仅驱动光标。</string>
+
+    <string name="settings_section_editor">布局编辑器</string>
+    <string name="settings_editor_edge_snap">边缘自动对齐</string>
+    <string name="settings_editor_edge_snap_summary">微调时，靠近另一个按钮的上 / 下 / 左 / 右或中线会自动吸附，并显示一条灰色虚线提示。</string>
+    <string name="settings_editor_spacing_snap">间距自动对齐</string>
+    <string name="settings_editor_spacing_snap_summary">当与某个按钮的间距和其他按钮间的间距相同时自动吸附，并在两个间距上同时显示对齐辅助线。</string>
 
     <string name="settings_section_volume">音量键</string>
     <string name="settings_volume_up">音量 +</string>

@@ -45,6 +45,29 @@ class JoystickView @JvmOverloads constructor(
 
     var onSprintExtensionChanged: ((engaged: Boolean) -> Unit)? = null
 
+    /**
+     * Sprint engagement radius as a multiple of [baseRadius]. Used
+     * symmetrically for engage and disengage (no hysteresis band).
+     * Tuned at runtime from `AppSettings.sprintEngageFactor`.
+     */
+    var sprintEngageFactor: Float = DEFAULT_SPRINT_FACTOR
+
+    /**
+     * Master switch for "push-past-the-rim = sprint". When false the
+     * extension is ignored entirely and onSprintExtensionChanged is never
+     * fired with `true` (and is fired with `false` once if it was held
+     * the moment this flag flipped). Tunable from `AppSettings`.
+     */
+    var quickSprintEnabled: Boolean = true
+        set(value) {
+            if (field == value) return
+            field = value
+            if (!value && sprintEngaged) {
+                sprintEngaged = false
+                onSprintExtensionChanged?.invoke(false)
+            }
+        }
+
     private val density = resources.displayMetrics.density
     private fun dp(v: Float) = v * density
 
@@ -152,12 +175,14 @@ class JoystickView @JvmOverloads constructor(
         }
         invalidate()
 
-        val engageDist = baseRadius * SPRINT_ENGAGE_FACTOR
-        val disengageDist = baseRadius * SPRINT_DISENGAGE_FACTOR
-        val newEngaged = if (sprintEngaged) dist > disengageDist else dist > engageDist
-        if (newEngaged != sprintEngaged) {
-            sprintEngaged = newEngaged
-            onSprintExtensionChanged?.invoke(newEngaged)
+        if (quickSprintEnabled) {
+            // Symmetric engage / disengage — no hysteresis band, by design.
+            val threshold = baseRadius * sprintEngageFactor
+            val newEngaged = dist > threshold
+            if (newEngaged != sprintEngaged) {
+                sprintEngaged = newEngaged
+                onSprintExtensionChanged?.invoke(newEngaged)
+            }
         }
 
         val normX = (knobX - baseX) / baseRadius
@@ -254,8 +279,8 @@ class JoystickView @JvmOverloads constructor(
         private const val FADE_IN_MS = 120L
         private const val FADE_OUT_MS = 180L
         // Push past 1.2× the rim engages sprint; pull back inside 1.2×
-        // disengages — symmetric, no hysteresis band, per user request.
-        private const val SPRINT_ENGAGE_FACTOR = 1.2f
-        private const val SPRINT_DISENGAGE_FACTOR = 1.2f
+        // disengages. Symmetric (no hysteresis band) — but tunable per
+        // user, see AppSettings.sprintEngageFactor.
+        const val DEFAULT_SPRINT_FACTOR = 1.2f
     }
 }

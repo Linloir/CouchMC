@@ -269,6 +269,143 @@
 
                     </LinearLayout>
 
+                    <!-- Sensitivity row — only shown in Relative mode. -->
+                    <View
+                        android:id="@+id/divider_hotbar_step"
+                        style="@style/SettingsDivider"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/row_hotbar_step"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="12dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_hotbar_relative_step"
+                                android:textAppearance="?attr/textAppearanceTitleMedium"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/txt_hotbar_step_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceLabelLarge"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:fontFeatureSettings="tnum"
+                                android:minWidth="56dp"
+                                android:gravity="end"
+                                tools:text="32 dp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/settings_hotbar_relative_step_summary"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/slider_hotbar_step"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:valueFrom="12"
+                            android:valueTo="80"
+                            android:stepSize="2" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- =========================== SPRINT ============================== -->
+            <TextView
+                style="@style/SettingsSectionLabel"
+                android:text="@string/settings_section_sprint" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/SettingsCard">
+
+                <LinearLayout style="@style/SettingsCardInner">
+
+                    <include
+                        android:id="@+id/row_sprint_enable"
+                        layout="@layout/view_settings_switch" />
+
+                    <!-- Engagement-distance row — disabled when the switch is off. -->
+                    <View
+                        android:id="@+id/divider_sprint_factor"
+                        style="@style/SettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/row_sprint_factor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="12dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_sprint_factor"
+                                android:textAppearance="?attr/textAppearanceTitleMedium"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/txt_sprint_factor_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceLabelLarge"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:fontFeatureSettings="tnum"
+                                android:minWidth="56dp"
+                                android:gravity="end"
+                                tools:text="1.20×" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/settings_sprint_factor_summary"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/slider_sprint_factor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:valueFrom="1.00"
+                            android:valueTo="2.00"
+                            android:stepSize="0.05" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -290,6 +427,29 @@
 
                     <include
                         android:id="@+id/row_ui_quick"
+                        layout="@layout/view_settings_switch" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- =========================== LAYOUT EDITOR ============================== -->
+            <TextView
+                style="@style/SettingsSectionLabel"
+                android:text="@string/settings_section_editor" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/SettingsCard">
+
+                <LinearLayout style="@style/SettingsCardInner">
+
+                    <include
+                        android:id="@+id/row_editor_edge_snap"
+                        layout="@layout/view_settings_switch" />
+
+                    <View style="@style/SettingsDivider" />
+
+                    <include
+                        android:id="@+id/row_editor_spacing_snap"
                         layout="@layout/view_settings_switch" />
 
                 </LinearLayout>

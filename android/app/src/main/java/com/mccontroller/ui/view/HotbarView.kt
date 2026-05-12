@@ -51,6 +51,12 @@ class HotbarView @JvmOverloads constructor(
     var swipeMode: com.mccontroller.core.HotbarSwipeMode =
         com.mccontroller.core.HotbarSwipeMode.Precise
 
+    /**
+     * Travel (in dp) required to cycle one slot in Relative mode.
+     * Lower = more sensitive. Ignored in Precise mode.
+     */
+    var relativeStepDp: Float = DEFAULT_RELATIVE_STEP_DP
+
     // Relative-mode accumulator: each ACTION_MOVE's horizontal delta adds
     // to this; every SLOT_STEP_PX threshold step cycles the selection.
     private var relAccumPx = 0f
@@ -176,7 +182,7 @@ class HotbarView @JvmOverloads constructor(
         relLastX = curX
         relAccumPx += dx
         var stepped = false
-        val stepPx = dp(SLOT_STEP_DP)
+        val stepPx = dp(relativeStepDp.coerceAtLeast(4f))
         while (relAccumPx >= stepPx) {
             selectedSlot = (selectedSlot + 1) % slotCount
             onSelect?.invoke(selectedSlot)
@@ -286,9 +292,10 @@ class HotbarView @JvmOverloads constructor(
     companion object {
         private const val LONG_PRESS_MS = 400L
         private const val DROP_PERIOD_MS = 200L
-        // Travel distance per slot step in Relative mode. Roughly matches the
-        // visible slot width (32dp), so it feels like the finger is "carrying"
-        // a virtual scroll wheel one notch per slot.
-        private const val SLOT_STEP_DP = 32f
+        // Default travel distance per slot step in Relative mode. Roughly
+        // matches the visible slot width (32dp), so it feels like the
+        // finger is "carrying" a virtual scroll wheel one notch per slot.
+        // Tunable per user via [relativeStepDp] (driven from AppSettings).
+        const val DEFAULT_RELATIVE_STEP_DP = 32f
     }
 }

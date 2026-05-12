@@ -96,12 +96,28 @@
     <string name="settings_hotbar_mode_precise_summary">The selected slot is whichever one the finger is over</string>
     <string name="settings_hotbar_mode_relative">Relative</string>
     <string name="settings_hotbar_mode_relative_summary">Scroll-wheel feel: every ~32dp of swipe advances by one slot, wraps at the ends</string>
+    <string name="settings_hotbar_relative_step">Swipe sensitivity</string>
+    <string name="settings_hotbar_relative_step_summary">Travel needed to advance one slot. Lower = more sensitive.</string>
+    <string name="settings_hotbar_relative_step_value">%1$d dp</string>
+
+    <string name="settings_section_sprint">Sprint extension</string>
+    <string name="settings_sprint_enable">Push past rim to sprint</string>
+    <string name="settings_sprint_enable_summary">Push the joystick past the rim to engage sprint. Turn off to use only the sprint toggle button.</string>
+    <string name="settings_sprint_factor">Engagement distance</string>
+    <string name="settings_sprint_factor_summary">How far past the rim the knob must travel before sprint kicks in. 1.0 = at the rim, 2.0 = a base-radius further.</string>
+    <string name="settings_sprint_factor_value">%1$.2f×</string>
 
     <string name="settings_section_gestures">Lookpad gestures</string>
     <string name="settings_in_game_quick_clicks">In-game quick clicks</string>
     <string name="settings_in_game_quick_clicks_summary">Single tap = LMB. Tap then re-press and slide = LMB held while looking. When off, the lookpad only moves the camera.</string>
     <string name="settings_ui_quick_clicks">UI-mode quick clicks</string>
     <string name="settings_ui_quick_clicks_summary">Single tap = LMB, double tap = RMB, tap-then-slide = LMB hold, double-tap-then-slide = RMB hold. When off, the lookpad only drives the cursor.</string>
+
+    <string name="settings_section_editor">Layout editor</string>
+    <string name="settings_editor_edge_snap">Edge snap</string>
+    <string name="settings_editor_edge_snap_summary">Pop into alignment with another widget\'s top / bottom / left / right / centerline when nearby; shows a dashed guide.</string>
+    <string name="settings_editor_spacing_snap">Spacing snap</string>
+    <string name="settings_editor_spacing_snap_summary">When the gap to a neighbour matches some other pair\'s gap, snap to match exactly and draw a guide over both gaps.</string>
 
     <string name="settings_section_volume">Volume keys</string>
     <string name="settings_volume_up">Volume up</string>

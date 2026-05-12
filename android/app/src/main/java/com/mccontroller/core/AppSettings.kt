@@ -30,10 +30,45 @@ data class AppSettings(
     /** Hotbar swipe interpretation — moved out of [LayoutProfile] per user request. */
     val hotbarSwipeMode: HotbarSwipeMode = HotbarSwipeMode.Precise,
 
+    /**
+     * Travel distance (in dp) required to cycle one slot in
+     * [HotbarSwipeMode.Relative]. Smaller = more sensitive. Ignored in
+     * Precise mode.
+     */
+    val hotbarRelativeStepDp: Float = 32f,
+
+    /** Master switch for "push-past-the-rim = sprint" on the floating joystick. */
+    val quickSprintEnabled: Boolean = true,
+
+    /**
+     * Sprint engagement radius as a multiple of the joystick's `baseRadius`.
+     * 1.0 means the knob has to reach the rim; 1.5 means it has to be
+     * pushed half a base-radius further past the rim. Used symmetrically
+     * for engage AND disengage (no hysteresis band) — matches existing
+     * behaviour where the engage / disengage factors were both 1.2.
+     */
+    val sprintEngageFactor: Float = 1.2f,
+
     /** Extra horizontal offset applied to widgets anchored to the left edge. */
     val leftMarginOffsetDp: Int = 0,
     /** Extra horizontal offset applied to widgets anchored to the right edge. */
     val rightMarginOffsetDp: Int = 0,
+
+    /**
+     * Layout editor: snap the selected widget to a neighbour's edge
+     * (top / bottom / left / right or centerline) when it's within a few
+     * dp during a nudge. Long dashed guide line indicates which edges
+     * aligned. Turn off if you'd rather position freehand.
+     */
+    val editorEdgeSnap: Boolean = true,
+
+    /**
+     * Layout editor: snap to match existing gaps. When the moving widget's
+     * proposed gap to a neighbour matches some other pair's gap (within
+     * threshold), pop into alignment and draw a dashed marker over both
+     * gaps. PowerPoint-style "equal distribution" hint.
+     */
+    val editorSpacingSnap: Boolean = true,
 )
 
 /**
@@ -72,8 +107,15 @@ class SettingsStore private constructor(ctx: Context) {
                 hotbarSwipeMode = runCatching {
                     HotbarSwipeMode.valueOf(o.optString("hotbar_swipe", "Precise"))
                 }.getOrDefault(HotbarSwipeMode.Precise),
+                hotbarRelativeStepDp = o.optDouble("hotbar_rel_step_dp", 32.0).toFloat()
+                    .coerceIn(8f, 128f),
+                quickSprintEnabled = o.optBoolean("quick_sprint_enabled", true),
+                sprintEngageFactor = o.optDouble("sprint_engage_factor", 1.2).toFloat()
+                    .coerceIn(1.0f, 2.5f),
                 leftMarginOffsetDp = o.optInt("l_margin", 0),
                 rightMarginOffsetDp = o.optInt("r_margin", 0),
+                editorEdgeSnap = o.optBoolean("editor_edge_snap", true),
+                editorSpacingSnap = o.optBoolean("editor_spacing_snap", true),
             )
         } catch (_: Exception) {
             AppSettings()
@@ -87,8 +129,13 @@ class SettingsStore private constructor(ctx: Context) {
             put("vol_up", s.volumeUpBinding ?: -1)
             put("vol_down", s.volumeDownBinding ?: -1)
             put("hotbar_swipe", s.hotbarSwipeMode.name)
+            put("hotbar_rel_step_dp", s.hotbarRelativeStepDp.toDouble())
+            put("quick_sprint_enabled", s.quickSprintEnabled)
+            put("sprint_engage_factor", s.sprintEngageFactor.toDouble())
             put("l_margin", s.leftMarginOffsetDp)
             put("r_margin", s.rightMarginOffsetDp)
+            put("editor_edge_snap", s.editorEdgeSnap)
+            put("editor_spacing_snap", s.editorSpacingSnap)
         }
         prefs.edit().putString(KEY_BLOB, o.toString()).apply()
     }

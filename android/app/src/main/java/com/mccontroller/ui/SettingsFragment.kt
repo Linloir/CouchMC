@@ -19,6 +19,7 @@ import com.mccontroller.BuildConfig
 import com.mccontroller.R
 import com.mccontroller.core.AppSettings
 import com.mccontroller.core.ButtonBindingRegistry
+import com.mccontroller.core.DefaultLayouts
 import com.mccontroller.core.HotbarSwipeMode
 import com.mccontroller.core.LayoutProfile
 import com.mccontroller.core.ProfileStore
@@ -59,7 +60,10 @@ class SettingsFragment : Fragment() {
         wireLayoutShortcuts()
         wireProfileSection()
         wireHotbar()
+        wireHotbarStepSlider()
+        wireSprintSection()
         wireGestureSwitches()
+        wireEditorSnapSwitches()
         wireVolumePickers()
         wireMarginSliders()
 
@@ -162,14 +166,12 @@ class SettingsFragment : Fragment() {
             },
         ) { name ->
             val (profiles, _) = profileStore.loadAll()
-            val seed = profiles.firstOrNull() ?: return@show
-            val copy = LayoutProfile(
-                name = name,
-                inGame = seed.inGame,
-                uiMode = seed.uiMode,
-                hotbarSwipeMode = seed.hotbarSwipeMode,
-            )
-            profileStore.saveAll(profiles + copy, activeName = name)
+            // Per user preference, new profiles use factory defaults, not a
+            // copy of the current/first profile — gives a clean starting
+            // point that matches what "Reset to defaults" inside the editor
+            // would produce. Profile name is the one the user just typed.
+            val fresh = DefaultLayouts.DEFAULT_PROFILE.copy(name = name)
+            profileStore.saveAll(profiles + fresh, activeName = name)
             renderActiveProfileButton()
         }
     }
@@ -228,6 +230,69 @@ class SettingsFragment : Fragment() {
             else HotbarSwipeMode.Relative
             settingsStore.update { it.copy(hotbarSwipeMode = mode) }
         }
+    }
+
+    private fun wireHotbarStepSlider() {
+        val slider = binding.sliderHotbarStep
+        val label = binding.txtHotbarStepValue
+        slider.value = settingsStore.current.hotbarRelativeStepDp
+            .coerceIn(slider.valueFrom, slider.valueTo)
+        label.text = getString(
+            R.string.settings_hotbar_relative_step_value,
+            slider.value.toInt(),
+        )
+        slider.addOnChangeListener { _, v, fromUser ->
+            label.text = getString(R.string.settings_hotbar_relative_step_value, v.toInt())
+            if (fromUser) settingsStore.update { it.copy(hotbarRelativeStepDp = v) }
+        }
+    }
+
+    private fun wireSprintSection() {
+        // Switch
+        val switchRow = binding.rowSprintEnable.root
+        val switchView = switchRow.findViewById<MaterialSwitch>(R.id.switch_value)
+        switchRow.findViewById<TextView>(R.id.switch_title).setText(R.string.settings_sprint_enable)
+        switchRow.findViewById<TextView>(R.id.switch_summary).setText(R.string.settings_sprint_enable_summary)
+        switchView.isChecked = settingsStore.current.quickSprintEnabled
+        switchRow.setOnClickListener {
+            val next = !switchView.isChecked
+            switchView.isChecked = next
+            settingsStore.update { it.copy(quickSprintEnabled = next) }
+        }
+
+        // Factor slider
+        val slider = binding.sliderSprintFactor
+        val label = binding.txtSprintFactorValue
+        slider.value = settingsStore.current.sprintEngageFactor
+            .coerceIn(slider.valueFrom, slider.valueTo)
+        label.text = getString(R.string.settings_sprint_factor_value, slider.value)
+        slider.addOnChangeListener { _, v, fromUser ->
+            label.text = getString(R.string.settings_sprint_factor_value, v)
+            if (fromUser) settingsStore.update { it.copy(sprintEngageFactor = v) }
+        }
+    }
+
+    private fun wireEditorSnapSwitches() {
+        wireSwitchRow(
+            row = binding.rowEditorEdgeSnap.root,
+            switch = binding.rowEditorEdgeSnap.root.findViewById(R.id.switch_value),
+            title = binding.rowEditorEdgeSnap.root.findViewById(R.id.switch_title),
+            summary = binding.rowEditorEdgeSnap.root.findViewById(R.id.switch_summary),
+            titleRes = R.string.settings_editor_edge_snap,
+            summaryRes = R.string.settings_editor_edge_snap_summary,
+            getValue = { settingsStore.current.editorEdgeSnap },
+            setValue = { v -> settingsStore.update { it.copy(editorEdgeSnap = v) } },
+        )
+        wireSwitchRow(
+            row = binding.rowEditorSpacingSnap.root,
+            switch = binding.rowEditorSpacingSnap.root.findViewById(R.id.switch_value),
+            title = binding.rowEditorSpacingSnap.root.findViewById(R.id.switch_title),
+            summary = binding.rowEditorSpacingSnap.root.findViewById(R.id.switch_summary),
+            titleRes = R.string.settings_editor_spacing_snap,
+            summaryRes = R.string.settings_editor_spacing_snap_summary,
+            getValue = { settingsStore.current.editorSpacingSnap },
+            setValue = { v -> settingsStore.update { it.copy(editorSpacingSnap = v) } },
+        )
     }
 
     private fun wireGestureSwitches() {
@@ -384,10 +449,30 @@ class SettingsFragment : Fragment() {
             },
         )
 
+        // Sensitivity row only makes sense in Relative mode — hide it
+        // (and its divider) entirely in Precise mode rather than disabling
+        // it, since there's nothing it can do there.
+        val relative = s.hotbarSwipeMode == HotbarSwipeMode.Relative
+        binding.dividerHotbarStep.visibility = if (relative) View.VISIBLE else View.GONE
+        binding.rowHotbarStep.visibility = if (relative) View.VISIBLE else View.GONE
+
+        // Sprint section: switch always visible; factor slider disabled
+        // (greyed out) when the master switch is off so the user can see
+        // what they're missing without being able to fiddle with it.
+        val sprintOn = s.quickSprintEnabled
+        binding.rowSprintEnable.root.findViewById<MaterialSwitch>(R.id.switch_value).isChecked =
+            sprintOn
+        binding.sliderSprintFactor.isEnabled = sprintOn
+        binding.rowSprintFactor.alpha = if (sprintOn) 1f else 0.45f
+
         binding.rowInGameQuick.root.findViewById<MaterialSwitch>(R.id.switch_value).isChecked =
             s.inGameQuickClicks
         binding.rowUiQuick.root.findViewById<MaterialSwitch>(R.id.switch_value).isChecked =
             s.uiQuickClicks
+        binding.rowEditorEdgeSnap.root.findViewById<MaterialSwitch>(R.id.switch_value).isChecked =
+            s.editorEdgeSnap
+        binding.rowEditorSpacingSnap.root.findViewById<MaterialSwitch>(R.id.switch_value).isChecked =
+            s.editorSpacingSnap
 
         binding.rowVolUp.root.findViewById<TextView>(R.id.picker_value).text =
             getString(ButtonBindingRegistry.labelResFor(s.volumeUpBinding))
