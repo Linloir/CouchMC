@@ -6,7 +6,10 @@ struct DeviceDiscoveryView: View {
 
     @StateObject private var adb: AdbDiscovery
     @State private var accessibilityGranted: Bool = AccessibilityPermission.isGranted
-    @State private var menuBarHiddenManager: String?
+    // The "menu bar icon hidden" notice now lives on the Global
+    // Settings page — conceptually it belongs with launch-at-login
+    // and the rest of "how does this app sit in the menu bar"
+    // preferences. Removed from this page to avoid duplication.
 
     /// Polls every 1 s in addition to the explicit refreshes below.
     /// AX trust changes don't fire any notification we can listen to,
@@ -29,9 +32,6 @@ struct DeviceDiscoveryView: View {
             if !accessibilityGranted {
                 accessibilitySection
             }
-            if let manager = menuBarHiddenManager {
-                menuBarHiddenSection(manager: manager)
-            }
             statusSection
             usbSection
             lanSection
@@ -43,106 +43,20 @@ struct DeviceDiscoveryView: View {
         .onAppear {
             adb.start()
             refreshAccessibility()
-            refreshMenuBarStatus()
         }
         .onDisappear { adb.stop() }
         .onReceive(accessibilityTimer) { _ in
             refreshAccessibility()
-            refreshMenuBarStatus()
         }
         .onReceive(NotificationCenter.default.publisher(
             for: NSApplication.didBecomeActiveNotification)) { _ in
             refreshAccessibility()
-            refreshMenuBarStatus()
         }
     }
 
     private func refreshAccessibility() {
         let now = AccessibilityPermission.isGranted
         if now != accessibilityGranted { accessibilityGranted = now }
-    }
-
-    /// Detects whether our `NSStatusItem` is currently invisible.
-    /// Catches both flavors of hiding a menu-bar manager applies:
-    ///   - **`kCGWindowIsOnscreen = false`** — `NSStatusItem.isVisible`
-    ///     was toggled off (Hidden Bar's "always hide" group does this,
-    ///     and the flag persists even after Hidden Bar quits).
-    ///   - **`bounds.x < 0`** — the status item's window was moved
-    ///     off-screen via the Accessibility API (Bartender's older
-    ///     technique).
-    private func refreshMenuBarStatus() {
-        let myPID = Int(ProcessInfo.processInfo.processIdentifier)
-        let info = (CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID)
-                    as? [[String: Any]]) ?? []
-        var hidden = false
-        for w in info {
-            guard (w[kCGWindowOwnerPID as String] as? Int) == myPID else { continue }
-            // NSStatusWindowLevel == 25 (Carbon kCGStatusWindowLevel).
-            guard (w[kCGWindowLayer as String] as? Int) == 25 else { continue }
-            let onScreen = w[kCGWindowIsOnscreen as String] as? Bool ?? false
-            var offscreenX = false
-            if let bounds = w[kCGWindowBounds as String] as? [String: Any],
-               let x = bounds["X"] as? Double, x < 0 {
-                offscreenX = true
-            }
-            if !onScreen || offscreenX {
-                hidden = true
-            }
-            break
-        }
-        if hidden {
-            menuBarHiddenManager = detectMenuBarManager()
-        } else {
-            menuBarHiddenManager = nil
-        }
-    }
-
-    /// Detect known menu-bar-manager apps that hide newly-added
-    /// `NSStatusItem`s by default. Returns the user-visible product
-    /// name we can name in the warning card so the user knows where
-    /// to look.
-    private func detectMenuBarManager() -> String {
-        let knownManagers: [(bundleIDs: [String], name: String)] = [
-            (["com.dwarvesv.minimalbar"], "Hidden Bar"),
-            (["com.surteesstudios.Bartender",
-              "com.surteesstudios.Bartender-Beta",
-              "com.surteesstudios.Bartender4"], "Bartender"),
-            (["com.bjango.istatmenus",
-              "com.bjango.istatmenus6",
-              "com.bjango.istatmenus.status"], "iStat Menus"),
-            (["com.matthewpalmer.Vanilla"], "Vanilla"),
-        ]
-        let running = NSWorkspace.shared.runningApplications
-            .compactMap(\.bundleIdentifier)
-        for (ids, name) in knownManagers {
-            if ids.contains(where: { running.contains($0) }) {
-                return name
-            }
-        }
-        return L.get("discovery.menubar.unknownManager", fallback: "Menu bar manager")
-    }
-
-    @ViewBuilder private func menuBarHiddenSection(manager: String) -> some View {
-        Section {
-            // No "Restore" button. The previous revision called into
-            // `AppDelegate.forceStatusItemVisible()` which restarted
-            // ControlCenter via `launchctl kickstart -k` — that's
-            // observed to occasionally leave the system menu bar in
-            // a broken state on Sequoia. An app must not restart
-            // system-owned launchd services. We just inform the user
-            // and let them take action in the manager's own UI.
-            titleDesc(
-                title: L.get("discovery.menubar.hiddenTitle",
-                             fallback: "Menu bar icon hidden"),
-                description: String(
-                    format: L.get(
-                        "discovery.menubar.hiddenDesc",
-                        fallback: "%@ is hiding CouchMC's menu bar icon. Reveal it by clicking the manager's overflow chevron, or open the manager's preferences and move CouchMC into the always-visible group."),
-                    manager))
-                .frame(maxWidth: .infinity, alignment: .leading)
-        } header: {
-            sectionHeader(L.get("discovery.menubar.section", fallback: "Menu bar"))
-        }
     }
 
     // MARK: - Sections
