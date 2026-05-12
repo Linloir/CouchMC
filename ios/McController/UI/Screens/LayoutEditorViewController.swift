@@ -504,7 +504,8 @@ final class LayoutEditorViewController: UIViewController {
             applyDragMovement(
                 startSpec: startSpec,
                 screenDelta: CGSize(width: translation.x, height: translation.y),
-                axis: .both
+                axis: .both,
+                snapEnabled: true
             )
 
         case .ended, .cancelled, .failed:
@@ -552,10 +553,16 @@ final class LayoutEditorViewController: UIViewController {
             // Precision factor — finger moves N pt, widget shifts N×0.3 pt.
             let dx: CGFloat = axis == .horizontal ? translation.x * canvasPanPrecision : 0
             let dy: CGFloat = axis == .vertical   ? translation.y * canvasPanPrecision : 0
+            // Snap is intentionally disabled for canvas-pan microadjust.
+            // The whole point of dragging on blank space is "I want fine
+            // control without the spec being yanked to a snap target" —
+            // a 1pt nudge being silently pulled 6pt to align with a
+            // neighbour defeats that. Direct on-widget drag still snaps.
             applyDragMovement(
                 startSpec: startSpec,
                 screenDelta: CGSize(width: dx, height: dy),
-                axis: axis == .horizontal ? .horizontal : .vertical
+                axis: axis == .horizontal ? .horizontal : .vertical,
+                snapEnabled: false
             )
 
         case .ended, .cancelled, .failed:
@@ -571,13 +578,19 @@ final class LayoutEditorViewController: UIViewController {
 
     // MARK: - Shared drag movement + snap pipeline
 
-    /// Apply a screen-space drag translation to `startSpec`, optionally
-    /// snapping the result to nearby widgets and rendering alignment
-    /// guides. Used by BOTH the per-widget pan and the canvas precision
-    /// pan so snap + guide rendering is consistent across both paths.
+    /// Apply a screen-space drag translation to `startSpec`. When
+    /// `snapEnabled` is true, the result is snapped to nearby widget
+    /// edges / equal-spacing and alignment guides are rendered. When
+    /// false, the raw translation is committed verbatim and any
+    /// existing guides are cleared — that mode is for the canvas
+    /// precision pan, where the user is microadjusting on purpose and
+    /// would be surprised by the spec jumping to align with a
+    /// neighbour. Used by both the per-widget drag and the canvas pan
+    /// so the rest of the pipeline stays identical.
     private func applyDragMovement(startSpec: WidgetSpec,
                                    screenDelta: CGSize,
-                                   axis: AlignmentSnapper.Axis) {
+                                   axis: AlignmentSnapper.Axis,
+                                   snapEnabled: Bool) {
         // Anchor → screen-to-spec sign conversion.
         let edgeSign: CGFloat
         switch startSpec.anchor {
@@ -604,27 +617,37 @@ final class LayoutEditorViewController: UIViewController {
         let bounds = widgetBounds
         let preSnapFrame = LayoutApplier.frame(for: preSpec, in: layout, bounds: bounds)
 
-        // 2) Ask the snapper if the pre-snap frame is close to anything.
-        let otherFrames: [CGRect] = widgetViews.compactMap { id, view in
-            id == startSpec.id ? nil : view.frame
+        // 2) Optionally ask the snapper. When snap is disabled (canvas
+        //    precision pan), commit the pre-snap spec verbatim and
+        //    clear any guides left over from a prior on-widget drag.
+        let snappedEdge: CGFloat
+        let snappedVert: CGFloat
+        let guides: [AlignmentSnapper.Guide]
+        if snapEnabled {
+            let otherFrames: [CGRect] = widgetViews.compactMap { id, view in
+                id == startSpec.id ? nil : view.frame
+            }
+            let s = settings.settings
+            let result = AlignmentSnapper.snap(
+                candidate: preSnapFrame,
+                others: otherFrames,
+                axis: axis,
+                edgeEnabled: s.editorEdgeSnap,
+                spacingEnabled: s.editorSpacingSnap
+            )
+            let snapEdgeDelta = result.snapDelta.width * edgeSign
+            let snapVertDelta = result.snapDelta.height * vertSign
+            let raw = preEdge + snapEdgeDelta
+            snappedEdge = startSpec.anchor.isHorizontallyCentered ? raw : max(0, raw)
+            snappedVert = max(0, preVert + snapVertDelta)
+            guides = result.guides
+        } else {
+            snappedEdge = preEdge
+            snappedVert = preVert
+            guides = []
         }
-        let s = settings.settings
-        let result = AlignmentSnapper.snap(
-            candidate: preSnapFrame,
-            others: otherFrames,
-            axis: axis,
-            edgeEnabled: s.editorEdgeSnap,
-            spacingEnabled: s.editorSpacingSnap
-        )
 
-        // 3) Convert the screen-space snap delta back into spec deltas.
-        let snapEdgeDelta = result.snapDelta.width * edgeSign
-        let snapVertDelta = result.snapDelta.height * vertSign
-        let snappedEdgeRaw = preEdge + snapEdgeDelta
-        let snappedEdge = startSpec.anchor.isHorizontallyCentered ? snappedEdgeRaw : max(0, snappedEdgeRaw)
-        let snappedVert = max(0, preVert + snapVertDelta)
-
-        // 4) Persist + repaint.
+        // 3) Persist + repaint.
         mutateLayout { layout in
             var spec = startSpec
             spec.edge = snappedEdge
@@ -637,7 +660,7 @@ final class LayoutEditorViewController: UIViewController {
         // re-ordered subviews (no, addSubview reuses the existing slot,
         // but defensively bringSubviewToFront).
         canvas.bringSubviewToFront(alignmentGuides)
-        alignmentGuides.setGuides(result.guides)
+        alignmentGuides.setGuides(guides)
     }
 
     // MARK: - Tap: select widget / deselect on empty
