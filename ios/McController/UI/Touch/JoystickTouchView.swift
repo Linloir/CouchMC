@@ -37,10 +37,12 @@ final class JoystickTouchView: UIView, EditableWidgetView {
     private let fadeOutMs: CGFloat = 180
 
     /// Joystick-extension sprint config — driven externally by
-    /// `ControllerHostingController` from `SettingsStore`. Defaults match
-    /// previous hard-coded values.
+    /// `ControllerHostingController` from `SettingsStore`. Defaults
+    /// match `AppSettings.sprintEngageFactor` so the in-game widget
+    /// seeded from code (before the settings push reaches it) lines
+    /// up with the persisted default.
     var sprintFromJoystickEnabled: Bool = true
-    var sprintEngageFactor: CGFloat = 1.20
+    var sprintEngageFactor: CGFloat = 1.5
     /// Disengage hysteresis is fixed below engage (avoids jitter at the
     /// boundary). 1.00 means "back inside the rim".
     private let sprintDisengageFactor: CGFloat = 1.00

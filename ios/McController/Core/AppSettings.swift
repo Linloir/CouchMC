@@ -37,8 +37,11 @@ struct AppSettings: Codable, Equatable, Sendable {
     /// auto-engages sprint. Manual sprint button works regardless.
     var sprintFromJoystick: Bool = true
     /// Distance multiplier (×baseRadius) at which the joystick triggers
-    /// sprint. Hysteresis on disengage is fixed at 1.0.
-    var sprintEngageFactor: CGFloat = 1.20
+    /// sprint. Hysteresis on disengage is fixed at 1.0. Default 1.5
+    /// keeps casual stick wobble from triggering sprint while staying
+    /// easy to reach intentionally; matches the Android client's
+    /// updated default after retuning.
+    var sprintEngageFactor: CGFloat = 1.5
 
     // MARK: - Layout editor snapping
 
