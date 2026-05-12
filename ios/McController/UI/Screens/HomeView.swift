@@ -81,7 +81,17 @@ struct HomeView: View {
                 .onTapGesture { Task { await connect(to: host) } }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
-                        hostStore.remove(id: host.id)
+                        // Wrap in `withAnimation` so the row-collapse
+                        // animation and the empty-hint insertion below
+                        // share an animation transaction. Without this,
+                        // the conditional `if hostStore.hosts.isEmpty`
+                        // updates on a *separate* SwiftUI commit from
+                        // the swipe-delete row collapse — the LAN
+                        // section header below briefly snaps upward
+                        // (no row, no empty hint yet) and then back
+                        // down once the hint appears, producing the
+                        // visible overshoot / overlap flicker.
+                        withAnimation { hostStore.remove(id: host.id) }
                     } label: { Label(L.key("host.remove"), systemImage: "trash") }
                 }
                 .contextMenu {
@@ -92,12 +102,18 @@ struct HomeView: View {
                         changingPort = host
                     } label: { Label(L.key("host.edit_port"), systemImage: "number") }
                     Button(role: .destructive) {
-                        hostStore.remove(id: host.id)
+                        withAnimation { hostStore.remove(id: host.id) }
                     } label: { Label(L.key("host.remove"), systemImage: "trash") }
                 }
             }
             if hostStore.hosts.isEmpty {
+                // `.identity` transition — the hint should be in place
+                // the instant the last row starts collapsing, not
+                // fade-in afterwards (which would let the LAN section
+                // header below briefly slide up into the gap before
+                // bouncing back).
                 emptyRow(L.key("home.empty.saved"))
+                    .transition(.identity)
             }
         } header: {
             Text(L.key("home.section.saved"))
