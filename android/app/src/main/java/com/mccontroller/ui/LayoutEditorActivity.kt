@@ -206,36 +206,40 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
         }
         updateSpec(id) { it.copy(edgeMarginDp = proposedEdge, verticalMarginDp = proposedVert) }
 
-        // After applying the proposed move, run the snap pass and (if it
-        // matches) re-apply with the corrective offset. We snap in screen
-        // pixels — that's where alignment visually means something — then
-        // translate the px delta back into dp-space spec adjustments.
-        runSnapPass(id, axis)
+        // Empty-area nudge is intentional fine-adjust — running snap here
+        // would yank the widget away from the user's pixel-perfect target
+        // every time the proposed position came within threshold of an
+        // alignment line. Snap only fires from the direct-drag path
+        // (see runDragSnapPass).
     }
 
     override fun onNudgeEnd() {
         nudgeAnchor = null
+        // Defensive cleanup — nudge doesn't paint guides itself, but if a
+        // drag-on-widget gesture was somehow interrupted by a nudge, the
+        // leftover overlay would persist without this.
         binding.canvas.setGuides(emptyList())
     }
 
     /**
-     * Read the rects of every other in-mode widget, run the snap engine,
-     * and apply any returned correction to the moving widget's spec.
-     * Sets the canvas overlay guides as a side effect.
+     * Two-axis snap pass for the direct-drag path: read all other widgets'
+     * rects, run the snap engine once for X-alignment and once for
+     * Y-alignment, merge the guide overlays, and translate any pixel
+     * corrections back into the moving widget's anchor-aware spec
+     * margins. No-ops if both snap toggles are disabled in settings.
      */
-    private fun runSnapPass(id: String, axis: com.mccontroller.ui.view.EditorCanvas.NudgeAxis) {
+    private fun runDragSnapPass(id: String) {
         val s = SettingsStore.get(this).current
+        val canvas = binding.canvas
         if (!s.editorEdgeSnap && !s.editorSpacingSnap) {
-            binding.canvas.setGuides(emptyList())
+            canvas.setGuides(emptyList())
             return
         }
         val movingView = allWidgetMap()[id] ?: return
         if (movingView.width == 0 || movingView.height == 0) return
 
-        val canvas = binding.canvas
-        // Build rects in canvas-local pixel coords. Use the views' .left /
-        // .top etc. directly — those are already in canvas-local space
-        // since the views are direct children of the canvas FrameLayout.
+        // Rects are in canvas-local pixel space because every editable
+        // widget is a direct child of the EditorCanvas FrameLayout.
         val moving = android.graphics.RectF(
             movingView.left.toFloat(), movingView.top.toFloat(),
             movingView.right.toFloat(), movingView.bottom.toFloat(),
@@ -254,36 +258,39 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
             .toList()
 
         val threshold = SNAP_THRESHOLD_DP * resources.displayMetrics.density
-        val result = com.mccontroller.ui.editor.SnapEngine.compute(
+        val rh = com.mccontroller.ui.editor.SnapEngine.compute(
             moving = moving,
             others = others,
-            axis = axis,
+            axis = com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Horizontal,
             edgeSnap = s.editorEdgeSnap,
             spacingSnap = s.editorSpacingSnap,
             thresholdPx = threshold,
         )
-        canvas.setGuides(result.guides)
-        if (result.snappedDx == 0f) return
+        val rv = com.mccontroller.ui.editor.SnapEngine.compute(
+            moving = moving,
+            others = others,
+            axis = com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Vertical,
+            edgeSnap = s.editorEdgeSnap,
+            spacingSnap = s.editorSpacingSnap,
+            thresholdPx = threshold,
+        )
+        canvas.setGuides(rh.guides + rv.guides)
+        if (rh.snappedDx == 0f && rv.snappedDx == 0f) return
 
         val density = resources.displayMetrics.density
-        val snappedDp = result.snappedDx / density
-        // Translate the px-space snap correction back into dp-space spec
-        // edits respecting the active anchor's sign.
+        val dxDp = rh.snappedDx / density
+        val dyDp = rv.snappedDx / density
         val spec = currentSpec(id) ?: return
-        val newSpec = when (axis) {
-            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Horizontal -> {
-                val sign = when {
-                    spec.anchor.isHorizontalCenter() -> 0f
-                    spec.anchor.isStart() -> 1f
-                    else -> -1f
-                }
-                spec.copy(edgeMarginDp = (spec.edgeMarginDp + snappedDp * sign).coerceAtLeast(0f))
-            }
-            com.mccontroller.ui.view.EditorCanvas.NudgeAxis.Vertical -> {
-                val sign = if (spec.anchor.isTop()) 1f else -1f
-                spec.copy(verticalMarginDp = (spec.verticalMarginDp + snappedDp * sign).coerceAtLeast(0f))
-            }
+        val edgeSign = when {
+            spec.anchor.isHorizontalCenter() -> 0f
+            spec.anchor.isStart() -> 1f
+            else -> -1f
         }
+        val vertSign = if (spec.anchor.isTop()) 1f else -1f
+        val newSpec = spec.copy(
+            edgeMarginDp = (spec.edgeMarginDp + dxDp * edgeSign).coerceAtLeast(0f),
+            verticalMarginDp = (spec.verticalMarginDp + dyDp * vertSign).coerceAtLeast(0f),
+        )
         updateSpec(id) { newSpec }
     }
 
@@ -476,12 +483,18 @@ class LayoutEditorActivity : AppCompatActivity(), EditorCanvas.Callback {
                     updateSpec(id) {
                         it.copy(edgeMarginDp = newEdge, verticalMarginDp = newVert)
                     }
+                    // Snap is only applied during direct drag (this path).
+                    // Empty-area nudge is intentional fine-adjust and would
+                    // fight snap, so onNudgeDelta skips it.
+                    runDragSnapPass(id)
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!didMove) setSelectedWidget(id)  // tap → select
+                    if (didMove) binding.canvas.setGuides(emptyList())
                 }
                 MotionEvent.ACTION_CANCEL -> {
                     // Canvas grabbed for pinch — treat as a non-tap, no select change.
+                    binding.canvas.setGuides(emptyList())
                 }
             }
             true
