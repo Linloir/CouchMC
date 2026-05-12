@@ -63,7 +63,7 @@ enum AccessibilityPermission {
     static func resetTrust() {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
-        task.arguments = ["reset", "Accessibility", "com.linloir.mccontroller"]
+        task.arguments = ["reset", "Accessibility", "cn.linloir.couchmc.mac"]
         do {
             try task.run()
             task.waitUntilExit()

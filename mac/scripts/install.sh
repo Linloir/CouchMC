@@ -45,7 +45,7 @@ esac
 
 SOURCE_APP="${PROJECT_ROOT}/build/${CONFIG}/McController.app"
 TARGET_APP="/Applications/McController.app"
-BUNDLE_ID="com.linloir.mccontroller"
+BUNDLE_ID="cn.linloir.couchmc.mac"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
 
 echo "→ Building (${CONFIG})..."

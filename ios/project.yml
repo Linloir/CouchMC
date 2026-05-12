@@ -8,7 +8,7 @@
 
 name: McController
 options:
-  bundleIdPrefix: com.linloir
+  bundleIdPrefix: cn.linloir.couchmc
   deploymentTarget:
     iOS: "18.0"
   developmentLanguage: zh-Hans
@@ -85,7 +85,7 @@ targets:
         NSLocalNetworkUsageDescription: 用于在局域网中发现并连接到您的 PC 服务器。MC Controller will use the local network to find and connect to your PC server.
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.linloir.mccontroller
+        PRODUCT_BUNDLE_IDENTIFIER: cn.linloir.couchmc.ios
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleDefault
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

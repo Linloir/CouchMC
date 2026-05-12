@@ -133,7 +133,7 @@ swift -e '
 import AppKit
 import CoreGraphics
 let pid = (NSRunningApplication.runningApplications(withBundleIdentifier:
-    "com.linloir.mccontroller").first?.processIdentifier).map(Int.init) ?? 0
+    "cn.linloir.couchmc.mac").first?.processIdentifier).map(Int.init) ?? 0
 let info = (CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID)
     as? [[String: Any]]) ?? []
 for w in info where (w[kCGWindowOwnerPID as String] as? Int) == pid {

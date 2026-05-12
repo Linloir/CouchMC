@@ -36,7 +36,7 @@ In `McController.App` (the entire project is WinUI 3 — the macOS shell is a se
 |---|---|---|
 | App shell | `App.xaml.cs`, `MainWindow.xaml(.cs)`, `Views/*` | See § 3 below — Avalonia is the recommended path. |
 | Tray icon | `Services/TrayService.cs` (H.NotifyIcon) | `NSStatusItem` via Avalonia's `TrayIcon` API, or a small Cocoa P/Invoke if the cross-platform abstraction is too thin. |
-| Start at login | `Services/StartupRegistration.cs` (HKCU\…\Run) | Write a `LaunchAgent` plist at `~/Library/LaunchAgents/com.linloir.mccontroller.plist` and `launchctl load` it. |
+| Start at login | `Services/StartupRegistration.cs` (HKCU\…\Run) | Write a `LaunchAgent` plist at `~/Library/LaunchAgents/cn.linloir.couchmc.mac.plist` and `launchctl load` it. |
 | Window backdrop | `MainWindow.xaml.cs` (`DesktopAcrylicBackdrop`) | macOS has native visual-effect views (`NSVisualEffectView`); Avalonia exposes this on macOS as `TransparencyLevelHint.AcrylicBlur` / `Mica`. |
 | ADB integration | `Services/AdbDiscovery.cs` | Drop entirely — iOS has no `adb`. (See § 4.) |
 | Installer | `installer/McController.iss` | `.app` bundle + DMG, optionally signed/notarized. |
