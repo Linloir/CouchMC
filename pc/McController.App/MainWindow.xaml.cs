@@ -22,8 +22,16 @@ public sealed partial class MainWindow : Window
     // can dial bleed-through to taste from the global settings page. The
     // brushes are reused for the lifetime of the window — changing Opacity
     // on the same instance triggers a redraw without rebuilding the tree.
+    //
+    // _windowBgBrush is a third "underlay" applied to RootGrid that's
+    // only opaque when transparency is OFF. Its job is to cover the
+    // window's default-black where the chrome/content brushes have a gap
+    // (NavigationView splitter, the strip below the title bar, page
+    // transition slivers, etc). With acrylic on, this brush sits at
+    // opacity 0 and the live backdrop fills those gaps instead.
     private readonly SolidColorBrush _chromeBrush;
     private readonly SolidColorBrush _contentBrush;
+    private readonly SolidColorBrush _windowBgBrush;
 
     public MainWindow()
     {
@@ -56,8 +64,9 @@ public sealed partial class MainWindow : Window
         var tintColor = Application.Current.RequestedTheme == ApplicationTheme.Dark
             ? Color.FromArgb(0xFF, 0x20, 0x20, 0x20)
             : Color.FromArgb(0xFF, 0xF3, 0xF3, 0xF3);
-        _chromeBrush  = new SolidColorBrush(tintColor) { Opacity = 0.0 };
-        _contentBrush = new SolidColorBrush(tintColor) { Opacity = 0.35 };
+        _chromeBrush   = new SolidColorBrush(tintColor) { Opacity = 0.0 };
+        _contentBrush  = new SolidColorBrush(tintColor) { Opacity = 0.35 };
+        _windowBgBrush = new SolidColorBrush(tintColor) { Opacity = 0.0 };
 
         // Override the NavigationView pane + content tint resources with
         // our managed brushes, and paint the title bar with the same
@@ -67,6 +76,7 @@ public sealed partial class MainWindow : Window
         Nav.Resources["NavigationViewExpandedPaneBackground"] = _chromeBrush;
         Nav.Resources["NavigationViewContentBackground"]      = _contentBrush;
         AppTitleBar.Background = _chromeBrush;
+        RootGrid.Background    = _windowBgBrush;
 
         ApplyAppearance(AppearancePreferences.Current);
         AppearancePreferences.Changed += OnAppearanceChanged;
@@ -114,22 +124,30 @@ public sealed partial class MainWindow : Window
         if (s.TransparencyEnabled)
         {
             // Acrylic active: the brush opacities act as tints over the
-            // live-blurred wallpaper, both adjustable from settings.
+            // live-blurred wallpaper, both adjustable from settings. The
+            // RootGrid underlay sits at 0 so it doesn't double-tint the
+            // chrome / content layers that paint on top of it.
             if (SystemBackdrop is not DesktopAcrylicBackdrop)
             {
                 try { SystemBackdrop = new DesktopAcrylicBackdrop(); }
                 catch { }
             }
-            _chromeBrush.Opacity  = s.ChromeOpacity;
-            _contentBrush.Opacity = s.ContentOpacity;
+            _chromeBrush.Opacity   = s.ChromeOpacity;
+            _contentBrush.Opacity  = s.ContentOpacity;
+            _windowBgBrush.Opacity = 0.0;
         }
         else
         {
-            // Solid mode: drop the backdrop entirely and force both tints
-            // to fully opaque so the window paints with a flat theme color.
+            // Solid mode: drop the backdrop entirely. The chrome / content
+            // brushes go opaque so the visible areas paint with a flat
+            // theme color, and the RootGrid underlay also goes opaque so
+            // the gaps between NavigationView regions (where the brushes
+            // don't reach) don't fall through to the window's default
+            // black.
             SystemBackdrop = null;
-            _chromeBrush.Opacity  = 1.0;
-            _contentBrush.Opacity = 1.0;
+            _chromeBrush.Opacity   = 1.0;
+            _contentBrush.Opacity  = 1.0;
+            _windowBgBrush.Opacity = 1.0;
         }
     }
 
