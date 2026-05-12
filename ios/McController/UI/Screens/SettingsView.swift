@@ -130,8 +130,9 @@ struct SettingsView: View {
                                 .monospacedDigit()
                                 .foregroundStyle(.secondary)
                         }
-                        Slider(value: $settings.settings.cameraSensitivity,
-                               in: 0.5...3.0, step: 0.1)
+                        Slider(value: $settings.settings.cameraSensitivity
+                                .stepped(in: 0.5...3.0, by: 0.1),
+                               in: 0.5...3.0)
                     }
                 } header: {
                     Text(L.key("settings.section.camera"))
@@ -162,8 +163,15 @@ struct SettingsView: View {
                             // `JoystickTouchView`'s knob extent), so
                             // values above 1.0 mean "user has pushed
                             // past the visual ring by N%".
-                            Slider(value: $settings.settings.sprintEngageFactor,
-                                   in: 1.05...2.00, step: 0.05)
+                            //
+                            // Snap is implemented via `.stepped(...)`
+                            // on the binding rather than the slider's
+                            // own `step:` parameter — see the helper
+                            // below for why (TL;DR: native `step:`
+                            // can't reach 2.0 due to IEEE round-off).
+                            Slider(value: $settings.settings.sprintEngageFactor
+                                    .stepped(in: 1.05...2.00, by: 0.05),
+                                   in: 1.05...2.00)
                         }
                     }
                 } header: {
@@ -489,4 +497,41 @@ struct AboutView: View {
 // Make ControllerMode Identifiable so we can drive fullScreenCover with it.
 extension ControllerMode: Identifiable {
     public var id: UInt8 { rawValue }
+}
+
+// MARK: - Slider snapping
+
+extension Binding where Value: BinaryFloatingPoint {
+    /// Wraps a `Binding` so that on every set, the incoming value is
+    /// snapped to the nearest multiple of `step` measured from
+    /// `bounds.lowerBound`, then clamped to `bounds`.
+    ///
+    /// Use in place of `Slider(step:)` when the slider's `(min, max)`
+    /// don't both fall on clean `lowerBound + n*step` positions in
+    /// IEEE 754 floating point. SwiftUI's native step parameter
+    /// computes the snap as `lowerBound + n*step` and a comparison
+    /// against `upperBound`; round-off can make the largest valid
+    /// snapped value test as *just over* the upper bound, so the
+    /// slider falls back to `n-1` and the user can't reach the max.
+    ///
+    /// Concretely: a `1.05…2.0`/`step 0.05` slider tops out at 1.95
+    /// because `1.05 + 19*0.05` evaluates to `2.0 + ε` in some Swift
+    /// runtime paths. Snapping in our own setter (and clamping after)
+    /// avoids that — the slider itself stays continuous (no `step:`
+    /// arg) so it can physically reach the upper bound, and we round
+    /// to step granularity here.
+    func stepped(in bounds: ClosedRange<Value>, by step: Value) -> Binding<Value> {
+        Binding(
+            get: { self.wrappedValue },
+            set: { raw in
+                let n = ((raw - bounds.lowerBound) / step).rounded()
+                let snapped = bounds.lowerBound + n * step
+                // `Binding<Value>`'s dynamic-member subscript shadows
+                // bare `min` / `max` here, so qualify with the std
+                // namespace to invoke the global free-function.
+                self.wrappedValue = Swift.min(bounds.upperBound,
+                                              Swift.max(bounds.lowerBound, snapped))
+            }
+        )
+    }
 }
