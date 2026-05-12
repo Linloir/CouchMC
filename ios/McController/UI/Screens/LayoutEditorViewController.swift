@@ -51,6 +51,11 @@ final class LayoutEditorViewController: UIViewController {
     private var dragStartLocation: CGPoint?
     private var dragStartSpec: WidgetSpec?
     private var didCrossSlop: Bool = false
+    /// Tracks which widget is currently being panned (single-finger drag).
+    /// Used by `UIGestureRecognizerDelegate.shouldReceive` to reject touches
+    /// that land on OTHER widgets mid-drag so a stray cross-finger doesn't
+    /// transfer the selection or scramble the move.
+    private var panningWidget: EditableWidgetView?
 
     // MARK: - Init
 
@@ -178,6 +183,7 @@ final class LayoutEditorViewController: UIViewController {
         case "btn_esc",    "btn_ui_esc":    return .esc
         case "btn_ui_q":                    return .drop
         case "btn_ui_shift":                return .shift
+        case "btn_close":                   return .close
         default:                            return nil
         }
     }
@@ -384,6 +390,7 @@ final class LayoutEditorViewController: UIViewController {
         case "btn_ui_q":   return L.key("widget.ui_q")
         case "btn_ui_shift": return L.key("widget.ui_shift")
         case "btn_ui_esc": return L.key("widget.ui_esc")
+        case "btn_close":  return L.key("widget.close")
         case "joystick":   return L.key("widget.joystick")
         case "hotbar":     return L.key("widget.hotbar")
         default:           return id
@@ -442,6 +449,7 @@ final class LayoutEditorViewController: UIViewController {
             dragStartLocation = recognizer.location(in: view)
             dragStartSpec = currentLayout().widgets[widget.widgetID]
             didCrossSlop = false
+            panningWidget = widget
             selectWidget(widget.widgetID)
 
         case .changed:
@@ -462,7 +470,9 @@ final class LayoutEditorViewController: UIViewController {
             switch startSpec.anchor {
             case .topStart, .bottomStart, .centerStart:  edgeSign = 1
             case .topEnd, .bottomEnd, .centerEnd:        edgeSign = -1
-            case .topCenter, .bottomCenter:              edgeSign = 0
+            // Centre anchors treat `edge` as a signed offset from the canvas
+            // centre (see LayoutApplier), so dragging right is positive.
+            case .topCenter, .bottomCenter:              edgeSign = 1
             }
             let vertSign: CGFloat
             switch startSpec.anchor {
@@ -470,7 +480,10 @@ final class LayoutEditorViewController: UIViewController {
             case .bottomStart, .bottomCenter, .bottomEnd:      vertSign = -1
             case .centerStart, .centerEnd:                     vertSign = 1
             }
-            let newEdge = max(0, startSpec.edge + translation.x * edgeSign)
+            // Edge-anchored widgets clamp to ≥ 0 (no off-screen).
+            // Centre-anchored widgets allow negative (left of centre).
+            let rawEdge = startSpec.edge + translation.x * edgeSign
+            let newEdge = startSpec.anchor.isHorizontallyCentered ? rawEdge : max(0, rawEdge)
             let newVert = max(0, startSpec.vertical + translation.y * vertSign)
 
             mutateLayout { layout in
@@ -485,6 +498,7 @@ final class LayoutEditorViewController: UIViewController {
             dragStartSpec = nil
             dragStartLocation = nil
             didCrossSlop = false
+            panningWidget = nil
 
         default:
             break
@@ -507,12 +521,16 @@ final class LayoutEditorViewController: UIViewController {
 
     @objc private func onPinch(_ recognizer: UIPinchGestureRecognizer) {
         guard let id = selectedID, DefaultLayouts.resizableIDs.contains(id) else { return }
-        guard recognizer.state == .changed else {
-            if recognizer.state == .began {
-                dragStartSpec = currentLayout().widgets[id]
-            }
+        if recognizer.state == .began {
+            // Cancel any in-progress widget pan so pinch doesn't fight with
+            // pan when 2 fingers land on a selected widget — without this,
+            // the button visibly "twitches" because it's being translated
+            // and scaled simultaneously.
+            cancelActiveWidgetPans()
+            dragStartSpec = currentLayout().widgets[id]
             return
         }
+        guard recognizer.state == .changed else { return }
         guard let baseSpec = dragStartSpec else { return }
         let scale = recognizer.scale
         let newW = max(40, min(600, baseSpec.width * scale))
@@ -525,6 +543,21 @@ final class LayoutEditorViewController: UIViewController {
             layout.widgets[id] = spec
         }
         reapplyWidget(id)
+    }
+
+    /// Toggle the `isEnabled` of every widget's pan recognizer off-then-on,
+    /// which cancels any in-progress pan immediately. Called when pinch
+    /// transitions to `.began` so pan + pinch can't run on the same finger.
+    private func cancelActiveWidgetPans() {
+        for widget in widgetViews.values {
+            for r in widget.gestureRecognizers ?? [] where r is UIPanGestureRecognizer {
+                r.isEnabled = false
+                r.isEnabled = true
+            }
+        }
+        panningWidget = nil
+        dragStartLocation = nil
+        didCrossSlop = false
     }
 
     // MARK: - Toolbar actions
@@ -613,17 +646,38 @@ final class LayoutEditorViewController: UIViewController {
 // MARK: - GestureRecognizerDelegate
 
 extension LayoutEditorViewController: UIGestureRecognizerDelegate {
+
+    /// All editor gestures are mutually exclusive. Allowing pan + pinch to
+    /// run simultaneously caused widgets to be translated AND scaled at the
+    /// same time when 2 fingers landed on a selected button.
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
-        // Allow pinch to coexist with pan-on-widget (pinch is view-level, pan is widget-level).
-        if gestureRecognizer is UIPinchGestureRecognizer || other is UIPinchGestureRecognizer {
-            return true
-        }
         return false
+    }
+
+    /// Block pan from starting (or restarting) while pinch is active.
+    /// Combined with `cancelActiveWidgetPans()` inside `onPinch(.began)`,
+    /// this guarantees a clean pinch-only resize.
+    func gestureRecognizerShouldBegin(_ gr: UIGestureRecognizer) -> Bool {
+        if gr is UIPanGestureRecognizer {
+            switch pinchRecognizer.state {
+            case .began, .changed: return false
+            default: break
+            }
+        }
+        return true
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                            shouldReceive touch: UITouch) -> Bool {
+        // While a widget is being panned, ignore touches landing on other
+        // widgets (or on the canvas) so a stray cross-finger doesn't
+        // transfer selection or trigger a deselect mid-drag.
+        if let panning = panningWidget {
+            if let touchView = touch.view, touchView !== panning {
+                return false
+            }
+        }
         // Canvas tap should only fire if the touch landed on the canvas itself
         // (not on a widget) — otherwise widget taps would also deselect.
         if gestureRecognizer === canvasTapRecognizer {

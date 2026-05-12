@@ -18,6 +18,27 @@ struct AppSettings: Codable, Equatable, Sendable {
     var haptics: Bool = true
     /// Design language: iOS standard (system materials) vs Liquid Glass (iOS 26+).
     var designLanguage: DesignLanguage = .standard
+
+    // MARK: - iOS-specific tuning (no Android counterpart yet)
+
+    /// Multiplier applied to look-pad camera deltas. Default 1.5× because the
+    /// baseline (1.0) feels visibly slower on iOS than on Android — the
+    /// UIKit touch sampling pipeline coalesces fewer micro-deltas than
+    /// Android's, so the wire signal has less resolution per finger pixel.
+    /// User-tunable in Settings.
+    var cameraSensitivity: Double = 1.5
+
+    /// Hotbar relative-mode step distance (pt). Smaller value = more
+    /// sensitive (less travel per slot change). Only effective when
+    /// `hotbarSwipeMode == .relative`.
+    var hotbarRelativeStep: CGFloat = 24
+
+    /// Whether overdriving the joystick past `sprintEngageFactor × baseRadius`
+    /// auto-engages sprint. Manual sprint button works regardless.
+    var sprintFromJoystick: Bool = true
+    /// Distance multiplier (×baseRadius) at which the joystick triggers
+    /// sprint. Hysteresis on disengage is fixed at 1.0.
+    var sprintEngageFactor: CGFloat = 1.20
 }
 
 enum DesignLanguage: String, Codable, CaseIterable, Sendable {

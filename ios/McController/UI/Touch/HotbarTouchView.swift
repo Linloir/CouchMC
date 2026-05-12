@@ -39,7 +39,11 @@ final class HotbarTouchView: UIView, EditableWidgetView {
     }
 
     private let slotCount: Int = 9
-    private let slotStep: CGFloat = 32
+    /// Travel distance (pt) per slot change in `.relative` mode. Lower =
+    /// more sensitive (the user reaches the next slot with less swipe). Set
+    /// from `SettingsStore` by the host VC; defaults to 32 to match the
+    /// Android baseline.
+    var slotStep: CGFloat = 32
     private let longPressMs: Int = 400
     private let dropPeriodMs: Int = 200
 

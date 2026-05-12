@@ -4,7 +4,8 @@ import Combine
 /// Landscape-locked, full-screen controller surface. Owns:
 ///   - LookPad (background) → camera/cursor + tap/hold gestures
 ///   - Joystick → WASD-equivalent movement
-///   - 7 action buttons (in-game) / 5 buttons (UI mode)
+///   - 8 action buttons (in-game) including a movable `btn_close` that dismisses
+///     the controller; 6 buttons in UI mode (5 normal + close)
 ///   - Hotbar
 ///   - LookAccumulator (8 ms flush → UDP/TCP camera deltas)
 ///   - HUD (mode indicator + RTT, top-center, monospace, mirrors Android)
@@ -33,7 +34,6 @@ final class ControllerHostingController: UIViewController {
 
     // HUD
     private let hud = UILabel()
-    private let backButton = UIButton(type: .system)
 
     // LookAccumulator
     private var lookAccumulator: LookAccumulator!
@@ -42,6 +42,18 @@ final class ControllerHostingController: UIViewController {
     private var sprintFromToggle: Bool = false
     private var sprintFromJoystick: Bool = false
     private var sprintEffective: Bool = false
+
+    // Connection retry — transient TCP drops on iOS sometimes kick us out
+    // 1–2 s after handshake before any PING/PONG round-trips. Auto-reconnect
+    // a few times before giving up so the user doesn't have to manually
+    // re-tap the host.
+    private var hasEverConnected: Bool = false
+    private var lastConnectedAt: Date?
+    private var retryCount: Int = 0
+    private let maxRetries: Int = 3
+    /// Set when the user taps the close widget so we don't auto-reconnect
+    /// against an intentional dismissal.
+    private var userInitiatedDismiss: Bool = false
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -77,6 +89,7 @@ final class ControllerHostingController: UIViewController {
         view.addSubview(stage)
 
         buildWidgets()
+        applyCurrentSettingsToWidgets()
         layoutLockOverlay()
         layoutHUD()
 
@@ -144,8 +157,6 @@ final class ControllerHostingController: UIViewController {
         lookPad.onHoldEnd = { [weak self] in self?.session.sendButton(.mouseLeft, down: false) }
         lookPad.onSecondaryHoldStart = { [weak self] in self?.session.sendButton(.mouseRight, down: true) }
         lookPad.onSecondaryHoldEnd = { [weak self] in self?.session.sendButton(.mouseRight, down: false) }
-        lookPad.inGameQuickClicks = settings.settings.inGameQuickClicks
-        lookPad.uiQuickClicks = settings.settings.uiQuickClicks
         stage.addSubview(lookPad)
 
         // Joystick
@@ -163,7 +174,6 @@ final class ControllerHostingController: UIViewController {
         // Hotbar
         hotbar = HotbarTouchView()
         hotbar.swipeMode = profileStore.activeProfile.hotbarSwipeMode
-        hotbar.hapticsEnabled = settings.settings.haptics
         hotbar.onSelect = { [weak self] slot in
             guard let self else { return }
             let id = Protocol.ButtonId.hotbar(slot)
@@ -193,6 +203,12 @@ final class ControllerHostingController: UIViewController {
         addInGameButton(id: "btn_inv",    icon: .inventory,  behavior: .tap,    button: .inventory)
         addInGameButton(id: "btn_swap",   icon: .swap,       behavior: .tap,    button: .swapHand)
         addInGameButton(id: "btn_esc",    icon: .esc,        behavior: .tap,    button: .esc)
+        // iOS-only movable close button — replaces the old floating top-right
+        // chevron. Fires close on press (engaged=true) only.
+        addInGameButton(id: "btn_close",  icon: .close,      behavior: .tap,    button: nil) {
+            [weak self] engaged in
+            if engaged { self?.closeRequested() }
+        }
 
         // UI mode buttons
         addUIButton(id: "btn_ui_lmb",   icon: .mouseLeft,  behavior: .hold, button: .mouseLeft)
@@ -200,6 +216,11 @@ final class ControllerHostingController: UIViewController {
         addUIButton(id: "btn_ui_q",     icon: .drop,       behavior: .tap,  button: .drop)
         addUIButton(id: "btn_ui_shift", icon: .shift,      behavior: .hold, button: .sneak)
         addUIButton(id: "btn_ui_esc",   icon: .esc,        behavior: .tap,  button: .esc)
+        // UI-mode close mirrors in-game close.
+        addUIButton(id: "btn_close",    icon: .close,      behavior: .tap,  button: nil) {
+            [weak self] engaged in
+            if engaged { self?.closeRequested() }
+        }
     }
 
     private func addInGameButton(id: String,
@@ -226,12 +247,15 @@ final class ControllerHostingController: UIViewController {
     private func addUIButton(id: String,
                               icon: WidgetIcon,
                               behavior: ActionButtonTouchView.Behavior,
-                              button: Protocol.ButtonId) {
+                              button: Protocol.ButtonId?,
+                              override: ((Bool) -> Void)? = nil) {
         let v = ActionButtonTouchView(widgetID: id)
         v.behavior = behavior
         v.widgetIcon = icon
         v.hapticsEnabled = settings.settings.haptics
         v.onStateChanged = { [weak self] engaged in
+            if let override { override(engaged); return }
+            guard let button else { return }
             self?.session.sendButton(button, down: engaged)
         }
         v.onDragDelta = { [weak self] dx, dy in
@@ -239,6 +263,28 @@ final class ControllerHostingController: UIViewController {
         }
         stage.addSubview(v)
         uiButtons[id] = v
+    }
+
+    // MARK: - Settings → widgets
+
+    /// Apply every user-tunable setting to the touch views in one go. Called
+    /// from `viewDidLoad` after widgets are built and from
+    /// `rebuildIfSettingsChanged` on subsequent settings updates.
+    private func applyCurrentSettingsToWidgets() {
+        let s = settings.settings
+        lookPad.inGameQuickClicks = s.inGameQuickClicks
+        lookPad.uiQuickClicks = s.uiQuickClicks
+        lookPad.cameraSensitivity = s.cameraSensitivity
+
+        joystick.sprintFromJoystickEnabled = s.sprintFromJoystick
+        joystick.sprintEngageFactor = s.sprintEngageFactor
+
+        hotbar.swipeMode = profileStore.activeProfile.hotbarSwipeMode
+        hotbar.hapticsEnabled = s.haptics
+        hotbar.slotStep = s.hotbarRelativeStep
+
+        inGameButtons.values.forEach { $0.hapticsEnabled = s.haptics }
+        uiButtons.values.forEach { $0.hapticsEnabled = s.haptics }
     }
 
     // MARK: - Layout
@@ -299,24 +345,15 @@ final class ControllerHostingController: UIViewController {
             hud.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             hud.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
         ])
-
-        // Back button (top-right of safe area) — disconnects + dismisses.
-        backButton.setImage(UIImage(systemName: "xmark.circle.fill",
-                                    withConfiguration: UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)),
-                            for: .normal)
-        backButton.tintColor = UIColor.white.withAlphaComponent(0.6)
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(backButton)
-        backButton.addTarget(self, action: #selector(tapBack), for: .touchUpInside)
-        NSLayoutConstraint.activate([
-            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
-            backButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
-            backButton.widthAnchor.constraint(equalToConstant: 36),
-            backButton.heightAnchor.constraint(equalToConstant: 36),
-        ])
+        // Note: no standalone "back" button anymore — replaced by the
+        // movable / resizable `btn_close` widget that ships in the default
+        // layout and can be repositioned through the editor.
     }
 
-    @objc private func tapBack() {
+    // MARK: - Close request (from btn_close widget)
+
+    private func closeRequested() {
+        userInitiatedDismiss = true
         prepareForExitFade()
         OrientationHelper.restorePortrait()
         onDismiss()
@@ -384,7 +421,13 @@ final class ControllerHostingController: UIViewController {
         case .idle:
             parts = ["Idle"]
         case .connecting:
-            parts = ["Connecting…"]
+            // Surface retry attempts in the HUD so the user knows we're
+            // chasing a flaky link rather than silently spinning.
+            if retryCount > 0 {
+                parts = ["Reconnecting (\(retryCount)/\(maxRetries))…"]
+            } else {
+                parts = ["Connecting…"]
+            }
         case .connected:
             let modeStr: String
             switch session.mode {
@@ -402,20 +445,39 @@ final class ControllerHostingController: UIViewController {
         hud.text = "\(prefix) " + parts.joined(separator: " · ")
     }
 
-    // MARK: - Session state
+    // MARK: - Session state + retry
 
     private func handleSessionState(_ state: ControllerSession.State) {
         switch state {
+        case .connected:
+            hasEverConnected = true
+            lastConnectedAt = Date()
+            retryCount = 0
         case .failed:
-            // Bounce home after showing the error briefly.
+            // Hard failure (e.g. server busy, protocol mismatch). Show the
+            // reason in the HUD briefly then bounce back to the host list.
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { [weak self] in
                 self?.onDismiss()
             }
         case .disconnected:
-            // Brief grace period so a transient TCP blip immediately after
-            // handshake doesn't snap the modal away with zero feedback. If
-            // the session magically recovers in this window (e.g. quick
-            // reconnect), we cancel the dismissal.
+            // iOS-specific: NWConnection sometimes drops the TCP within
+            // ~1–2 s of handshake, before the first PING/PONG round-trip
+            // completes. RTT stays "—" and the modal would otherwise pop
+            // away with zero recovery attempt. Retry up to `maxRetries`
+            // times if the disconnect was short-lived and the user didn't
+            // ask to close.
+            let recent = lastConnectedAt.map { Date().timeIntervalSince($0) < 5 } ?? false
+            if !userInitiatedDismiss && recent && retryCount < maxRetries {
+                retryCount += 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                    guard let self else { return }
+                    Task { await self.session.connect(host: self.host.ip, port: self.host.port) }
+                }
+                return
+            }
+            // Out of retries / not transient → fall through to the
+            // graceful-exit timer. Re-check state inside the delay so
+            // a recovery during the grace window cancels the dismiss.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { [weak self] in
                 guard let self else { return }
                 if case .disconnected = self.session.state {
@@ -430,12 +492,7 @@ final class ControllerHostingController: UIViewController {
     // MARK: - Public — rebuild on changes
 
     func rebuildIfSettingsChanged() {
-        lookPad.inGameQuickClicks = settings.settings.inGameQuickClicks
-        lookPad.uiQuickClicks = settings.settings.uiQuickClicks
-        hotbar.swipeMode = profileStore.activeProfile.hotbarSwipeMode
-        hotbar.hapticsEnabled = settings.settings.haptics
-        inGameButtons.values.forEach { $0.hapticsEnabled = settings.settings.haptics }
-        uiButtons.values.forEach { $0.hapticsEnabled = settings.settings.haptics }
+        applyCurrentSettingsToWidgets()
         applyLayout()
     }
 }

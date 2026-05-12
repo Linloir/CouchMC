@@ -63,10 +63,6 @@ struct SettingsView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-                    Picker(L.key("settings.hotbar_swipe"), selection: hotbarSwipeBinding) {
-                        Text(L.key("settings.hotbar_swipe.precise")).tag(HotbarSwipeMode.precise)
-                        Text(L.key("settings.hotbar_swipe.relative")).tag(HotbarSwipeMode.relative)
-                    }
                     Stepper(value: $settings.settings.leftMarginOffset, in: 0...80, step: 1) {
                         HStack {
                             Text(L.key("settings.left_margin_offset"))
@@ -87,6 +83,76 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text(L.key("settings.section.layout"))
+                }
+
+                // === Hotbar ===
+                Section {
+                    Picker(L.key("settings.hotbar_swipe"), selection: hotbarSwipeBinding) {
+                        Text(L.key("settings.hotbar_swipe.precise")).tag(HotbarSwipeMode.precise)
+                        Text(L.key("settings.hotbar_swipe.relative")).tag(HotbarSwipeMode.relative)
+                    }
+                    if profileStore.activeProfile.hotbarSwipeMode == .relative {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(L.key("settings.hotbar_step"))
+                                Spacer()
+                                Text(verbatim: "\(Int(settings.settings.hotbarRelativeStep)) pt")
+                                    .monospacedDigit()
+                                    .foregroundStyle(.secondary)
+                            }
+                            Slider(value: $settings.settings.hotbarRelativeStep,
+                                   in: 12...60, step: 1)
+                        }
+                    }
+                } header: {
+                    Text(L.key("settings.section.hotbar"))
+                } footer: {
+                    if profileStore.activeProfile.hotbarSwipeMode == .relative {
+                        Text(L.key("settings.hotbar_step.hint"))
+                    }
+                }
+
+                // === Camera ===
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(L.key("settings.camera_sensitivity"))
+                            Spacer()
+                            Text(verbatim: String(format: "%.1f×", settings.settings.cameraSensitivity))
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                        }
+                        Slider(value: $settings.settings.cameraSensitivity,
+                               in: 0.5...3.0, step: 0.1)
+                    }
+                } header: {
+                    Text(L.key("settings.section.camera"))
+                } footer: {
+                    Text(L.key("settings.camera_sensitivity.hint"))
+                }
+
+                // === Sprint ===
+                Section {
+                    Toggle(L.key("settings.sprint_from_joystick"),
+                           isOn: $settings.settings.sprintFromJoystick)
+                    if settings.settings.sprintFromJoystick {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(L.key("settings.sprint_engage"))
+                                Spacer()
+                                Text(verbatim: String(format: "%.2f×",
+                                                      Double(settings.settings.sprintEngageFactor)))
+                                    .monospacedDigit()
+                                    .foregroundStyle(.secondary)
+                            }
+                            Slider(value: $settings.settings.sprintEngageFactor,
+                                   in: 1.05...1.50, step: 0.05)
+                        }
+                    }
+                } header: {
+                    Text(L.key("settings.section.sprint"))
+                } footer: {
+                    Text(L.key("settings.sprint.hint"))
                 }
 
                 // === Gameplay ===

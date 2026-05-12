@@ -35,7 +35,14 @@ final class JoystickTouchView: UIView, EditableWidgetView {
     private let baseRadius: CGFloat = 70
     private let fadeInMs: CGFloat = 120
     private let fadeOutMs: CGFloat = 180
-    private let sprintEngageFactor: CGFloat = 1.20
+
+    /// Joystick-extension sprint config — driven externally by
+    /// `ControllerHostingController` from `SettingsStore`. Defaults match
+    /// previous hard-coded values.
+    var sprintFromJoystickEnabled: Bool = true
+    var sprintEngageFactor: CGFloat = 1.20
+    /// Disengage hysteresis is fixed below engage (avoids jitter at the
+    /// boundary). 1.00 means "back inside the rim".
     private let sprintDisengageFactor: CGFloat = 1.00
 
     private let emitThreshold: Float = 0.02
@@ -125,24 +132,37 @@ final class JoystickTouchView: UIView, EditableWidgetView {
     }
 
     private func drawRimSweep(ctx: CGContext, center: CGPoint, angle: CGFloat, intensity: CGFloat) {
-        // Sweep gradient: short bright arc centered around `angle`, fading to
-        // transparent. We approximate it with a stroked arc at multiple alpha
-        // steps — efficient and good enough visually.
-        let steps = 18
-        let halfSpread: CGFloat = .pi * 0.20  // arc spread either side of angle (~36°)
+        // Approximate a sweep gradient with densely-packed overlapping arcs.
+        // The previous 18-step implementation with round caps + butted
+        // boundaries showed a visible "dashed" pattern because adjacent
+        // strokes had perceptibly different alpha values and their rounded
+        // ends made the seams blob up. The fix:
+        //   - 64 steps (~3.5× density) so per-segment alpha deltas are
+        //     below the perceptible threshold;
+        //   - butt caps so segment ends are flush rather than rounded blobs;
+        //   - 1.8× overlap so each segment slightly extends into its
+        //     neighbour, smoothing out any residual seam;
+        //   - cos² falloff (instead of sin) so the alpha curve is gentler
+        //     at the tails and there's no abrupt edge between "lit" and
+        //     "dark" sides.
+        let steps = 64
+        let halfSpread: CGFloat = .pi * 0.22         // ~40° either side
         let peakAlpha = min(intensity * 235 / 255, 1)
-        ctx.setLineCap(.round)
-        for i in 0...steps {
-            let t = CGFloat(i) / CGFloat(steps)
-            // Bell curve: max at center, fades to edges.
-            let bell = sin(t * .pi)
+        let segmentArc = 2 * halfSpread / CGFloat(steps)
+        let overlap: CGFloat = 1.8
+        ctx.setLineCap(.butt)
+        ctx.setLineWidth(2.5)
+        for i in 0..<steps {
+            let t = (CGFloat(i) + 0.5) / CGFloat(steps)   // segment centre 0..1
+            let phase = (t - 0.5) * .pi
+            let bell = cos(phase) * cos(phase)             // smooth cos² bell
             let a = peakAlpha * bell
-            if a < 0.02 { continue }
-            let startA = angle - halfSpread + 2 * halfSpread * t
-            let endA = startA + 2 * halfSpread / CGFloat(steps)
+            if a < 0.005 { continue }
+            let mid = angle - halfSpread + 2 * halfSpread * t
+            let half = segmentArc * overlap / 2
             ctx.setStrokeColor(UIColor(white: 1, alpha: a).cgColor)
-            ctx.setLineWidth(2.5)
-            ctx.addArc(center: center, radius: baseRadius, startAngle: startA, endAngle: endA, clockwise: false)
+            ctx.addArc(center: center, radius: baseRadius,
+                       startAngle: mid - half, endAngle: mid + half, clockwise: false)
             ctx.strokePath()
         }
     }
@@ -180,11 +200,19 @@ final class JoystickTouchView: UIView, EditableWidgetView {
         knobOffset = CGSize(width: rawDx * scale, height: rawDy * scale)
 
         // Sprint hysteresis based on RAW finger distance vs base radius.
-        let factor = rawDist / baseRadius
-        if !sprintEngaged && factor >= sprintEngageFactor {
-            sprintEngaged = true
-            onSprintExtensionChanged?(true)
-        } else if sprintEngaged && factor <= sprintDisengageFactor {
+        // Skipped entirely when the user has disabled joystick-triggered
+        // sprint in Settings (only the manual button counts then).
+        if sprintFromJoystickEnabled {
+            let factor = rawDist / baseRadius
+            if !sprintEngaged && factor >= sprintEngageFactor {
+                sprintEngaged = true
+                onSprintExtensionChanged?(true)
+            } else if sprintEngaged && factor <= sprintDisengageFactor {
+                sprintEngaged = false
+                onSprintExtensionChanged?(false)
+            }
+        } else if sprintEngaged {
+            // Toggle was just turned off mid-press — release.
             sprintEngaged = false
             onSprintExtensionChanged?(false)
         }

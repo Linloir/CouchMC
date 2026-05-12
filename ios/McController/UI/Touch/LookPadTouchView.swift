@@ -50,6 +50,10 @@ final class LookPadTouchView: UIView, EditableWidgetView {
     }
     var inGameQuickClicks: Bool = true
     var uiQuickClicks: Bool = true
+    /// Multiplier on emitted look deltas. iOS coalesces fewer micro-touch
+    /// samples than Android in practice, so the raw signal feels slow; we
+    /// scale up by this factor when sending. Set from `SettingsStore`.
+    var cameraSensitivity: Double = 1.5
 
     private let touchSlop: CGFloat = 8                  // points; matches Android scaledTouchSlop on hidpi
     private let inGameChainWindowMs: Int = 280
@@ -266,9 +270,12 @@ final class LookPadTouchView: UIView, EditableWidgetView {
     }
 
     private func emitDelta(_ dx: CGFloat, _ dy: CGFloat) {
-        // Accumulate sub-pixel and emit only the integer portion.
-        let sx = dx * subpixelScale + residualX
-        let sy = dy * subpixelScale + residualY
+        // Accumulate sub-pixel and emit only the integer portion. Apply the
+        // user-tunable camera sensitivity multiplier on top of the protocol's
+        // ×10 sub-pixel scale (tenths-of-pixel wire deltas).
+        let sens = CGFloat(cameraSensitivity)
+        let sx = dx * subpixelScale * sens + residualX
+        let sy = dy * subpixelScale * sens + residualY
         let ix = Int(sx)
         let iy = Int(sy)
         residualX = sx - CGFloat(ix)

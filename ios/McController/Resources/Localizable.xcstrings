@@ -248,6 +248,66 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "游戏体验" } }
       }
     },
+    "settings.section.hotbar" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+      }
+    },
+    "settings.section.camera" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Camera" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角" } }
+      }
+    },
+    "settings.section.sprint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sprint" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "疾跑" } }
+      }
+    },
+    "settings.hotbar_step" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Swipe sensitivity" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "滑动灵敏度" } }
+      }
+    },
+    "settings.hotbar_step.hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Distance the finger has to travel to step through one hotbar slot. Lower is more sensitive. Only effective in Relative swipe mode." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "每移动一格物品栏所需的手指距离，数值越小越灵敏。只对相对滑动模式有效。" } }
+      }
+    },
+    "settings.camera_sensitivity" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Camera sensitivity" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角灵敏度" } }
+      }
+    },
+    "settings.camera_sensitivity.hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Multiplier applied to look-pad swipes before they're sent to the PC. Higher = faster camera turn." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板滑动发送到 PC 前的倍数。数值越大转动越快。" } }
+      }
+    },
+    "settings.sprint_from_joystick" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Quick sprint via joystick" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆触发快速疾跑" } }
+      }
+    },
+    "settings.sprint_engage" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Trigger distance" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "触发距离" } }
+      }
+    },
+    "settings.sprint.hint" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "When enabled, pushing the joystick past this multiple of its rim radius engages sprint automatically. The Sprint button on the controller always works regardless of this setting." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开启后，将摇杆推出此倍数的边缘半径时自动开启疾跑。无论本开关如何，操作界面上的疾跑按钮始终可用。" } }
+      }
+    },
     "settings.section.layout" : {
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Layout" } },
@@ -546,6 +606,12 @@
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+      }
+    },
+    "widget.close" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Close" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关闭" } }
       }
     }
   }

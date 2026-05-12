@@ -85,18 +85,19 @@ final class ProfileStoreObservable: ObservableObject {
 
     // MARK: - CRUD
 
-    /// Add a new profile, seeded from the active profile's current layouts.
+    /// Add a new profile seeded from the factory `DefaultLayouts`. Users
+    /// expect "new profile" to start clean rather than inheriting whatever
+    /// half-finished tweaks the currently-active profile has accumulated.
     /// Returns false if the name is empty, already taken, or invalid.
     @discardableResult
     func addProfile(named name: String) -> Bool {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, snapshot.profiles[trimmed] == nil else { return false }
-        let seed = activeProfile
         let newProfile = LayoutProfile(
             name: trimmed,
-            inGame: seed.inGame,
-            uiMode: seed.uiMode,
-            hotbarSwipeMode: seed.hotbarSwipeMode
+            inGame: DefaultLayouts.inGame,
+            uiMode: DefaultLayouts.uiMode,
+            hotbarSwipeMode: .precise
         )
         snapshot.profiles[trimmed] = newProfile
         snapshot.active = trimmed
