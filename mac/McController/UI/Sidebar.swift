@@ -69,8 +69,11 @@ struct SidebarView: View {
         List(selection: $selection) {
             Section {
                 row(.discovery)
-                row(.settings)
+                // Key Bindings sits above Settings so the related-but-
+                // separate input config has visual primacy over the
+                // (less frequently visited) profile / curve tuning page.
                 row(.bindings)
+                row(.settings)
             } header: {
                 Text(L.get("nav.root", fallback: "Mobile Controller"))
             }

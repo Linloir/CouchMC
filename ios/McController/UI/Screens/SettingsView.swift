@@ -153,8 +153,17 @@ struct SettingsView: View {
                                     .monospacedDigit()
                                     .foregroundStyle(.secondary)
                             }
+                            // Slider range expanded to 2.0× so users
+                            // who prefer "stick all the way out" sprint
+                            // triggering have headroom past the
+                            // joystick's nominal 1.0 radius. The
+                            // joystick can travel out to ~2× the dead-
+                            // zone before clamping (controlled by
+                            // `JoystickTouchView`'s knob extent), so
+                            // values above 1.0 mean "user has pushed
+                            // past the visual ring by N%".
                             Slider(value: $settings.settings.sprintEngageFactor,
-                                   in: 1.05...1.50, step: 0.05)
+                                   in: 1.05...2.00, step: 0.05)
                         }
                     }
                 } header: {
