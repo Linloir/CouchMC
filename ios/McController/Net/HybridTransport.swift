@@ -29,7 +29,14 @@ actor HybridTransport {
         port: UInt16,
         mode: Mode,
         clientId: UInt32 = UInt32.random(in: 1...UInt32.max - 1),
-        handshakeTimeout: TimeInterval = 3.0,
+        // Raised from 3.0 to 5.0 to absorb the iOS NWConnection edge
+        // case where `.ready` fires a hair before the server's accept
+        // loop has dequeued the socket. HELLO sits in the server's
+        // receive buffer for an extra hop and HELLO_ACK comes back
+        // late. Five seconds is still well under any "user notices a
+        // hang" threshold but eliminates the bulk of the false
+        // handshake-timeout retries we were seeing.
+        handshakeTimeout: TimeInterval = 5.0,
         onMessage: @escaping @Sendable (ControlMessage) -> Void,
         onModeChange: @escaping @Sendable (UInt8) -> Void,
         onClose: @escaping @Sendable (Error?) -> Void

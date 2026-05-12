@@ -28,9 +28,14 @@ final class ControllerHostingController: UIViewController {
     private var inGameButtons: [String: ActionButtonTouchView] = [:]
     private var uiButtons: [String: ActionButtonTouchView] = [:]
 
-    // Anti-mistouch overlay
+    // Anti-mistouch overlay. The "Minecraft is not in the foreground"
+    // prompt + a "back to host list" button — without that button there's
+    // no way to leave anti-mistouch mode without first switching MC into
+    // the foreground (which is exactly the case where the user wants
+    // *out*: MC isn't running, they want to dismiss the controller).
     private let lockOverlay = UIView()
     private let lockLabel = UILabel()
+    private let lockBackButton = UIButton(type: .system)
 
     // HUD
     private let hud = UILabel()
@@ -151,7 +156,30 @@ final class ControllerHostingController: UIViewController {
         super.viewWillLayoutSubviews()
         applyLayout()
         lockOverlay.frame = view.bounds
-        lockLabel.center = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
+
+        // Compose: prompt-text + button, vertically stacked, vertically
+        // centred as a group. We size the label and button to their
+        // intrinsic content, then place the label above the midline and
+        // the button below by (groupHeight / 2), so the entire stack
+        // optically centres on the screen.
+        lockLabel.sizeToFit()
+        let buttonSize = lockBackButton.sizeThatFits(view.bounds.size)
+        let spacing: CGFloat = 24
+        let groupHeight = lockLabel.bounds.height + spacing + buttonSize.height
+        let groupTop = view.bounds.midY - groupHeight / 2
+
+        lockLabel.frame = CGRect(
+            x: view.bounds.midX - lockLabel.bounds.width / 2,
+            y: groupTop,
+            width: lockLabel.bounds.width,
+            height: lockLabel.bounds.height
+        )
+        lockBackButton.frame = CGRect(
+            x: view.bounds.midX - buttonSize.width / 2,
+            y: groupTop + lockLabel.bounds.height + spacing,
+            width: buttonSize.width,
+            height: buttonSize.height
+        )
     }
 
     // MARK: - Build
@@ -339,8 +367,39 @@ final class ControllerHostingController: UIViewController {
         lockLabel.text = L.key("controller.lock.message")
         lockLabel.textColor = .white
         lockLabel.font = .systemFont(ofSize: 22, weight: .semibold)
-        lockLabel.sizeToFit()
+        lockLabel.textAlignment = .center
+        lockLabel.numberOfLines = 0
         lockOverlay.addSubview(lockLabel)
+
+        // Pill button — plain title text + faint rounded-rect bg.
+        // UIButton.Configuration.contentInsets handles the inner padding
+        // symmetrically; baseBackgroundColor + cornerStyle does the chip
+        // look. The button auto-sizes to fit (text height + insets),
+        // so the title is reliably centred both axes.
+        var cfg = UIButton.Configuration.plain()
+        cfg.title = L.key("controller.lock.back_to_home")
+        cfg.baseForegroundColor = UIColor.white.withAlphaComponent(0.92)
+        cfg.background.backgroundColor = UIColor.white.withAlphaComponent(0.10)
+        cfg.background.cornerRadius = 12
+        cfg.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 28,
+                                                    bottom: 12, trailing: 28)
+        cfg.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attr in
+            var out = attr
+            out.font = .systemFont(ofSize: 17, weight: .medium)
+            return out
+        }
+        lockBackButton.configuration = cfg
+        // Keep the highlight tint coherent with the pill background.
+        lockBackButton.tintColor = .white
+        lockBackButton.addTarget(self, action: #selector(lockBackTapped), for: .touchUpInside)
+        lockOverlay.addSubview(lockBackButton)
+    }
+
+    /// Tap-target for the "back to host list" pill on the anti-mistouch
+    /// overlay. Same as the close-widget path: marks the dismiss as user-
+    /// initiated (so the auto-retry can't fight it) and bounces back.
+    @objc private func lockBackTapped() {
+        closeRequested()
     }
 
     private func layoutHUD() {
@@ -466,8 +525,36 @@ final class ControllerHostingController: UIViewController {
             lastConnectedAt = Date()
             retryCount = 0
         case .failed:
-            // Hard failure (e.g. server busy, protocol mismatch). Show the
-            // reason in the HUD briefly then bounce back to the host list.
+            // Initial-connect or mid-session hard failure. The two
+            // scenarios that bring us here:
+            //
+            //  1. HELLO_ACK timeout — `HybridTransport.connect` threw
+            //     because the server didn't respond inside the handshake
+            //     window. Happens intermittently on iOS when NWConnection
+            //     reaches .ready a hair before the server's accept loop
+            //     dequeues the socket, so HELLO either lands in a stalled
+            //     read buffer or the response packet gets reordered. The
+            //     server is almost always reachable on the next attempt.
+            //
+            //  2. Server actively rejected — `serverBusy` or
+            //     `protocolMismatch`. These are deterministic; retrying
+            //     won't fix them and we should surface the error and
+            //     dismiss.
+            //
+            // We can't tell (1) from (2) by inspecting State.failed alone
+            // (the reason string is human-formatted), but retrying a hard
+            // reject just gets the same reject back instantly — the user
+            // sees a slightly delayed bounce instead of an instant one.
+            // The cost of the extra attempt is low; the win when it WAS
+            // case (1) is large. Retry up to `maxRetries`, then dismiss.
+            if !userInitiatedDismiss && retryCount < maxRetries {
+                retryCount += 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                    guard let self else { return }
+                    Task { await self.session.connect(host: self.host.ip, port: self.host.port) }
+                }
+                return
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { [weak self] in
                 self?.onDismiss()
             }

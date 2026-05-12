@@ -494,6 +494,12 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 未处于前台" } }
       }
     },
+    "controller.lock.back_to_home" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Back to host list" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "返回宿主机列表" } }
+      }
+    },
     "controller.disconnected" : {
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Disconnected from server" } },
