@@ -132,8 +132,8 @@ gradle :app:assembleDebug --console=plain
 
 # Install + relaunch (phone must be authorized for adb)
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am force-stop com.mccontroller
-adb shell am start -n com.mccontroller/.ui.ConnectActivity
+adb shell am force-stop cn.linloir.couchmc.android
+adb shell am start -n cn.linloir.couchmc.android/com.mccontroller.ui.ConnectActivity
 ```
 
 First-run on a new machine: `local.properties` doesn't exist yet. Create it manually per "Toolchain" above; otherwise the build fails with "SDK location not found."
@@ -179,8 +179,8 @@ Start-Process pc\McController.App\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x
 cd android
 gradle :app:assembleDebug --console=plain
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am force-stop com.mccontroller
-adb shell am start -n com.mccontroller/.ui.ConnectActivity
+adb shell am force-stop cn.linloir.couchmc.android
+adb shell am start -n cn.linloir.couchmc.android/com.mccontroller.ui.ConnectActivity
 
 # 5. Test:
 #    - Phone displays Connect screen with discovered LAN servers + USB option

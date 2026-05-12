@@ -231,8 +231,12 @@ public sealed class AdbDiscovery : IDisposable
         if (_appCache.TryGetValue(serial, out var cached)) return cached;
         try
         {
-            var raw = await RunAdb($"-s {serial} shell pm list packages com.mccontroller", ct);
-            var has = raw.Contains("package:com.mccontroller");
+            // Match the Android applicationId set in app/build.gradle.kts.
+            // Distinct from the Kotlin namespace (com.mccontroller.*),
+            // which still lives at the source level — only the OS-visible
+            // package id was rebranded.
+            var raw = await RunAdb($"-s {serial} shell pm list packages cn.linloir.couchmc.android", ct);
+            var has = raw.Contains("package:cn.linloir.couchmc.android");
             _appCache[serial] = has;
             return has;
         }

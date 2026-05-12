@@ -1,4 +1,4 @@
-# MC Controller — LAN Discovery Protocol
+# CouchMC — LAN Discovery Protocol
 
 This document specifies how the Android client discovers PC servers on
 the local network without the user having to type an IP address. It is

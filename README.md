@@ -1,4 +1,4 @@
-# MC Controller
+# CouchMC
 
 Turn your phone into a low-latency touchscreen controller for PC Java Edition Minecraft. Replicates the mobile MC control scheme (left joystick + right look pad + buttons) and injects keyboard/mouse events into the PC.
 
@@ -79,7 +79,7 @@ adb reverse --list                  # expect "tcp:34555 tcp:34555" per device
 cd android
 gradle :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n com.mccontroller/.ui.ConnectActivity
+adb shell am start -n cn.linloir.couchmc.android/com.mccontroller.ui.ConnectActivity
 
 # 4. On the phone: pick a discovered server (LAN) or tap "Connect (USB)".
 #    HUD shows "● USB · ... · Xms" once connected.

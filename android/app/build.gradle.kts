@@ -8,7 +8,12 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mccontroller"
+        // OS-visible package identifier. Distinct from the Kotlin
+        // package (which stays at com.mccontroller.* for source-level
+        // stability) — applicationId is the "real name" for installers
+        // and intent targets; namespace is only what R/BuildConfig
+        // generate under.
+        applicationId = "cn.linloir.couchmc.android"
         minSdk = 26
         targetSdk = 34
         versionCode = 2

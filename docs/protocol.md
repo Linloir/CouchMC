@@ -1,4 +1,4 @@
-# MC Controller — Wire Protocol
+# CouchMC — Wire Protocol
 
 This document is the **single source of truth** for the over-the-wire protocol between the Android client and the Windows PC server. PC and Android implementations of `PacketCodec` and `Protocol` constants must mirror this spec.
 

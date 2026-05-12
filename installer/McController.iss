@@ -20,20 +20,26 @@
 ;     after asking the user. The %LOCALAPPDATA%\McController error log is
 ;     wiped unconditionally because it has no value beyond a session.
 
-#define AppName       "MC Controller"
+#define AppName       "CouchMC"
 #define AppVersion    "0.2.0"
 #define AppPublisher  "Linloir"
 #define AppExe        "McController.App.exe"
 #define BuildOutputDir "..\pc\McController.App\bin\x64\Release\net8.0-windows10.0.19041.0\win-x64"
 
 [Setup]
-AppId={{C3F1E7F8-7B5F-4D8C-9C3E-9B7E0E2A5F70}
+; AppId is the reverse-DNS rebrand identifier — distinct from the older
+; v0.x GUID, so v0.x installs are seen as a SEPARATE app by Inno Setup
+; and won't auto-upgrade. That's intentional: the rebrand from
+; "MC Controller" to "CouchMC" also moves to this new id. Users who
+; want a clean install can uninstall the old "MC Controller" entry
+; first; otherwise both will coexist.
+AppId=cn.linloir.couchmc.win
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
 AppPublisherURL=https://github.com/Linloir
-DefaultDirName={userpf}\McController
-DefaultGroupName=MC Controller
+DefaultDirName={userpf}\CouchMC
+DefaultGroupName=CouchMC
 UninstallDisplayIcon={app}\{#AppExe}
 UninstallDisplayName={#AppName}
 PrivilegesRequired=lowest
@@ -44,7 +50,7 @@ SolidCompression=yes
 WizardStyle=modern
 DisableProgramGroupPage=yes
 OutputDir=out
-OutputBaseFilename=McController-Setup-{#AppVersion}
+OutputBaseFilename=CouchMC-Setup-{#AppVersion}
 SetupIconFile=..\pc\McController.App\Assets\app.ico
 ; Per-user install: no UAC prompt, registers in HKCU.
 UsedUserAreasWarning=no
@@ -55,7 +61,7 @@ Name: "chinese";    MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "runatlogon"; Description: "Start MC Controller when I sign in to Windows"; GroupDescription: "Startup:"; Flags: unchecked
+Name: "runatlogon"; Description: "Start CouchMC when I sign in to Windows"; GroupDescription: "Startup:"; Flags: unchecked
 
 [Files]
 ; The whole self-contained publish output. WindowsAppSDKSelfContained=true in
@@ -64,9 +70,9 @@ Name: "runatlogon"; Description: "Start MC Controller when I sign in to Windows"
 Source: "{#BuildOutputDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MC Controller"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\Assets\app.ico"
-Name: "{group}\Uninstall MC Controller"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\MC Controller"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\Assets\app.ico"; Tasks: desktopicon
+Name: "{group}\CouchMC"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\Assets\app.ico"
+Name: "{group}\Uninstall CouchMC"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\CouchMC"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\Assets\app.ico"; Tasks: desktopicon
 
 [Registry]
 ; "Run at logon" task — registers HKCU\Software\Microsoft\Windows\CurrentVersion\Run.

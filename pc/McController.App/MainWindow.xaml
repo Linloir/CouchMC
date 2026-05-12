@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="using:McController.App.Views"
     xmlns:tb="using:H.NotifyIcon"
-    Title="MC Controller">
+    Title="CouchMC">
 
     <Grid x:Name="RootGrid">
         <Grid.RowDefinitions>
@@ -31,7 +31,7 @@
              menu item, but via Command (which always works regardless
              of menu mode). -->
         <tb:TaskbarIcon x:Name="TrayIcon"
-                        ToolTipText="MC Controller"
+                        ToolTipText="CouchMC"
                         ContextMenuMode="SecondWindow"
                         LeftClickCommand="{x:Bind ShowWindowCommand}"
                         DoubleClickCommand="{x:Bind ShowWindowCommand}">
@@ -75,7 +75,7 @@
             <Image x:Name="TitleBarIcon" Width="20" Height="20"
                    Source="ms-appx:///Assets/app.ico"
                    VerticalAlignment="Center"/>
-            <TextBlock Grid.Column="1" Text="MC Controller"
+            <TextBlock Grid.Column="1" Text="CouchMC"
                        Margin="12,0,0,0" VerticalAlignment="Center"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
         </Grid>

@@ -62,8 +62,8 @@ public static class L
     private static readonly Dictionary<string, string> ZhHans = new()
     {
         // App-wide
-        ["app.title"] = "MC Controller",
-        ["app.tooltip"] = "MC Controller",
+        ["app.title"] = "CouchMC",
+        ["app.tooltip"] = "CouchMC",
 
         // Tray menu
         ["tray.open"] = "打开面板",
@@ -163,7 +163,7 @@ public static class L
         // About
         ["about.title"] = "关于",
         ["about.subtitle"] = "应用信息",
-        ["about.app.header"] = "MC Controller",
+        ["about.app.header"] = "CouchMC",
         ["about.app.tagline"] = "把手机变成 Java 版 Minecraft 的触屏控制器",
         ["about.version.header"] = "版本",
         ["about.author.header"] = "开发者",
@@ -174,8 +174,8 @@ public static class L
 
     private static readonly Dictionary<string, string> EnUs = new()
     {
-        ["app.title"] = "MC Controller",
-        ["app.tooltip"] = "MC Controller",
+        ["app.title"] = "CouchMC",
+        ["app.tooltip"] = "CouchMC",
 
         ["tray.open"] = "Open Panel",
         ["tray.exit"] = "Exit Service",
@@ -269,7 +269,7 @@ public static class L
 
         ["about.title"] = "About",
         ["about.subtitle"] = "App info",
-        ["about.app.header"] = "MC Controller",
+        ["about.app.header"] = "CouchMC",
         ["about.app.tagline"] = "Turn your phone into a touchscreen controller for Java Edition Minecraft",
         ["about.version.header"] = "Version",
         ["about.author.header"] = "Author",

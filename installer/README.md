@@ -1,6 +1,6 @@
-# MC Controller — Installer
+# CouchMC — Installer
 
-The Windows installer for MC Controller is built with [Inno Setup](https://jrsoftware.org/isinfo.php) (free, open-source). It produces a single `.exe` that:
+The Windows installer for CouchMC is built with [Inno Setup](https://jrsoftware.org/isinfo.php) (free, open-source). It produces a single `.exe` that:
 
 - Installs per-user under `%LOCALAPPDATA%\Programs\McController` (no admin prompt).
 - Drops Start-Menu shortcuts + an optional Desktop shortcut + an optional "Run at sign-in" registry entry.
@@ -27,15 +27,15 @@ winget install --id JRSoftware.InnoSetup
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\McController.iss
 ```
 
-Output lands in `installer\out\McController-Setup-<version>.exe` (~80–90 MB — the WindowsAppSDK runtime is bundled so end users don't need a separate install).
+Output lands in `installer\out\CouchMC-Setup-<version>.exe` (~80–90 MB — the WindowsAppSDK runtime is bundled so end users don't need a separate install).
 
 ## What the installer touches
 
 | Location | Purpose | Removed on uninstall? |
 |---|---|---|
-| `%LOCALAPPDATA%\Programs\McController\` | App binaries (self-contained, includes WindowsAppSDK runtime) | yes |
-| `%APPDATA%\McController\config.json` | User profiles + tuning | only if the user opts in at uninstall time |
-| `%LOCALAPPDATA%\McController\errors.log` | Crash/error trail | yes |
+| `%LOCALAPPDATA%\Programs\CouchMC\` | App binaries (self-contained, includes WindowsAppSDK runtime) | yes |
+| `%APPDATA%\McController\config.json` | User profiles + tuning (folder name kept across the v0.2 → v0.3 rebrand so existing user tunings survive the install) | only if the user opts in at uninstall time |
+| `%LOCALAPPDATA%\McController\errors.log` | Crash/error trail (same folder-name reason) | yes |
 | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\McController` | "Run at sign-in" — only present if the user enabled it (in-app toggle or installer checkbox) | yes |
 | Start Menu shortcut | Launcher | yes |
 | Desktop shortcut | Optional launcher | yes |
@@ -44,7 +44,7 @@ The in-app **全局设置 → 开机时启动** toggle and the installer's **Run
 
 ## Distributing to end users
 
-The output `McController-Setup-<version>.exe` is the only file you hand out. Users don't need to install .NET, the Windows App SDK runtime, or any redistributable — everything is in the bundle.
+The output `CouchMC-Setup-<version>.exe` is the only file you hand out. Users don't need to install .NET, the Windows App SDK runtime, or any redistributable — everything is in the bundle.
 
 The first time a user runs the unsigned installer, SmartScreen may show "Windows protected your PC" — they click **More info → Run anyway**. Code-signing the installer (an Authenticode cert) removes this prompt; that's left as a future enhancement.
 

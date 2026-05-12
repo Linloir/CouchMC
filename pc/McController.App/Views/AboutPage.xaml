@@ -26,7 +26,7 @@
                         <ImageIcon Source="ms-appx:///Assets/app.ico"/>
                     </tk:SettingsCard.HeaderIcon>
                     <tk:SettingsCard.Header>
-                        <TextBlock x:Name="AppName" Text="MC Controller" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="AppName" Text="CouchMC" FontSize="18" FontWeight="SemiBold"/>
                     </tk:SettingsCard.Header>
                     <tk:SettingsCard.Description>
                         <TextBlock x:Name="AppTagline"

@@ -48,12 +48,12 @@ public sealed partial class MainWindow : Window
             (Application.Current as App)?.ShowMainWindow());
 
         InitializeComponent();
-        Title = Util.L.Get("app.title", "MC Controller");
+        Title = Util.L.Get("app.title", "CouchMC");
 
         // Tray strings + icon are runtime values; XAML defaults cover the
         // first paint, this pass applies the user's locale + the path-
         // resolved app.ico.
-        TrayIcon.ToolTipText = Util.L.Get("app.tooltip", TrayIcon.ToolTipText ?? "MC Controller");
+        TrayIcon.ToolTipText = Util.L.Get("app.tooltip", TrayIcon.ToolTipText ?? "CouchMC");
         TrayOpenItem.Text    = Util.L.Get("tray.open",   TrayOpenItem.Text);
         TrayExitItem.Text    = Util.L.Get("tray.exit",   TrayExitItem.Text);
         try

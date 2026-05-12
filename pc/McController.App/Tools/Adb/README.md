@@ -1,6 +1,6 @@
 # Bundled Android Debug Bridge (adb)
 
-These files are the Windows binaries from **Android SDK Platform-Tools**, bundled with MC Controller so end users don't need to install the Android SDK separately to enable USB-mode device discovery and port forwarding.
+These files are the Windows binaries from **Android SDK Platform-Tools**, bundled with CouchMC so end users don't need to install the Android SDK separately to enable USB-mode device discovery and port forwarding.
 
 ## What's here
 
