@@ -515,7 +515,12 @@ final class ControllerHostingController: UIViewController {
             case .antiMistouch:  modeStr = "locked"
             }
             let rttStr = rtt.map { "\($0)ms" } ?? "—"
-            parts = ["Wi-Fi", modeStr, rttStr]
+            // Distinguish UDP (the low-latency camera path) from the
+            // TCP-framed fallback. If users report "look is laggy", the
+            // first thing to check is whether this says "Wi-Fi/UDP" or
+            // "Wi-Fi/TCP-fallback".
+            let transportStr = session.isCameraUDP ? "Wi-Fi/UDP" : "Wi-Fi/TCP"
+            parts = [transportStr, modeStr, rttStr]
         case .disconnected:
             parts = ["Disconnected"]
         case .failed(let reason):

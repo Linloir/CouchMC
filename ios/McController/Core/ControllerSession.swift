@@ -23,6 +23,12 @@ final class ControllerSession: ObservableObject {
     private var pingSentAt: [UInt32: Date] = [:]
     private var nextPingSeq: UInt32 = 0
 
+    /// Thread-safe handle to the active transport's look-delta fast
+    /// path. `sendLookDelta(...)` reads it from a non-main flush queue
+    /// without going through the actor or main-thread, eliminating the
+    /// burst-when-main-busy artifact described in `LookDeltaSender`.
+    private let lookSenderHolder = LookSenderHolder()
+
     // MARK: - lifecycle
 
     /// Connect over WiFi. Returns once the HELLO_ACK is received or throws.
@@ -50,12 +56,16 @@ final class ControllerSession: ObservableObject {
                     Task { @MainActor in self?.handleClose(err) }
                 }
             )
+            // Publish the transport's nonisolated look-sender so the
+            // hot path can skip the actor on every packet.
+            lookSenderHolder.set(t.lookSender)
             state = .connected
             startPingLoop()
         } catch {
             state = .failed(reason: error.localizedDescription)
             await t.close()
             self.transport = nil
+            lookSenderHolder.set(nil)
         }
     }
 
@@ -63,6 +73,7 @@ final class ControllerSession: ObservableObject {
         pingTask?.cancel()
         pingTask = nil
         pingSentAt.removeAll()
+        lookSenderHolder.set(nil)
         await transport?.close()
         transport = nil
         state = .disconnected
@@ -87,16 +98,25 @@ final class ControllerSession: ObservableObject {
         Task { await self.send(payload) }
     }
 
+    /// Camera-delta hot path. Bypasses the MainActor + HybridTransport
+    /// actor hops by going through the lock-protected `LookDeltaSender`
+    /// directly. Safe to call from any thread (designed to be invoked
+    /// from `LookAccumulator`'s flush queue at ~125 Hz).
     nonisolated func sendLookDelta(dx: Int16, dy: Int16) {
-        Task { await self.transportSendLookDelta(dx: dx, dy: dy) }
+        lookSenderHolder.get()?.send(dx: dx, dy: dy)
+    }
+
+    /// `true` when the camera-delta path is currently using UDP (lower
+    /// overhead, lower latency); `false` when it has fallen back to
+    /// TCP-framed packets (used when the server didn't advertise a UDP
+    /// port or the UDP open failed). Surfaced in the HUD so users can
+    /// diagnose laggy in-game look.
+    nonisolated var isCameraUDP: Bool {
+        lookSenderHolder.get()?.isUDPActive ?? false
     }
 
     @MainActor private func send(_ data: Data) async {
         await transport?.send(data)
-    }
-
-    @MainActor private func transportSendLookDelta(dx: Int16, dy: Int16) async {
-        await transport?.sendLookDelta(dx: dx, dy: dy)
     }
 
     // MARK: - incoming routing
@@ -125,6 +145,7 @@ final class ControllerSession: ObservableObject {
         mode = .antiMistouch
         rttMs = nil
         transport = nil
+        lookSenderHolder.set(nil)
     }
 
     // MARK: - ping loop
