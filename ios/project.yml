@@ -41,6 +41,7 @@ targets:
     resources:
       - McController/Resources/Assets.xcassets
       - McController/Resources/Localizable.xcstrings
+      - McController/Resources/PrivacyInfo.xcprivacy
     info:
       path: McController/Resources/Info.plist
       properties:

@@ -454,8 +454,8 @@
     },
     "about.subtitle" : {
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Touch controller for PC Minecraft" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "PC 端 Minecraft 的触屏控制器" } }
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Touch controller for Minecraft™ on PC" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "PC 端 Minecraft™ 的触屏控制器" } }
       }
     },
     "about.section.info" : {
@@ -486,6 +486,18 @@
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Connect over your local Wi-Fi network. USB tethering is not yet supported on iOS." } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请通过本地 Wi-Fi 网络连接。iOS 端暂不支持 USB 直连。" } }
+      }
+    },
+    "about.section.legal" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Legal" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "法律声明" } }
+      }
+    },
+    "about.legal.body" : {
+      "localizations" : {
+        "en"      : { "stringUnit" : { "state" : "translated", "value" : "MINECRAFT is a trademark of Mojang Synergies AB. CouchMC is an unofficial third-party utility and is not affiliated with, endorsed, sponsored, or specifically approved by Mojang AB, Microsoft Corporation, or Notch Development AB. All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 是 Mojang Synergies AB 的商标。CouchMC 为非官方第三方工具，与 Mojang AB、Microsoft Corporation 及 Notch Development AB 均无任何隶属、合作、赞助或授权关系。文中提及的所有产品和公司名称均为各自所有者的商标™ 或注册商标®，引用并不表示与之存在任何关联或得到其认可。" } }
       }
     },
     "controller.lock.message" : {

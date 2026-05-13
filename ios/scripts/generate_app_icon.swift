@@ -43,7 +43,17 @@ guard let source = NSImage(contentsOf: sourceURL) else {
     exit(1)
 }
 
-func renderPNG(size: CGFloat, withAlpha: Bool, to url: URL) {
+/// Render `source` into a `size × size` PNG.
+///
+/// `zoom > 1.0` scales the source up before drawing, then center-crops back
+/// to the canvas. Used for the AppIcon to compensate for the visual
+/// padding the source PNG carries — at 1.0 the gamepad+forest reads quite
+/// small once iOS applies its own ~22 % squircle mask on top, so we
+/// pre-zoom to give the subject more presence on the home screen.
+///
+/// The about-card icons stay at zoom 1.0 — they're shown inside SwiftUI
+/// `RoundedRectangle(cornerRadius: 12)` and don't need extra cropping.
+func renderPNG(size: CGFloat, withAlpha: Bool, zoom: CGFloat = 1.0, to url: URL) {
     let cs = CGColorSpace(name: CGColorSpace.sRGB)!
     let bitmapInfo: UInt32 = withAlpha
         ? CGImageAlphaInfo.premultipliedLast.rawValue
@@ -65,10 +75,16 @@ func renderPNG(size: CGFloat, withAlpha: Bool, to url: URL) {
         ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
     }
 
-    let rect = CGRect(x: 0, y: 0, width: size, height: size)
-    var dst = rect
-    if let cg = source.cgImage(forProposedRect: &dst, context: nil, hints: nil) {
-        ctx.draw(cg, in: rect)
+    // Compute a centered, zoomed destination rect. At zoom == 1.0 this is
+    // just the canvas. At zoom > 1.0 the source overflows on all four
+    // sides equally, effectively cropping a uniform border.
+    let drawSize = size * zoom
+    let origin = (size - drawSize) / 2
+    let drawRect = CGRect(x: origin, y: origin, width: drawSize, height: drawSize)
+
+    var probe = CGRect(x: 0, y: 0, width: size, height: size)
+    if let cg = source.cgImage(forProposedRect: &probe, context: nil, hints: nil) {
+        ctx.draw(cg, in: drawRect)
     } else {
         fatalError("Cannot get CGImage from source")
     }
@@ -81,9 +97,19 @@ func renderPNG(size: CGFloat, withAlpha: Bool, to url: URL) {
     try! FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                              withIntermediateDirectories: true)
     try! data.write(to: url, options: [.atomic])
-    print("Wrote \(url.lastPathComponent) (\(Int(size))×\(Int(size)))")
+    let zoomLabel = zoom == 1.0 ? "" : ", zoom: \(String(format: "%.2f", Double(zoom)))×"
+    print("Wrote \(url.lastPathComponent) (\(Int(size))×\(Int(size))\(zoomLabel))")
 }
 
-renderPNG(size: 1024, withAlpha: false, to: appIconSet.appendingPathComponent("icon-1024.png"))
-renderPNG(size:  256, withAlpha: true,  to: aboutSet.appendingPathComponent("icon-256.png"))
-renderPNG(size:  512, withAlpha: true,  to: aboutSet.appendingPathComponent("icon-512.png"))
+// AppIcon: zoom in 1.20× to crop ~10 % off each edge, so the gamepad +
+// forest fill more of the icon on the home screen. Tune this if you
+// re-render the source PNG with different padding.
+renderPNG(size: 1024, withAlpha: false, zoom: 1.20,
+          to: appIconSet.appendingPathComponent("icon-1024.png"))
+
+// About-card icons: no zoom; they live behind a SwiftUI RoundedRectangle
+// and the source's padding looks fine at small sizes.
+renderPNG(size:  256, withAlpha: true,
+          to: aboutSet.appendingPathComponent("icon-256.png"))
+renderPNG(size:  512, withAlpha: true,
+          to: aboutSet.appendingPathComponent("icon-512.png"))

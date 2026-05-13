@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        CouchMC's privacy manifest. Apple began enforcing this in May 2024.
+
+        Summary of CouchMC's privacy posture (verified by code review):
+          * No tracking — does not link any data with third-party data for
+            advertising / measurement, and does not pass data to a data
+            broker.
+          * No data collection — every byte of user data (saved hosts,
+            layout profiles, settings) is stored locally in the app's
+            sandboxed Application Support directory and never leaves the
+            device. No analytics, no crash reporting, no telemetry.
+          * No tracking domains — does not contact any external server
+            other than the user-configured local PC server on their LAN.
+          * No required-reason API usage — does not query
+            UserDefaults / system boot time / disk space / file timestamps /
+            active keyboards, so no NSPrivacyAccessedAPITypes entries are
+            needed.
+          * No third-party SDKs — only Apple frameworks (SwiftUI, UIKit,
+            Combine, Network, Foundation, CoreGraphics, os.lock).
+    -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array/>
+</dict>
+</plist>

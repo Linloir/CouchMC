@@ -493,6 +493,19 @@ struct AboutView: View {
                 Text(L.key("about.notes.body"))
                     .font(.subheadline)
             }
+            // Trademark / non-affiliation disclaimer required to ride the line
+            // between App Store Review Guideline 5.2.1 (third-party IP) and
+            // 4.1 (don't suggest you're an official product). Keep this
+            // section visible by default — Apple reviewers explicitly look
+            // for it when an app's purpose centres on a trademarked third-
+            // party game.
+            Section {
+                Text(L.key("about.legal.body"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text(L.key("about.section.legal"))
+            }
         }
         .navigationTitle(L.key("settings.about.open"))
         .navigationBarTitleDisplayMode(.inline)
