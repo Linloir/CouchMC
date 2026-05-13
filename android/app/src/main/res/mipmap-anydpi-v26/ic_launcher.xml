@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Adaptive launcher icon: pixel-art Minecraft grass block (rendered by
-    IconBaker on the PC side, mirrored as PNGs into mipmap-*) over a
-    solid white chip. Matches the Windows app icon exactly aside from
-    the background colour.
+    Adaptive launcher icon (API 26+). Foreground is the full-bleed CouchMC
+    icon rendered into a 108dp canvas at five densities; background is a
+    flat forest green chosen so the launcher mask can crop the foreground
+    without revealing a clashing seam.
 
     Foreground PNGs live in mipmap-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}.
-    Regenerate them by running the PC app with the
-    "generate-android-icon" CLI flag (see App.xaml.cs).
+    Regenerate every density from `assets/icon.png` by running
+    `scripts/regenerate_app_icons.ps1` at the repo root.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
