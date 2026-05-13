@@ -361,29 +361,31 @@ final class LayoutEditorViewController: UIViewController {
 
     private func styleTextButton(_ b: UIButton, title: String) {
         var config = UIButton.Configuration.plain()
-        config.title = title
+        // See `ControllerHostingController.layoutLockOverlay` for the
+        // rationale on the NSAttributedString → AttributedString bridge
+        // (avoids the Swift 6 non-Sendable key-path warning that
+        // `AttributedString.font = …` triggers).
+        let titleNS = NSAttributedString(
+            string: title,
+            attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .medium)]
+        )
+        config.attributedTitle = AttributedString(titleNS)
         config.baseForegroundColor = .white
         config.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var out = incoming
-            out.font = .systemFont(ofSize: 14, weight: .medium)
-            return out
-        }
         b.configuration = config
     }
 
     private func styleTonalButton(_ b: UIButton, title: String) {
         var config = UIButton.Configuration.filled()
-        config.title = title
+        let titleNS = NSAttributedString(
+            string: title,
+            attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .semibold)]
+        )
+        config.attributedTitle = AttributedString(titleNS)
         config.baseForegroundColor = .black
         config.baseBackgroundColor = .white
         config.cornerStyle = .capsule
         config.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12)
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var out = incoming
-            out.font = .systemFont(ofSize: 14, weight: .semibold)
-            return out
-        }
         b.configuration = config
     }
 

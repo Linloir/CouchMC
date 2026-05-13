@@ -15,23 +15,34 @@ import UIKit
 /// cause iOS to silently drop the rotation, which is exactly what we hit on
 /// repeat enter/exit cycles.
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    /// Marked `@MainActor` because UIKit only ever calls
+    /// `application(_:supportedInterfaceOrientationsFor:)` on the main
+    /// thread, and OrientationHelper (also `@MainActor`) is the only
+    /// other writer. Using a plain `static var` would require either
+    /// `nonisolated(unsafe)` or an actor hop on every read; pinning
+    /// to MainActor avoids both and matches reality.
+    @MainActor
     static var allowedOrientations: UIInterfaceOrientationMask = .portrait
 
+    @MainActor
     func application(_ application: UIApplication,
                      supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return AppDelegate.allowedOrientations
     }
 }
 
+@MainActor
 enum OrientationHelper {
 
     /// Cross-fade timings used by the landscape overlays. Centralised so
     /// SettingsView / HomeView / RootView all open + close their overlays
     /// with identical, explicit `withAnimation` timing — avoiding the
     /// inconsistency we saw when relying on implicit `.animation(_:value:)`
-    /// on the parent view.
-    static let enterFadeDuration: Double = 0.40
-    static let exitFadeDuration: Double = 0.22
+    /// on the parent view. Marked nonisolated because they're plain
+    /// `Double`s — accessible from anywhere without an actor hop, even
+    /// though the enum itself is @MainActor for the geometry-update calls.
+    nonisolated static let enterFadeDuration: Double = 0.40
+    nonisolated static let exitFadeDuration: Double = 0.22
 
     static func currentScene() -> UIWindowScene? {
         UIApplication.shared.connectedScenes

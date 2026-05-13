@@ -16,8 +16,6 @@ struct HomeView: View {
     @Binding var connectingTo: ConnectionRequest?
     @Binding var controllerOpacity: Double
 
-    var theme: Theme { Theme(language: settings.settings.designLanguage) }
-
     var body: some View {
         NavigationStack {
             List {

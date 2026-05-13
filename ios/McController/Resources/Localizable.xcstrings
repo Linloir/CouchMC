@@ -362,12 +362,6 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "反馈" } }
       }
     },
-    "settings.section.appearance" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Appearance" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "外观" } }
-      }
-    },
     "settings.section.about" : {
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "About" } },
@@ -420,30 +414,6 @@
       "localizations" : {
         "en"      : { "stringUnit" : { "state" : "translated", "value" : "Haptic feedback" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "触觉反馈" } }
-      }
-    },
-    "settings.design_language" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Design language" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设计风格" } }
-      }
-    },
-    "settings.design.standard" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Standard (iOS 18)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "标准 (iOS 18)" } }
-      }
-    },
-    "settings.design.liquid_glass" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Liquid Glass" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "液态玻璃" } }
-      }
-    },
-    "settings.design.liquid_glass_hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Liquid Glass surfaces appear on iOS 26 and later; on earlier versions the standard look is used." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "液态玻璃效果在 iOS 26 及更新系统上可用；旧系统会自动回退到标准外观。" } }
       }
     },
     "settings.about.open" : {

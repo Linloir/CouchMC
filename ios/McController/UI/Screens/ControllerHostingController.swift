@@ -377,17 +377,25 @@ final class ControllerHostingController: UIViewController {
         // look. The button auto-sizes to fit (text height + insets),
         // so the title is reliably centred both axes.
         var cfg = UIButton.Configuration.plain()
-        cfg.title = L.key("controller.lock.back_to_home")
+        // Build the title via NSAttributedString → AttributedString
+        // instead of either `titleTextAttributesTransformer` or
+        // AttributedString's `.font` setter. Both of those would form a
+        // `KeyPath<AttributeScopes.UIKitAttributes, …FontAttribute>` —
+        // that key path isn't Sendable and trips Swift 6 strict-
+        // concurrency warnings even when used at top-level (because
+        // forming the key path itself is the issue, not capture). The
+        // NSAttributedString.Key route stays in plain Foundation types
+        // and produces the same UIButton appearance.
+        let titleNS = NSAttributedString(
+            string: L.key("controller.lock.back_to_home"),
+            attributes: [.font: UIFont.systemFont(ofSize: 17, weight: .medium)]
+        )
+        cfg.attributedTitle = AttributedString(titleNS)
         cfg.baseForegroundColor = UIColor.white.withAlphaComponent(0.92)
         cfg.background.backgroundColor = UIColor.white.withAlphaComponent(0.10)
         cfg.background.cornerRadius = 12
         cfg.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 28,
                                                     bottom: 12, trailing: 28)
-        cfg.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attr in
-            var out = attr
-            out.font = .systemFont(ofSize: 17, weight: .medium)
-            return out
-        }
         lockBackButton.configuration = cfg
         // Keep the highlight tint coherent with the pill background.
         lockBackButton.tintColor = .white

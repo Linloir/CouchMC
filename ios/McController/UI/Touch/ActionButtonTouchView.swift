@@ -272,6 +272,14 @@ final class ActionButtonTouchView: UIView, EditableWidgetView {
 }
 
 /// Common interface for widgets that can be edited in the layout editor.
+///
+/// Marked `@MainActor` because every conformer is a `UIView` (which is
+/// itself `@MainActor`-isolated), and the conformance was implicitly
+/// crossing the actor boundary in Swift 6 strict-concurrency mode. Making
+/// the protocol main-actor-bound matches the runtime reality (UIView
+/// methods can only be touched from main) and silences the Swift 6
+/// "conformance crosses into main actor-isolated code" warning.
+@MainActor
 protocol EditableWidgetView: UIView {
     var widgetID: String { get }
     var isEditing: Bool { get set }

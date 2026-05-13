@@ -16,8 +16,6 @@ struct AppSettings: Codable, Equatable, Sendable {
     var rightMarginOffset: CGFloat = 0
     /// Haptic feedback on button presses.
     var haptics: Bool = true
-    /// Design language: iOS standard (system materials) vs Liquid Glass (iOS 26+).
-    var designLanguage: DesignLanguage = .standard
 
     // MARK: - iOS-specific tuning (no Android counterpart yet)
 
@@ -52,11 +50,6 @@ struct AppSettings: Codable, Equatable, Sendable {
     /// matches the gap of another pair on screen — i.e. equal-spacing
     /// alignment, with arrow indicators on the matching pairs.
     var editorSpacingSnap: Bool = true
-}
-
-enum DesignLanguage: String, Codable, CaseIterable, Sendable {
-    case standard       // iOS 18 system materials
-    case liquidGlass    // iOS 26 Liquid Glass APIs (gracefully falls back on <26)
 }
 
 @MainActor
