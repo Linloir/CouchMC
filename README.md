@@ -26,9 +26,13 @@
 
 ### 项目简介
 
-CouchMC 的初衷很简单：把手机变成一块低延迟的触屏 Minecraft Java Edition 控制器，让你可以坐在沙发上，用类似移动版 Minecraft 的手感玩 PC 版。手机负责触摸输入，电脑端服务负责把摇杆、视角滑动、按钮和快捷栏操作转换为系统级键盘与鼠标事件。
+CouchMC 的初衷来自一个很普通的晚上：我刚搬到新家，买了一个大电视，也终于有了一张舒服的沙发。下班回到家以后，我常常只想关上灯，打开游戏，短暂地沉浸在 Minecraft 带来的放松和自由里。但当时没有这样一款软件。想在沙发上玩 MC，要么别扭地抱着鼠标键盘，要么买手柄、装插件。
 
-它不依赖 Minecraft Mod。核心设计是一个 **三状态模式系统**：电脑端检测 Minecraft 是否在前台、鼠标是否被游戏捕获，然后让手机自动切换为游戏内控制器、UI 光标控制器或防误触锁屏。这样背包、箱子、菜单等原生 UI 仍由 Minecraft 自己渲染，手机只负责驱动光标和输入。
+我试过这两条路。鼠标键盘的姿势很快破坏了沉浸感；手柄和 MOD 也没有想象中轻松。视角转动像“航母掉头”，键位总是不够用，我还经常记混跳跃和攻击。折腾了一晚上之后，我意识到：我玩游戏是为了放松，不是为了再掌握一个需要训练的新任务。
+
+所以 CouchMC 想做的事情很简单：让习惯手机 MOBA 或 FPS 操作的玩家，可以零成本地切回 MC。你不需要研究各种 MOD，不需要购买手柄，也不需要适应手柄奇怪的按键和视角转动体验。下载电脑端和手机端，连在同一个局域网里，就可以开始玩。
+
+实现上，手机负责触摸输入，电脑端服务负责把摇杆、视角滑动、按钮和快捷栏操作转换为系统级键盘与鼠标事件。它不依赖 Minecraft Mod。核心设计是一个 **三状态模式系统**：电脑端检测 Minecraft 是否在前台、鼠标是否被游戏捕获，然后让手机自动切换为游戏内控制器、UI 光标控制器或防误触锁屏。这样背包、箱子、菜单等原生 UI 仍由 Minecraft 自己渲染，手机只负责驱动光标和输入。
 
 ### 当前支持
 
@@ -238,9 +242,13 @@ CouchMC 现在使用 [MIT License](LICENSE) 开源。
 
 ### What Is CouchMC?
 
-CouchMC turns your phone into a low-latency touchscreen controller for Minecraft Java Edition on a computer. It was built for one very specific feeling: playing PC Minecraft from the couch with mobile-style touch controls instead of a traditional gamepad.
+CouchMC started from a very ordinary evening. I had just moved into a new home, bought a big TV, and finally had a comfortable couch. After work, I often wanted to turn off the lights, open Minecraft, and spend a short while inside that relaxed, free world. But there was no comfortable way to do it: I either had to use a mouse and keyboard awkwardly from the couch, or buy a controller and install mods.
 
-The phone captures joystick, look-pad, button and hotbar gestures. The desktop server translates those packets into native keyboard and mouse events. No Minecraft mod is required.
+I tried both. The mouse-and-keyboard posture broke the immersion almost immediately. A controller sounded better, so I spent a night trying launchers and recommended controller mods, but it still felt like a new task to learn. Camera movement felt like turning an aircraft carrier, the button layout was easy to mix up, and switching hotbar items never became natural.
+
+That is why CouchMC exists: to make couch Minecraft feel familiar for people who already know mobile MOBA or FPS controls. No controller purchase, no mod research, no strange camera feel. Install the desktop app and the phone app, keep both devices on the same LAN, and start playing.
+
+Technically, the phone captures joystick, look-pad, button and hotbar gestures. The desktop server translates those packets into native keyboard and mouse events. No Minecraft mod is required.
 
 The key idea is the **three-state mode system**. The desktop app detects whether Minecraft is focused and whether its cursor is captured, then tells the phone which UI to show: in-game controller, UI cursor control, or anti-mistouch lock screen. Minecraft still renders all inventory, chest and menu screens itself; CouchMC only drives input.
 
