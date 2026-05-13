@@ -102,32 +102,21 @@ bash scripts/install.sh
 
 #### Android 手机
 
-当前 Android 客户端可从源码构建 APK。准备 Android Studio / Android SDK、JDK 17、Gradle 8.10+，并在手机上开启开发者选项和 USB 调试。
+普通用户不需要安装 Android Studio，也不需要会用命令行。直接在手机上安装 APK 即可：
 
-```powershell
-cd android
-gradle :app:assembleDebug --console=plain
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n cn.linloir.couchmc.android/com.mccontroller.ui.ConnectActivity
-```
+1. 用手机打开 [GitHub Releases](https://github.com/Linloir/mc-controller/releases)。
+2. 下载最新版本里的 `CouchMC-Android-<version>.apk`，或名字类似的 Android APK 文件。
+3. 下载完成后点开 APK。系统如果提示“禁止安装未知应用”，按提示进入设置，允许当前浏览器或文件管理器安装应用。
+4. 回到安装页面，点击 **安装**。
+5. 安装完成后打开 **CouchMC**，确保手机和电脑连在同一个 Wi-Fi；如果使用 Android USB 模式，再用数据线连接电脑即可。
 
-如果是第一次在本机编译 Android 项目，需要创建 `android/local.properties`：
-
-```properties
-sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
-```
+如果浏览器提示“此文件可能有风险”，这是因为 APK 不是从应用商店下载。确认来源是本仓库 Release 后，选择继续下载。
 
 #### iPhone / iPad
 
-iOS 客户端正在筹备 App Store 上架。当前可用开发者方式安装：准备 macOS、Xcode 16+、`xcodegen` 和 iOS 18+ 真机，在 Xcode 中选择自己的 Development Team 后运行到设备。
+iOS 客户端正在筹备 App Store 上架，暂时还不能直接下载。正式上架后，这里会放 App Store 链接，普通用户只需要像安装普通 App 一样点击下载。
 
-```bash
-cd ios
-xcodegen generate
-open McController.xcodeproj
-```
-
-iOS 版本目前以 Wi-Fi 连接为主。首次连接前请允许 Local Network 权限，否则无法发现电脑端服务。
+在上架前，如果你有 Mac、Xcode 和 Apple 开发者签名环境，可以参考下方 **本地开发、打包与部署 → iOS 客户端** 自己构建并安装到真机。iOS 版本目前以 Wi-Fi 连接为主，首次连接前请允许 Local Network 权限，否则无法发现电脑端服务。
 
 ### 使用方法
 
@@ -327,32 +316,21 @@ On first launch, grant Accessibility permission in **System Settings → Privacy
 
 #### Android Phone
 
-Build the APK from source with Android Studio / Android SDK, JDK 17 and Gradle 8.10+. Enable Developer Options and USB debugging on the phone.
+Regular users do not need Android Studio or command-line tools. Install the APK directly on the phone:
 
-```powershell
-cd android
-gradle :app:assembleDebug --console=plain
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n cn.linloir.couchmc.android/com.mccontroller.ui.ConnectActivity
-```
+1. Open [GitHub Releases](https://github.com/Linloir/mc-controller/releases) on the phone.
+2. Download `CouchMC-Android-<version>.apk`, or the similarly named Android APK asset from the latest release.
+3. Open the downloaded APK. If Android blocks it, follow the prompt to allow the current browser or file manager to install unknown apps.
+4. Return to the installer and tap **Install**.
+5. Open **CouchMC** after installation. Put the phone and computer on the same Wi-Fi; for Android USB mode, connect the phone to the computer with a data cable.
 
-On a fresh checkout, create `android/local.properties`:
-
-```properties
-sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
-```
+If the browser warns that the file may be risky, that is expected for APKs installed outside an app store. Continue only after confirming the file came from this repository's Release page.
 
 #### iPhone / iPad
 
-The iOS client is being prepared for the App Store. For now, install it as a developer build with macOS, Xcode 16+, `xcodegen` and a real iOS 18+ device.
+The iOS client is being prepared for the App Store and cannot be downloaded directly yet. Once it is listed, this section will point to the App Store page, and normal users will install it like any other app.
 
-```bash
-cd ios
-xcodegen generate
-open McController.xcodeproj
-```
-
-Set your Development Team in Xcode, run on device, and allow Local Network permission. The current iOS path is Wi-Fi first.
+Before the App Store release, users with a Mac, Xcode and Apple signing setup can build it manually from source. See **Local Build, Packaging And Deployment → iOS Client** below. The current iOS path is Wi-Fi first; allow Local Network permission on first launch so the app can discover desktop servers.
 
 ### How To Use
 
