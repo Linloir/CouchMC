@@ -25,7 +25,6 @@ settings:
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     IPHONEOS_DEPLOYMENT_TARGET: "18.0"
-    TARGETED_DEVICE_FAMILY: "1,2"
     GCC_OPTIMIZATION_LEVEL: s
     SWIFT_OPTIMIZATION_LEVEL: "-O"
     ENABLE_BITCODE: NO
@@ -80,11 +79,6 @@ targets:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        "UISupportedInterfaceOrientations~ipad":
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
         # Bonjour service for LAN discovery (Channel B)
         NSBonjourServices:
           - _mccontroller._tcp
@@ -93,6 +87,11 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cn.linloir.couchmc.ios
+        # iPhone-only (1 = iPhone, 2 = iPad). Must be set at the target level
+        # because xcodegen's default Xcode boilerplate writes "1,2" here and
+        # target-level overrides project-level — leaving it at the project
+        # level had no effect.
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleDefault
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

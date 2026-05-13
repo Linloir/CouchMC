@@ -12,8 +12,11 @@ profiles, LAN discovery) using a native Swift/SwiftUI + UIKit stack.
 
 - macOS with Xcode 16+ (for iOS 18 SDK; iOS 26 SDK enables full Liquid Glass)
 - [`xcodegen`](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- An iPhone or iPad running iOS 18+. The app is portrait on iPhone (host
-  picker / settings) and locks to landscape only during gameplay.
+- An iPhone running iOS 18+. The app is portrait on the home/settings
+  screens and locks to landscape only during gameplay. (iPad is **not** a
+  supported destination — `TARGETED_DEVICE_FAMILY = 1`; iPad users can
+  still install the iPhone build via "Designed for iPhone" compatibility
+  mode, but no iPad-specific layout is shipped.)
 
 ## Project layout
 
@@ -135,10 +138,10 @@ return zero hosts, so the home screen will show only manually added IPs.
   be opened; that adds framing overhead.
 - **"Server busy"** — only one client may connect at a time. Disconnect
   the Android client first.
-- **App freezes on landscape rotation** — make sure
-  `UISupportedInterfaceOrientations~ipad` and the iPhone-specific entry
-  in `Info.plist` are not edited. Portrait + Landscape are intentionally
-  separate per-screen, not a Plist matter.
+- **App freezes on landscape rotation** — Portrait + Landscape are
+  intentionally separate per-screen (`AppDelegate.allowedOrientations`),
+  not a Plist matter. Don't edit `UISupportedInterfaceOrientations` to
+  try to force one or the other globally.
 
 ## Roadmap
 
