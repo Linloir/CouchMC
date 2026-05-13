@@ -1,0 +1,12 @@
+services:
+  couchmc-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: couchmc-web:latest
+    container_name: couchmc-web
+    restart: always
+    ports:
+      - "127.0.0.1:23010:3000"
+    environment:
+      NODE_ENV: production

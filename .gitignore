@@ -70,6 +70,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# TypeScript incremental build
+*.tsbuildinfo
+
 # =====================================
 # OS / IDE
 # =====================================
