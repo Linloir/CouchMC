@@ -90,6 +90,7 @@ Desktop.ini
 # =====================================
 # Project-specific
 # =====================================
+.claude/
 config.json
 *.pfx
 *.snk
