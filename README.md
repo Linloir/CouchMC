@@ -1,11 +1,13 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-light.png">
-  <img alt="CouchMC" src="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-light.png" width="100%">
-</picture>
+<a href="https://couchmc.linloir.cn">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-light.png">
+    <img alt="CouchMC" src="https://raw.githubusercontent.com/Linloir/mc-controller/master/assets/header-light.png" width="100%">
+  </picture>
+</a>
 
 <div align="center">
-  <a href="#中文">中文</a> | <a href="#english">English</a>
+  <a href="https://couchmc.linloir.cn">Website</a> | <a href="#中文">中文</a> | <a href="#english">English</a>
   <br><br>
   <img alt="Version" src="https://img.shields.io/badge/version-v0.2.0-2ea043?style=for-the-badge">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Linloir/mc-controller?style=for-the-badge"></a>
