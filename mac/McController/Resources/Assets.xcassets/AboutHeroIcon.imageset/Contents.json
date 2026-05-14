@@ -9,6 +9,26 @@
       "filename" : "about_hero_64@2x.png",
       "idiom" : "mac",
       "scale" : "2x"
+    },
+    {
+      "filename" : "about_hero_128@1x.png",
+      "idiom" : "mac",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "about_hero_128@2x.png",
+      "idiom" : "mac",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "about_hero_256@1x.png",
+      "idiom" : "mac",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "about_hero_256@2x.png",
+      "idiom" : "mac",
+      "scale" : "2x"
     }
   ],
   "info" : {

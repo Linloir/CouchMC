@@ -9,7 +9,7 @@
 <div align="center">
   <a href="https://couchmc.linloir.cn">Website</a> | <a href="#中文">中文</a> | <a href="#english">English</a>
   <br><br>
-  <img alt="Version" src="https://img.shields.io/badge/version-v0.2.0-2ea043?style=for-the-badge">
+  <img alt="Version" src="https://img.shields.io/badge/version-v1.0.1-2ea043?style=for-the-badge">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Linloir/mc-controller?style=for-the-badge"></a>
   <a href="https://github.com/Linloir/mc-controller/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Linloir/mc-controller?style=for-the-badge"></a>
   <img alt=".NET 8" src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white">

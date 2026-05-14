@@ -21,7 +21,7 @@
 ;     wiped unconditionally because it has no value beyond a session.
 
 #define AppName       "CouchMC"
-#define AppVersion    "0.2.0"
+#define AppVersion    "1.0.1"
 #define AppPublisher  "Linloir"
 #define AppExe        "McController.App.exe"
 #define BuildOutputDir "..\pc\McController.App\bin\x64\Release\net8.0-windows10.0.19041.0\win-x64"
