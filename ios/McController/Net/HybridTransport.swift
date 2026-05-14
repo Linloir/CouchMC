@@ -12,15 +12,26 @@ actor HybridTransport {
     private let tcp = TCPChannel()
     private var udp: UDPChannel?
 
+    /// Nonisolated, lock-protected fast path for camera deltas. Callers
+    /// (specifically `ControllerSession.sendLookDelta`) should hand
+    /// look-delta packets to this instead of awaiting `sendLookDelta(...)`
+    /// on the actor — it skips both the MainActor and HybridTransport
+    /// actor hops, which is essential for keeping the 125 Hz look stream
+    /// non-bursty when the main thread is busy with touch handling.
+    /// See `LookDeltaSender` for the rationale.
+    nonisolated let lookSender: LookDeltaSender
+
     /// Server-reported mode (0/1/2). Updated eagerly by the read loop so the
     /// initial STATE_CHANGE that arrives during handshake is not missed.
     private(set) var serverMode: UInt8 = 2  // start in AntiMistouch
 
-    private var lookSeqTCP: UInt32 = 0
-
     private var onMessage: (@Sendable (ControlMessage) -> Void)?
     private var onClose: (@Sendable (Error?) -> Void)?
     private var onMode: (@Sendable (UInt8) -> Void)?
+
+    init() {
+        self.lookSender = LookDeltaSender(tcp: tcp)
+    }
 
     /// Connect, send HELLO, await HELLO_ACK. WiFi mode opens UDP if the server
     /// advertised a port; USB mode never opens UDP.
@@ -114,10 +125,14 @@ actor HybridTransport {
             do {
                 try await u.open(host: host, port: udpPort)
                 self.udp = u
+                lookSender.setUDP(u)
             } catch {
                 // UDP optional — fall back to TCP camera deltas silently.
                 self.udp = nil
+                lookSender.setUDP(nil)
             }
+        } else {
+            lookSender.setUDP(nil)
         }
     }
 
@@ -127,19 +142,10 @@ actor HybridTransport {
         tcp.send(data)
     }
 
-    /// Camera delta. Goes via UDP when available, TCP framing otherwise.
-    func sendLookDelta(dx: Int16, dy: Int16) {
-        if let udp {
-            udp.sendLookDelta(dx: dx, dy: dy)
-        } else {
-            lookSeqTCP = lookSeqTCP &+ 1
-            tcp.send(PacketCodec.encodeLookDeltaTCP(seq: lookSeqTCP, dx: dx, dy: dy))
-        }
-    }
-
     func close() {
         udp?.close()
         udp = nil
+        lookSender.setUDP(nil)
         tcp.close()
     }
 
