@@ -3,6 +3,13 @@ import { REPOSITORY_URL } from "./i18n";
 export const APP_VERSION = "1.0.1";
 
 const RELEASE_BASE = `${REPOSITORY_URL}/releases/download/v${APP_VERSION}`;
+// Tencent COS bucket bound to dl.couchmc.linloir.cn. APK / EXE / DMG are
+// blocked on the default COS domain, so this custom domain is what makes
+// the high-speed mirror legal. HTTPS is required because the site is
+// served over HTTPS — make sure the SSL cert is configured on the COS
+// custom-domain side, otherwise modern browsers will silently block the
+// download as mixed content.
+const COS_BASE = `https://dl.couchmc.linloir.cn/couchmc`;
 
 export type PlatformKey = "windows" | "macos" | "android" | "ios";
 
@@ -15,15 +22,12 @@ export type PlatformDownload = {
   appStoreUrl: string | null;
 };
 
-// COS URLs are placeholders — replace with the real CDN endpoints when
-// they're provisioned. The GitHub URLs auto-resolve through any future
-// repo rename redirects.
 export const DOWNLOADS: Record<PlatformKey, PlatformDownload> = {
   windows: {
     key: "windows",
     filename: `CouchMC-Setup-${APP_VERSION}.exe`,
     size: "46 MB",
-    cosUrl: `https://cos.couchmc.app/releases/v${APP_VERSION}/CouchMC-Setup-${APP_VERSION}.exe`,
+    cosUrl: `${COS_BASE}/CouchMC-Setup-${APP_VERSION}.exe`,
     githubUrl: `${RELEASE_BASE}/CouchMC-Setup-${APP_VERSION}.exe`,
     appStoreUrl: null,
   },
@@ -31,7 +35,7 @@ export const DOWNLOADS: Record<PlatformKey, PlatformDownload> = {
     key: "macos",
     filename: `CouchMC-${APP_VERSION}.dmg`,
     size: "14 MB",
-    cosUrl: `https://cos.couchmc.app/releases/v${APP_VERSION}/CouchMC-${APP_VERSION}.dmg`,
+    cosUrl: `${COS_BASE}/CouchMC-${APP_VERSION}.dmg`,
     githubUrl: `${RELEASE_BASE}/CouchMC-${APP_VERSION}.dmg`,
     appStoreUrl: null,
   },
@@ -39,7 +43,7 @@ export const DOWNLOADS: Record<PlatformKey, PlatformDownload> = {
     key: "android",
     filename: `CouchMC-${APP_VERSION}.apk`,
     size: "7 MB",
-    cosUrl: `https://cos.couchmc.app/releases/v${APP_VERSION}/CouchMC-${APP_VERSION}.apk`,
+    cosUrl: `${COS_BASE}/CouchMC-${APP_VERSION}.apk`,
     githubUrl: `${RELEASE_BASE}/CouchMC-${APP_VERSION}.apk`,
     appStoreUrl: null,
   },
