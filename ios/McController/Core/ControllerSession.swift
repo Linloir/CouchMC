@@ -18,6 +18,26 @@ final class ControllerSession: ObservableObject {
     @Published private(set) var mode: ControllerMode = .antiMistouch
     @Published private(set) var rttMs: Int? = nil
 
+    /// `true` when the active "session" is the in-app simulator, NOT a
+    /// real PC. Activated by connecting to a host marked `isDemo`
+    /// (the `0.0.0.0:65537` magic combo from `AddHostSheet`). Demo mode:
+    ///   - Skips the network stack entirely (no TCP/UDP).
+    ///   - Lets the user cycle modes manually via the HUD button instead
+    ///     of waiting for server-driven STATE_CHANGE.
+    ///   - Captures button presses / joystick / look-delta in
+    ///     `demoInputState` for the on-screen diagnostic HUD.
+    @Published private(set) var isDemoMode: Bool = false
+
+    /// Thread-safe demo-input collector. Populated from the nonisolated
+    /// `send*` methods below when `isDemoMode` is true. The HUD polls
+    /// this on a 30 Hz timer.
+    nonisolated let demoInputState = DemoInputState()
+
+    /// Lock-protected mirror of `isDemoMode` so the nonisolated send
+    /// hot paths can branch without an actor hop. Set / cleared on the
+    /// main actor whenever `isDemoMode` changes.
+    private let demoFlag = LockedBool(false)
+
     private var transport: HybridTransport?
     private var pingTask: Task<Void, Never>?
     private var pingSentAt: [UInt32: Date] = [:]
@@ -79,6 +99,40 @@ final class ControllerSession: ObservableObject {
         state = .disconnected
         mode = .antiMistouch
         rttMs = nil
+        // Demo teardown
+        if isDemoMode {
+            isDemoMode = false
+            demoFlag.set(false)
+            demoInputState.reset()
+        }
+    }
+
+    // MARK: - Demo mode (App Store reviewer simulator)
+
+    /// Enter the in-app simulator. Triggered when the user (or App Store
+    /// reviewer) selects a host marked `isDemo` from the home list.
+    /// No network connection is opened.
+    func connectDemo() {
+        if case .connected = state, isDemoMode { return }
+        demoInputState.reset()
+        isDemoMode = true
+        demoFlag.set(true)
+        state = .connected
+        mode = .antiMistouch
+        rttMs = 0
+    }
+
+    /// Cycle / set the simulated mode in demo. No-op outside demo.
+    func setDemoMode(_ newMode: ControllerMode) {
+        guard isDemoMode else { return }
+        mode = newMode
+        // Mirror real-server semantics: locking releases all held buttons
+        // (in real mode the server's state-change message triggers this
+        // via the controller VC's `apply(mode:)` path; demo just clears
+        // the captured state directly).
+        if newMode == .antiMistouch {
+            demoInputState.reset()
+        }
     }
 
     // MARK: - outgoing
@@ -89,11 +143,28 @@ final class ControllerSession: ObservableObject {
     // capture the transport reference, then hand off to the transport actor.
 
     nonisolated func sendButton(_ id: Protocol.ButtonId, down: Bool) {
+        if demoFlag.get() {
+            demoInputState.setButton(id: id.rawValue, down: down)
+            // In demo we also mirror hotbar slot presses into a
+            // dedicated field so the HUD can show "slot N" instead of
+            // "button 0x4N" — the slot number is the more user-readable
+            // representation.
+            if id.rawValue >= Protocol.ButtonId.hotbar1.rawValue
+                && id.rawValue <= Protocol.ButtonId.hotbar9.rawValue
+                && down {
+                demoInputState.setHotbarSlot(Int(id.rawValue - Protocol.ButtonId.hotbar1.rawValue))
+            }
+            return
+        }
         let payload = PacketCodec.encodeButton(buttonId: id.rawValue, down: down)
         Task { await self.send(payload) }
     }
 
     nonisolated func sendJoystick(x: Float, y: Float) {
+        if demoFlag.get() {
+            demoInputState.setJoystick(x: x, y: y)
+            return
+        }
         let payload = PacketCodec.encodeJoystick(x: x, y: y)
         Task { await self.send(payload) }
     }
@@ -103,6 +174,10 @@ final class ControllerSession: ObservableObject {
     /// directly. Safe to call from any thread (designed to be invoked
     /// from `LookAccumulator`'s flush queue at ~125 Hz).
     nonisolated func sendLookDelta(dx: Int16, dy: Int16) {
+        if demoFlag.get() {
+            demoInputState.addDelta(dx: dx, dy: dy)
+            return
+        }
         lookSenderHolder.get()?.send(dx: dx, dy: dy)
     }
 

@@ -5,6 +5,7 @@ struct HomeView: View {
 
     @EnvironmentObject var hostStore: HostStore
     @EnvironmentObject var settings: SettingsStore
+    @EnvironmentObject var session: ControllerSession
     @StateObject private var discovery = DiscoveryClient()
 
     @State private var probingHostID: String?
@@ -12,6 +13,7 @@ struct HomeView: View {
     @State private var renamingHost: SavedHost?
     @State private var changingPort: SavedHost?
     @State private var probeError: String?
+    @State private var showingHelp: Bool = false
 
     @Binding var connectingTo: ConnectionRequest?
     @Binding var controllerOpacity: Double
@@ -25,6 +27,9 @@ struct HomeView: View {
             .listStyle(.insetGrouped)
             .navigationTitle(L.key("home.title"))
             .toolbar {
+                // Both icons live on the trailing edge; SwiftUI lays
+                // them out in declaration order from right to left, so
+                // declare "?" first to land it just to the LEFT of "+".
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         addingHost = true
@@ -32,10 +37,18 @@ struct HomeView: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingHelp = true
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                    .accessibilityLabel(L.key("home.help.title"))
+                }
             }
             .sheet(isPresented: $addingHost) {
-                AddHostSheet { name, ip, port in
-                    _ = hostStore.upsert(name: name, ip: ip, port: port)
+                AddHostSheet { name, ip, port, isDemo in
+                    _ = hostStore.upsert(name: name, ip: ip, port: port, isDemo: isDemo)
                     addingHost = false
                 }
             }
@@ -58,6 +71,9 @@ struct HomeView: View {
             } message: {
                 Text(probeError ?? "")
             }
+            .sheet(isPresented: $showingHelp) {
+                HelpSheet()
+            }
             .onAppear { discovery.start() }
             .onDisappear { discovery.stop() }
         }
@@ -73,7 +89,8 @@ struct HomeView: View {
                     ip: host.ip,
                     port: host.port,
                     statusBadge: badge(for: host),
-                    probing: probingHostID == host.id
+                    probing: probingHostID == host.id,
+                    isDemo: host.isDemo
                 )
                 .contentShape(Rectangle())
                 .onTapGesture { Task { await connect(to: host) } }
@@ -148,7 +165,8 @@ struct HomeView: View {
                     ip: live.ip,
                     port: live.tcpPort,
                     statusBadge: live.busy ? .busy : (live.mcInForeground ? .mcRunning : .online),
-                    probing: false
+                    probing: false,
+                    isDemo: false
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -171,6 +189,23 @@ struct HomeView: View {
     // MARK: - Connect flow
 
     private func connect(to host: SavedHost) async {
+        // Demo entries skip the probe entirely and drop straight into
+        // the in-app simulator. Used by App Store reviewers (and by us
+        // when verifying UI without a PC server handy).
+        if host.isDemo {
+            session.connectDemo()
+            hostStore.markConnected(id: host.id)
+            OrientationHelper.enterLandscape()
+            controllerOpacity = 0
+            connectingTo = ConnectionRequest(host: host)
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: OrientationHelper.enterFadeDuration)) {
+                    controllerOpacity = 1
+                }
+            }
+            return
+        }
+
         probingHostID = host.id
         defer { probingHostID = nil }
         let result = await ConnectivityProbe.probe(host: host.ip, port: host.port)
@@ -210,22 +245,36 @@ private struct HostRow: View {
     let port: UInt16
     let statusBadge: HostStatusDot.Status
     let probing: Bool
+    let isDemo: Bool
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "desktopcomputer")
+            Image(systemName: isDemo ? "wand.and.sparkles" : "desktopcomputer")
                 .font(.title3)
-                .foregroundStyle(.tint)
+                .foregroundStyle(isDemo ? AnyShapeStyle(Color.orange) : AnyShapeStyle(.tint))
                 .frame(width: 32, height: 32)
             VStack(alignment: .leading, spacing: 2) {
                 Text(name).font(.headline)
-                Text(verbatim: HostFormat.endpoint(ip: ip, port: port))
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                if isDemo {
+                    Text(L.key("host.demo_subtitle"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(verbatim: HostFormat.endpoint(ip: ip, port: port))
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
             if probing {
                 ProgressView()
+            } else if isDemo {
+                Text(L.key("host.demo_badge"))
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.orange.opacity(0.18), in: Capsule())
+                    .foregroundStyle(.orange)
             } else {
                 HostStatusDot(status: statusBadge)
             }
@@ -241,7 +290,23 @@ private struct AddHostSheet: View {
     @State private var ip: String = ""
     @State private var portText: String = "34555"
     @Environment(\.dismiss) var dismiss
-    let onSave: (String, String, UInt16) -> Void
+    /// `(name, ip, port, isDemo)`. `port` is 0 for demo entries because
+    /// the demo magic input "0.0.0.0:65537" doesn't fit a UInt16; `isDemo`
+    /// is the canonical flag the rest of the app branches on.
+    let onSave: (String, String, UInt16, Bool) -> Void
+
+    /// The "magic" combo that activates the in-app demo / simulator. The
+    /// port is intentionally 65537 — out of range for UInt16 (TCP/UDP
+    /// max is 65535) so it can never collide with a real host. App Store
+    /// reviewers can use this to verify gameplay UI without setting up
+    /// the PC server.
+    private static let demoIP = "0.0.0.0"
+    private static let demoPortText = "65537"
+
+    private var isDemoInput: Bool {
+        ip.trimmingCharacters(in: .whitespaces) == Self.demoIP
+            && portText.trimmingCharacters(in: .whitespaces) == Self.demoPortText
+    }
 
     var body: some View {
         NavigationStack {
@@ -253,6 +318,13 @@ private struct AddHostSheet: View {
                     .autocorrectionDisabled(true)
                 TextField(L.key("host.field.port"), text: $portText)
                     .keyboardType(.numberPad)
+                if isDemoInput {
+                    Section {
+                        Label(L.key("host.demo_detected"), systemImage: "wand.and.sparkles")
+                            .foregroundStyle(.tint)
+                            .font(.footnote)
+                    }
+                }
             }
             .navigationTitle(L.key("host.add.title"))
             .toolbar {
@@ -261,9 +333,14 @@ private struct AddHostSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L.key("common.save")) {
-                        let port = UInt16(portText) ?? 34555
-                        let n = name.isEmpty ? ip : name
-                        onSave(n, ip, port)
+                        if isDemoInput {
+                            let demoName = name.isEmpty ? L.key("host.demo_name") : name
+                            onSave(demoName, Self.demoIP, 0, true)
+                        } else {
+                            let port = UInt16(portText) ?? 34555
+                            let n = name.isEmpty ? ip : name
+                            onSave(n, ip, port, false)
+                        }
                     }
                     .disabled(ip.isEmpty)
                 }
@@ -340,4 +417,98 @@ private struct EditPortSheet: View {
 struct ConnectionRequest: Identifiable, Hashable {
     let host: SavedHost
     var id: String { host.id }
+}
+
+// MARK: - Help sheet
+
+/// Tells the user how to actually use this app — they need a PC server
+/// from couchmc.linloir.cn. Shown via the "?" toolbar button. Also
+/// describes the demo magic combo for App Store reviewers.
+private struct HelpSheet: View {
+    @Environment(\.dismiss) var dismiss
+
+    private var siteURL: URL { URL(string: "https://couchmc.linloir.cn")! }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L.key("home.help.section.server.title"))
+                                .font(.headline)
+                            Text(L.key("home.help.section.server.body"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "desktopcomputer.and.arrow.down")
+                            .foregroundStyle(.tint)
+                    }
+                    Link(destination: siteURL) {
+                        HStack {
+                            Image(systemName: "safari")
+                            Text(verbatim: "couchmc.linloir.cn")
+                                .monospaced()
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text(L.key("home.help.section.server.footer"))
+                        .font(.footnote)
+                }
+
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L.key("home.help.section.discovery.title"))
+                                .font(.headline)
+                            Text(L.key("home.help.section.discovery.body"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "wifi.router")
+                            .foregroundStyle(.tint)
+                    }
+                }
+
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L.key("home.help.section.demo.title"))
+                                .font(.headline)
+                            Text(L.key("home.help.section.demo.body"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            HStack(spacing: 6) {
+                                Text(verbatim: "0.0.0.0")
+                                    .monospaced()
+                                Text(verbatim: ":")
+                                Text(verbatim: "65537")
+                                    .monospaced()
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
+                            .padding(.top, 4)
+                        }
+                    } icon: {
+                        Image(systemName: "wand.and.sparkles")
+                            .foregroundStyle(.orange)
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle(L.key("home.help.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L.key("common.done")) { dismiss() }
+                }
+            }
+        }
+    }
 }

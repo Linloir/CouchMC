@@ -2,12 +2,44 @@ import Foundation
 import Combine
 
 /// One saved host — what the user sees in the home list.
+///
+/// `isDemo == true` marks an entry that should bypass the real network
+/// connect / probe and instead drop the user into the in-app simulator
+/// (`ControllerSession.connectDemo`). Used by the App Store reviewer
+/// path: typing `0.0.0.0` + port `65537` in the Add Host sheet creates
+/// a demo entry. `isDemo` defaults to `false` so old `hosts.v1.json`
+/// files without this field decode correctly (custom `init(from:)` below).
 struct SavedHost: Identifiable, Hashable, Codable, Sendable {
     let id: String
     var name: String
     var ip: String
     var port: UInt16
     var lastConnectedAt: Date?
+    var isDemo: Bool
+
+    init(id: String, name: String, ip: String, port: UInt16,
+         lastConnectedAt: Date? = nil, isDemo: Bool = false) {
+        self.id = id
+        self.name = name
+        self.ip = ip
+        self.port = port
+        self.lastConnectedAt = lastConnectedAt
+        self.isDemo = isDemo
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, ip, port, lastConnectedAt, isDemo
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        ip = try c.decode(String.self, forKey: .ip)
+        port = try c.decode(UInt16.self, forKey: .port)
+        lastConnectedAt = try c.decodeIfPresent(Date.self, forKey: .lastConnectedAt)
+        isDemo = try c.decodeIfPresent(Bool.self, forKey: .isDemo) ?? false
+    }
 }
 
 /// CRUD-style store for saved hosts. JSON-backed; observable.
@@ -33,8 +65,13 @@ final class HostStore: ObservableObject {
         load()
     }
 
-    func upsert(name: String, ip: String, port: UInt16) -> SavedHost {
-        if let idx = hosts.firstIndex(where: { $0.ip == ip && $0.port == port }) {
+    func upsert(name: String, ip: String, port: UInt16, isDemo: Bool = false) -> SavedHost {
+        // Treat (ip, port, isDemo) as the dedup key: a real host on
+        // `0.0.0.0:0` and the demo entry both use the same numeric
+        // sentinel internally but should not collapse onto each other.
+        if let idx = hosts.firstIndex(where: {
+            $0.ip == ip && $0.port == port && $0.isDemo == isDemo
+        }) {
             hosts[idx].name = name
             save()
             return hosts[idx]
@@ -44,7 +81,8 @@ final class HostStore: ObservableObject {
             name: name,
             ip: ip,
             port: port,
-            lastConnectedAt: nil
+            lastConnectedAt: nil,
+            isDemo: isDemo
         )
         hosts.append(host)
         save()

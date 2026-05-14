@@ -458,40 +458,112 @@ private struct ProfileNameSheet: View {
 // MARK: - About
 
 struct AboutView: View {
+    private var websiteURL: URL { URL(string: "https://couchmc.linloir.cn")! }
+    private var repoURL: URL { URL(string: "https://github.com/Linloir/CouchMC")! }
+    private var feedbackURL: URL { URL(string: "https://github.com/Linloir/CouchMC/issues")! }
+
     var body: some View {
         List {
+            // === App identity ===
             Section {
-                HStack {
+                HStack(spacing: 14) {
                     Image("AppIconAbout")
                         .resizable()
-                        .frame(width: 56, height: 56)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .frame(width: 64, height: 64)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
                                 .stroke(.white.opacity(0.1), lineWidth: 1)
                         )
-                    VStack(alignment: .leading) {
-                        Text("CouchMC").font(.headline)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("CouchMC")
+                            .font(.title3.weight(.semibold))
                         Text(L.key("about.subtitle"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.vertical, 4)
             }
+
+            // === Purpose ===
+            Section {
+                Text(L.key("about.purpose.body"))
+                    .font(.subheadline)
+            } header: {
+                Text(L.key("about.section.purpose"))
+            }
+
+            // === Build info ===
             Section {
                 LabeledContent(L.key("about.version"), value: appVersion)
                 LabeledContent(L.key("about.build"), value: buildNumber)
+                LabeledContent(L.key("about.author"), value: "Linloir")
+                LabeledContent(L.key("about.license"), value: "MIT")
+            } header: {
+                Text(L.key("about.section.info"))
             }
+
+            // === Links: official site, server download, GitHub, feedback ===
+            Section {
+                Link(destination: websiteURL) {
+                    aboutLinkRow(icon: "safari",
+                                 title: L.key("about.link.website"),
+                                 trailing: "couchmc.linloir.cn")
+                }
+                Link(destination: websiteURL) {
+                    aboutLinkRow(icon: "desktopcomputer.and.arrow.down",
+                                 title: L.key("about.link.server_download"),
+                                 trailing: nil)
+                }
+                Link(destination: repoURL) {
+                    aboutLinkRow(icon: "chevron.left.forwardslash.chevron.right",
+                                 title: L.key("about.link.github"),
+                                 trailing: "Linloir/CouchMC")
+                }
+                Link(destination: feedbackURL) {
+                    aboutLinkRow(icon: "exclamationmark.bubble",
+                                 title: L.key("about.link.feedback"),
+                                 trailing: nil)
+                }
+            } header: {
+                Text(L.key("about.section.links"))
+            }
+
+            // === Privacy ===
+            Section {
+                NavigationLink {
+                    PrivacyPolicyView()
+                } label: {
+                    // No `chevron: true` — NavigationLink draws its own
+                    // disclosure indicator and we don't want a doubled
+                    // ">>" trailing icon.
+                    aboutLinkRow(icon: "hand.raised.fill",
+                                 title: L.key("about.link.privacy"),
+                                 trailing: nil,
+                                 showExternalArrow: false)
+                }
+            } header: {
+                Text(L.key("about.section.privacy"))
+            } footer: {
+                Text(L.key("about.privacy.footer"))
+                    .font(.footnote)
+            }
+
+            // === Notes / known limits ===
             Section {
                 Text(L.key("about.notes.body"))
                     .font(.subheadline)
+            } header: {
+                Text(L.key("about.section.notes"))
             }
-            // Trademark / non-affiliation disclaimer required to ride the line
-            // between App Store Review Guideline 5.2.1 (third-party IP) and
-            // 4.1 (don't suggest you're an official product). Keep this
-            // section visible by default — Apple reviewers explicitly look
-            // for it when an app's purpose centres on a trademarked third-
-            // party game.
+
+            // Trademark / non-affiliation disclaimer required to ride the
+            // line between App Store Review Guideline 5.2.1 (third-party
+            // IP) and 4.1 (don't suggest you're an official product).
+            // Phrased per Mojang's own brand guidelines: name use must be
+            // referential, not implying authorship, and must include the
+            // trademark + non-affiliation acknowledgement.
             Section {
                 Text(L.key("about.legal.body"))
                     .font(.footnote)
@@ -504,11 +576,99 @@ struct AboutView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    /// Generic row layout used by the About page link list.
+    ///
+    /// - `trailing`: optional secondary text on the right (e.g. URL host)
+    /// - `showExternalArrow`: when `true` (default), draws the
+    ///   "↗" outbound-link glyph on the right. Set to `false` when the
+    ///   row is wrapped in a `NavigationLink` (which renders its own
+    ///   disclosure indicator) so we don't get two trailing icons.
+    @ViewBuilder
+    private func aboutLinkRow(icon: String,
+                              title: String,
+                              trailing: String?,
+                              showExternalArrow: Bool = true) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .frame(width: 22)
+                .foregroundStyle(.tint)
+            Text(title)
+                .foregroundStyle(.primary)
+            Spacer()
+            if let trailing {
+                Text(trailing)
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            } else if showExternalArrow {
+                Image(systemName: "arrow.up.right.square")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
     }
     private var buildNumber: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+    }
+}
+
+// MARK: - Privacy policy
+
+/// In-app privacy policy. Kept in-app (rather than a remote URL) so the
+/// App Store reviewer can reach the policy without internet, and so the
+/// text we ship matches the manifest exactly. Body text is in
+/// `Localizable.xcstrings` so it can be updated without binary changes
+/// via App Store Connect's "What's new in this version" cycle.
+struct PrivacyPolicyView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(L.key("privacy.title"))
+                    .font(.title2.weight(.bold))
+
+                Group {
+                    privacySection(L.key("privacy.section.summary"),
+                                   body: L.key("privacy.body.summary"))
+                    privacySection(L.key("privacy.section.collection"),
+                                   body: L.key("privacy.body.collection"))
+                    privacySection(L.key("privacy.section.network"),
+                                   body: L.key("privacy.body.network"))
+                    privacySection(L.key("privacy.section.permissions"),
+                                   body: L.key("privacy.body.permissions"))
+                    privacySection(L.key("privacy.section.tracking"),
+                                   body: L.key("privacy.body.tracking"))
+                    privacySection(L.key("privacy.section.thirdparty"),
+                                   body: L.key("privacy.body.thirdparty"))
+                    privacySection(L.key("privacy.section.changes"),
+                                   body: L.key("privacy.body.changes"))
+                    privacySection(L.key("privacy.section.contact"),
+                                   body: L.key("privacy.body.contact"))
+                }
+
+                Text(L.key("privacy.last_updated"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 8)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .navigationTitle(L.key("about.link.privacy"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func privacySection(_ title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.headline)
+            Text(body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

@@ -40,6 +40,17 @@ final class ControllerHostingController: UIViewController {
     // HUD
     private let hud = UILabel()
 
+    // Demo mode UI (only added to the view tree when session.isDemoMode is
+    // true). The mode-cycle button replaces the server-driven STATE_CHANGE
+    // signal in the simulator; the bottom diagnostic label gives App
+    // reviewers a live readout that proves inputs are flowing without
+    // them needing to set up a PC server.
+    private let demoModeButton = UIButton(type: .system)
+    private let demoDiagnosticLabel = UILabel()
+    private var demoPollTimer: DispatchSourceTimer?
+    private weak var demoTutorialOverlay: UIView?
+    private var lastDemoSnapshotKey: String = ""
+
     // LookAccumulator
     private var lookAccumulator: LookAccumulator!
 
@@ -97,6 +108,7 @@ final class ControllerHostingController: UIViewController {
         applyCurrentSettingsToWidgets()
         layoutLockOverlay()
         layoutHUD()
+        layoutDemoControls()
 
         lookAccumulator = LookAccumulator { [weak self] dx, dy in
             self?.session.sendLookDelta(dx: dx, dy: dy)
@@ -115,11 +127,22 @@ final class ControllerHostingController: UIViewController {
             self?.handleSessionState(state)
         }.store(in: &cancellables)
 
-        Task {
-            await session.connect(host: host.ip, port: host.port)
-            await MainActor.run { [weak self] in
-                guard let self else { return }
-                self.hostStore.markConnected(id: self.host.id)
+        session.$isDemoMode.sink { [weak self] isDemo in
+            self?.applyDemoMode(isDemo)
+        }.store(in: &cancellables)
+
+        // Demo mode: skip the network stack entirely; the session is
+        // already in `.connected` from `HomeView.connect(to:)`.
+        if host.isDemo {
+            session.connectDemo()
+            hostStore.markConnected(id: host.id)
+        } else {
+            Task {
+                await session.connect(host: host.ip, port: host.port)
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    self.hostStore.markConnected(id: self.host.id)
+                }
             }
         }
     }
@@ -128,6 +151,7 @@ final class ControllerHostingController: UIViewController {
         super.viewWillDisappear(animated)
         UIApplication.shared.isIdleTimerDisabled = false
         lookAccumulator?.stop()
+        stopDemoPolling()
         Task { await session.disconnect() }
     }
 
@@ -429,6 +453,303 @@ final class ControllerHostingController: UIViewController {
         // layout and can be repositioned through the editor.
     }
 
+    // MARK: - Demo mode UI
+    //
+    // Two extra views, both `isHidden` until `applyDemoMode(true)`:
+    //   • demoModeButton — top-leading capsule, taps cycle through the
+    //     three controller modes (replaces server-driven STATE_CHANGE).
+    //   • demoDiagnosticLabel — bottom-centre monospace label with live
+    //     input readout (active buttons, last delta, joystick, hotbar).
+
+    private func layoutDemoControls() {
+        // Mode-cycle button. Capsule chip styled like the lock-back
+        // button so demo controls stylistically match the rest of the
+        // landscape overlay.
+        var cfg = UIButton.Configuration.plain()
+        let titleNS = NSAttributedString(
+            string: L.key("demo.mode_button"),
+            attributes: [.font: UIFont.systemFont(ofSize: 13, weight: .semibold)]
+        )
+        cfg.attributedTitle = AttributedString(titleNS)
+        cfg.image = UIImage(systemName: "arrow.triangle.2.circlepath")
+        cfg.imagePadding = 6
+        cfg.imagePlacement = .leading
+        cfg.baseForegroundColor = UIColor.white.withAlphaComponent(0.92)
+        cfg.background.backgroundColor = UIColor.systemOrange.withAlphaComponent(0.20)
+        cfg.background.strokeColor = UIColor.systemOrange.withAlphaComponent(0.55)
+        cfg.background.strokeWidth = 1
+        cfg.background.cornerRadius = 14
+        cfg.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12,
+                                                    bottom: 6, trailing: 14)
+        demoModeButton.configuration = cfg
+        demoModeButton.tintColor = .white
+        demoModeButton.translatesAutoresizingMaskIntoConstraints = false
+        demoModeButton.isHidden = true
+        demoModeButton.addTarget(self, action: #selector(demoCycleMode), for: .touchUpInside)
+        view.addSubview(demoModeButton)
+        NSLayoutConstraint.activate([
+            demoModeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 12),
+            demoModeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 4),
+        ])
+
+        // Bottom-centre diagnostic label.
+        demoDiagnosticLabel.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
+        demoDiagnosticLabel.textColor = .white
+        demoDiagnosticLabel.textAlignment = .center
+        demoDiagnosticLabel.numberOfLines = 0
+        demoDiagnosticLabel.shadowColor = UIColor.black.withAlphaComponent(0.7)
+        demoDiagnosticLabel.shadowOffset = CGSize(width: 0, height: 1)
+        demoDiagnosticLabel.translatesAutoresizingMaskIntoConstraints = false
+        demoDiagnosticLabel.isHidden = true
+        // Pass-through touches so widgets directly under the label still
+        // receive taps. The label is purely decorative.
+        demoDiagnosticLabel.isUserInteractionEnabled = false
+        view.addSubview(demoDiagnosticLabel)
+        NSLayoutConstraint.activate([
+            demoDiagnosticLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            demoDiagnosticLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            demoDiagnosticLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            demoDiagnosticLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+        ])
+    }
+
+    private func applyDemoMode(_ isDemo: Bool) {
+        demoModeButton.isHidden = !isDemo
+        demoDiagnosticLabel.isHidden = !isDemo
+        if isDemo {
+            startDemoPolling()
+            // First-time tutorial for whichever mode we land in
+            // (`antiMistouch` on connect).
+            showDemoTutorialIfNeeded(for: session.mode)
+        } else {
+            stopDemoPolling()
+        }
+    }
+
+    private func startDemoPolling() {
+        stopDemoPolling()
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + .milliseconds(33),
+                       repeating: .milliseconds(33))
+        timer.setEventHandler { [weak self] in
+            self?.refreshDemoDiagnostic()
+        }
+        timer.resume()
+        demoPollTimer = timer
+    }
+
+    private func stopDemoPolling() {
+        demoPollTimer?.cancel()
+        demoPollTimer = nil
+    }
+
+    private func refreshDemoDiagnostic() {
+        let snap = session.demoInputState.snapshot()
+        // Build a multi-line live readout. All fields are clamped to one
+        // line each so the bottom box doesn't grow unbounded.
+        var lines: [String] = []
+
+        // Active buttons row
+        if snap.activeButtonIDs.isEmpty {
+            lines.append(L.key("demo.line.no_buttons"))
+        } else {
+            let names = snap.activeButtonIDs
+                .sorted()
+                .map { Self.demoButtonName(for: $0) }
+                .joined(separator: " · ")
+            lines.append(String(format: L.key("demo.line.active_buttons"), names))
+        }
+
+        // Joystick row (only show if non-zero so the panel isn't noisy)
+        let jx = snap.joystick.0
+        let jy = snap.joystick.1
+        if abs(jx) > 0.01 || abs(jy) > 0.01 {
+            lines.append(String(format: L.key("demo.line.joystick"), jx, jy))
+        }
+
+        // Look delta row
+        let (dx, dy) = snap.lastDelta
+        let (ax, ay) = snap.accumulatedDelta
+        lines.append(String(format: L.key("demo.line.look_delta"), dx, dy, ax, ay))
+
+        // Hotbar slot (1-indexed for humans)
+        if snap.lastHotbarSlot >= 0 {
+            lines.append(String(format: L.key("demo.line.hotbar"), snap.lastHotbarSlot + 1))
+        }
+
+        let text = lines.joined(separator: "\n")
+        // Avoid layout churn when nothing changed.
+        if text != demoDiagnosticLabel.text {
+            demoDiagnosticLabel.text = text
+        }
+    }
+
+    @objc private func demoCycleMode() {
+        let next: ControllerMode
+        switch session.mode {
+        case .antiMistouch: next = .inGame
+        case .inGame:       next = .uiInteract
+        case .uiInteract:   next = .antiMistouch
+        }
+        session.setDemoMode(next)
+        showDemoTutorialIfNeeded(for: next)
+    }
+
+    /// Best-effort short label for a button id. Falls back to the raw hex
+    /// for any id we don't have a friendly name for (forward-compat).
+    private static func demoButtonName(for id: UInt8) -> String {
+        switch id {
+        case 0x01: return "LMB"
+        case 0x02: return "RMB"
+        case 0x10: return "Jump"
+        case 0x11: return "Sneak"
+        case 0x12: return "Sprint"
+        case 0x20: return "Inv"
+        case 0x21: return "Drop"
+        case 0x22: return "Swap"
+        case 0x30: return "Esc"
+        case 0x40...0x48: return "Slot\(Int(id - 0x40) + 1)"
+        default: return String(format: "0x%02X", id)
+        }
+    }
+
+    // MARK: - Demo tutorial overlay
+
+    private func userDefaultsKey(for mode: ControllerMode) -> String {
+        switch mode {
+        case .antiMistouch: return "demo.tutorial.shown.locked"
+        case .inGame:       return "demo.tutorial.shown.inGame"
+        case .uiInteract:   return "demo.tutorial.shown.uiInteract"
+        }
+    }
+
+    private func showDemoTutorialIfNeeded(for mode: ControllerMode) {
+        let key = userDefaultsKey(for: mode)
+        if UserDefaults.standard.bool(forKey: key) { return }
+        UserDefaults.standard.set(true, forKey: key)
+        presentDemoTutorial(for: mode)
+    }
+
+    private func presentDemoTutorial(for mode: ControllerMode) {
+        // Tear down any earlier tutorial first (mode flips can stack).
+        demoTutorialOverlay?.removeFromSuperview()
+
+        let dim = UIView()
+        dim.backgroundColor = UIColor.black.withAlphaComponent(0.78)
+        dim.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dim)
+        NSLayoutConstraint.activate([
+            dim.topAnchor.constraint(equalTo: view.topAnchor),
+            dim.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            dim.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dim.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+
+        let card = UIView()
+        card.backgroundColor = UIColor(white: 0.10, alpha: 0.96)
+        card.layer.cornerRadius = 16
+        card.layer.cornerCurve = .continuous
+        card.layer.borderColor = UIColor.systemOrange.withAlphaComponent(0.55).cgColor
+        card.layer.borderWidth = 1
+        card.translatesAutoresizingMaskIntoConstraints = false
+        dim.addSubview(card)
+        NSLayoutConstraint.activate([
+            card.centerXAnchor.constraint(equalTo: dim.centerXAnchor),
+            card.centerYAnchor.constraint(equalTo: dim.centerYAnchor),
+            card.widthAnchor.constraint(lessThanOrEqualTo: dim.widthAnchor, multiplier: 0.7),
+            card.widthAnchor.constraint(greaterThanOrEqualToConstant: 360),
+        ])
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 10
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 22),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -22),
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -24),
+        ])
+
+        // Header: "Demo Mode — current mode name"
+        let header = UILabel()
+        header.text = String(format: L.key("demo.tutorial.header"), Self.modeName(mode))
+        header.textColor = .systemOrange
+        header.font = .systemFont(ofSize: 18, weight: .bold)
+        header.textAlignment = .center
+        header.numberOfLines = 0
+        stack.addArrangedSubview(header)
+
+        // Generic blurb (always shown).
+        let intro = UILabel()
+        intro.text = L.key("demo.tutorial.intro")
+        intro.textColor = UIColor.white.withAlphaComponent(0.92)
+        intro.font = .systemFont(ofSize: 14, weight: .regular)
+        intro.textAlignment = .center
+        intro.numberOfLines = 0
+        stack.addArrangedSubview(intro)
+
+        // Per-mode body.
+        let body = UILabel()
+        body.text = Self.tutorialBody(for: mode)
+        body.textColor = UIColor.white.withAlphaComponent(0.85)
+        body.font = .systemFont(ofSize: 13, weight: .regular)
+        body.textAlignment = .natural
+        body.numberOfLines = 0
+        stack.addArrangedSubview(body)
+
+        // Dismiss button.
+        let dismissBtn = UIButton(type: .system)
+        var btnCfg = UIButton.Configuration.filled()
+        let btnTitle = NSAttributedString(
+            string: L.key("demo.tutorial.dismiss"),
+            attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .semibold)]
+        )
+        btnCfg.attributedTitle = AttributedString(btnTitle)
+        btnCfg.baseBackgroundColor = .systemOrange
+        btnCfg.baseForegroundColor = .white
+        btnCfg.cornerStyle = .capsule
+        btnCfg.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 22,
+                                                       bottom: 8, trailing: 22)
+        dismissBtn.configuration = btnCfg
+        dismissBtn.addTarget(self, action: #selector(dismissDemoTutorial), for: .touchUpInside)
+        stack.addArrangedSubview(dismissBtn)
+
+        // Tap anywhere on the dim layer (outside card) also dismisses.
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissDemoTutorial))
+        dim.addGestureRecognizer(tap)
+        // Don't let taps inside the card propagate up and dismiss the
+        // whole thing (we want the user to be able to read it).
+        let cardTapBlocker = UITapGestureRecognizer(target: nil, action: nil)
+        cardTapBlocker.cancelsTouchesInView = true
+        card.addGestureRecognizer(cardTapBlocker)
+
+        demoTutorialOverlay = dim
+    }
+
+    @objc private func dismissDemoTutorial() {
+        demoTutorialOverlay?.removeFromSuperview()
+        demoTutorialOverlay = nil
+    }
+
+    private static func modeName(_ m: ControllerMode) -> String {
+        switch m {
+        case .antiMistouch: return L.key("demo.mode.locked")
+        case .inGame:       return L.key("demo.mode.in_game")
+        case .uiInteract:   return L.key("demo.mode.ui")
+        }
+    }
+
+    private static func tutorialBody(for m: ControllerMode) -> String {
+        switch m {
+        case .antiMistouch: return L.key("demo.tutorial.body.locked")
+        case .inGame:       return L.key("demo.tutorial.body.in_game")
+        case .uiInteract:   return L.key("demo.tutorial.body.ui")
+        }
+    }
+
     // MARK: - Close request (from btn_close widget)
 
     private func closeRequested() {
@@ -515,11 +836,19 @@ final class ControllerHostingController: UIViewController {
             case .antiMistouch:  modeStr = "locked"
             }
             let rttStr = rtt.map { "\($0)ms" } ?? "—"
-            // Distinguish UDP (the low-latency camera path) from the
-            // TCP-framed fallback. If users report "look is laggy", the
-            // first thing to check is whether this says "Wi-Fi/UDP" or
-            // "Wi-Fi/TCP-fallback".
-            let transportStr = session.isCameraUDP ? "Wi-Fi/UDP" : "Wi-Fi/TCP"
+            let transportStr: String
+            if session.isDemoMode {
+                // In simulator we don't actually move bytes — surface
+                // that to the App reviewer (and to ourselves) so it's
+                // unambiguous this isn't a real network session.
+                transportStr = "DEMO/SIMULATED"
+            } else {
+                // Distinguish UDP (the low-latency camera path) from the
+                // TCP-framed fallback. If users report "look is laggy",
+                // the first thing to check is whether this says
+                // "Wi-Fi/UDP" or "Wi-Fi/TCP".
+                transportStr = session.isCameraUDP ? "Wi-Fi/UDP" : "Wi-Fi/TCP"
+            }
             parts = [transportStr, modeStr, rttStr]
         case .disconnected:
             parts = ["Disconnected"]
