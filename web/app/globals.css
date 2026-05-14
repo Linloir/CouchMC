@@ -338,26 +338,63 @@ html[data-ready] .site-header-glass--enter {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: var(--page-pad-y) var(--page-pad-x);
-  overflow: hidden;
-  background: #050504;
+  background: var(--page);
 }
 
-.home-shell::before {
+.hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--page-pad-y) var(--page-pad-x);
+  padding-top: calc(var(--page-pad-y) + clamp(4rem, 8vh, 7rem));
+  overflow: hidden;
+}
+
+/* Hero background: two stacked layers — a blurred placeholder that the
+   server-rendered HTML already carries (paints near-instantly because it's
+   an inline data URI), and the full image on top that fades in once JS has
+   confirmed it's decoded.
+
+   On narrow viewports both layers fade OUT and a clean tinted background
+   with subtle radial accents takes over (`.hero::before` below) — the
+   cinematic photo competes too hard with centered hero copy on phones.
+   The transition between the two looks like a soft crossfade as the user
+   resizes. */
+.hero__bg-placeholder,
+.hero__bg-full {
   position: absolute;
   inset: 0;
   z-index: 0;
-  content: "";
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  /* Long, slow crossfade between the cinematic photo and the decorative
+     phone background as the viewport crosses the 720px breakpoint —
+     short transitions felt like an abrupt "wallpaper snap". */
+  transition: opacity 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero__bg-placeholder {
+  background-image: var(--hero-bg-blur-dark);
+  filter: blur(28px);
+  transform: scale(1.06);
+}
+
+html[data-theme="light"] .hero__bg-placeholder {
+  background-image: var(--hero-bg-blur-light);
+}
+
+.hero__bg-full {
   background-image:
     image-set(
       url("/assets/background.webp") type("image/webp"),
       url("/assets/background.png") type("image/png")
     );
-  background-position: center;
-  background-size: cover;
+  opacity: 0;
 }
 
-html[data-theme="light"] .home-shell::before {
+html[data-theme="light"] .hero__bg-full {
   background-image:
     image-set(
       url("/assets/background-light.webp") type("image/webp"),
@@ -365,37 +402,84 @@ html[data-theme="light"] .home-shell::before {
     );
 }
 
-.home-shell::after {
+html[data-hero-bg-loaded] .hero__bg-full {
+  opacity: 1;
+}
+
+/* Phone-friendly background: solid page color with a couple of soft accent
+   radials at the top + an extra one anchored mid-left. All radials stop
+   well above the hero's bottom edge so the join with the next section
+   stays a clean, uniform `var(--page)` — no seam. Invisible on wider
+   viewports; the media query below fades it in as the cinematic photo
+   fades out. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14% 14%, rgba(65, 168, 102, 0.22), transparent 16rem),
+    radial-gradient(circle at 86% 8%, rgba(221, 151, 71, 0.18), transparent 18rem),
+    radial-gradient(circle at 6% 48%, rgba(47, 159, 100, 0.14), transparent 14rem),
+    var(--page);
+  opacity: 0;
+  transition: opacity 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="light"] .hero::before {
+  background:
+    radial-gradient(circle at 14% 14%, rgba(47, 134, 80, 0.2), transparent 16rem),
+    radial-gradient(circle at 86% 8%, rgba(196, 132, 56, 0.16), transparent 18rem),
+    radial-gradient(circle at 6% 48%, rgba(47, 134, 80, 0.12), transparent 14rem),
+    var(--page);
+}
+
+.hero::after {
   position: absolute;
   inset: 0;
   z-index: 1;
   content: "";
   background:
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.95) 0%,
-      rgba(0, 0, 0, 0.84) 8%,
-      rgba(0, 0, 0, 0.56) 28%,
-      transparent 56%
+    /* Localized darken behind hero copy — radial, so it tapers off well
+       before reaching the bottom edge and can't bleed into the seam. */
+    radial-gradient(
+      ellipse 55% 55% at 22% 48%,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.55) 38%,
+      transparent 72%
     ),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.42) 0%, transparent 34%, rgba(0, 0, 0, 0.64) 100%),
-    radial-gradient(circle at 18% 60%, rgba(0, 0, 0, 0.72), transparent 28rem);
+    /* Vertical fade to the page color at the bottom. By 92% from the top
+       we're at solid var(--page), so the join with the next section is
+       uniform left-to-right with no visible boundary. */
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.32) 0%,
+      transparent 32%,
+      rgba(5, 5, 4, 0.45) 65%,
+      var(--page) 92%,
+      var(--page) 100%
+    );
+  /* Fades out alongside .hero__bg-* when the viewport drops below the
+     phone breakpoint — see the media query at the bottom of this file. */
+  transition: opacity 1100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html[data-theme="light"] .home-shell::after {
+html[data-theme="light"] .hero::after {
   background:
     radial-gradient(
-      ellipse 60% 75% at 20% 52%,
+      ellipse 55% 55% at 22% 48%,
       rgba(250, 246, 236, 0.82) 0%,
-      rgba(250, 246, 236, 0.5) 26%,
-      rgba(250, 246, 236, 0.2) 50%,
-      transparent 70%
+      rgba(250, 246, 236, 0.5) 38%,
+      transparent 72%
     ),
     linear-gradient(
-      90deg,
-      rgba(250, 246, 236, 0.45) 0%,
-      rgba(250, 246, 236, 0.18) 14%,
-      transparent 32%
+      180deg,
+      transparent 0%,
+      transparent 55%,
+      rgba(231, 226, 213, 0.55) 78%,
+      var(--page) 92%,
+      var(--page) 100%
     );
 }
 
@@ -405,18 +489,88 @@ html[data-theme="light"] .site-header--home .preference-button {
   color: #151711;
 }
 
-.hero {
+.hero__content {
   position: relative;
   z-index: 2;
-  display: grid;
-  align-items: center;
-  flex: 1;
-  padding: clamp(2rem, 4vh, 4rem) 0;
-}
-
-.hero__content {
   width: min(36.5rem, 50vw);
   margin-top: clamp(1.2rem, 3vh, 2.6rem);
+}
+
+.hero__scroll-cue {
+  position: absolute;
+  z-index: 2;
+  bottom: clamp(1.4rem, 3.5vh, 2.6rem);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  /* Keep the cue centered. The original used translateX(-50%) but the
+     page-enter keyframe ended at `transform: none`, which silently lost
+     the centering and the cue jumped sideways once the bob animation
+     restored it. Custom keyframes below preserve translate(-50%, 0). */
+  transform: translate(-50%, 0);
+  opacity: 0;
+  transition:
+    background 200ms ease,
+    transform 200ms ease;
+}
+
+.hero__scroll-cue svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+html[data-theme="light"] .hero__scroll-cue {
+  border-color: rgba(20, 24, 16, 0.34);
+  color: rgba(20, 24, 16, 0.72);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.hero__scroll-cue:hover {
+  background: rgba(0, 0, 0, 0.32);
+  transform: translateX(-50%) translateY(2px);
+}
+
+html[data-ready] .hero__scroll-cue {
+  animation:
+    scroll-cue-enter 720ms cubic-bezier(0.16, 1, 0.3, 1) 620ms both,
+    scroll-cue-bob 2.6s ease-in-out 1.5s infinite;
+}
+
+/* Custom enter keyframe that preserves translate(-50%, 0) at the end —
+   otherwise the page-enter `to: { transform: none }` would strip the
+   centering and the cue would visibly snap sideways. */
+@keyframes scroll-cue-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 1.35rem) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes scroll-cue-bob {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 6px);
+  }
 }
 
 .hero__title,
@@ -441,24 +595,6 @@ html[data-ready] .hero__copy {
 
 html[data-ready] .hero__content .download-button {
   animation-delay: 400ms;
-}
-
-.page-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  border: 1px solid rgba(62, 175, 106, 0.72);
-  border-radius: 999px;
-  color: var(--green-bright);
-  background: rgba(4, 24, 13, 0.1);
-  font-size: clamp(0.68rem, 0.75vw, 0.9rem);
-  font-weight: 720;
-  line-height: 1;
-}
-
-.page-eyebrow {
-  padding: 0.45rem 0.85rem;
 }
 
 .hero__title {
@@ -561,6 +697,272 @@ html[data-theme="light"] .hero__copy {
 .secondary-button {
   padding: 0.85rem 1.1rem;
   font-size: 0.9rem;
+}
+
+.features {
+  position: relative;
+  padding: clamp(2.5rem, 5vw, 4.5rem) var(--page-pad-x) clamp(2.5rem, 5vw, 4rem);
+  background: transparent;
+}
+
+.features__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 64rem;
+  margin: 0 auto clamp(3rem, 6vw, 5rem);
+  text-align: center;
+}
+
+.features__title {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2rem, 3.4vw, 3.6rem);
+  font-weight: 820;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+}
+
+.feature-list {
+  list-style: none;
+  display: grid;
+  gap: clamp(3.5rem, 7vw, 6rem);
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Each feature alternates side-by-side: image left + text right by default,
+   the second one flips, the third flips again. Below the tablet breakpoint
+   they collapse to a single column with text under the image. */
+.feature-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1.6rem, 4vw, 3.4rem);
+  align-items: center;
+}
+
+.feature-card__media {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.feature-card__text {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-width: 30rem;
+}
+
+.feature-card:nth-child(even) .feature-card__media {
+  grid-column: 2;
+}
+
+.feature-card:nth-child(even) .feature-card__text {
+  grid-column: 1;
+  /* No justify-self: stick to the left of the column so the text block lines
+     up with the left edge of the images in the surrounding cards. */
+}
+
+/* Stagger inside each feature card: image enters first, then the title,
+   then the body copy. Same order on every card so the cadence is
+   consistent regardless of which side the image sits on. */
+.feature-card__media {
+  --reveal-delay: 0ms;
+}
+
+.feature-card__title {
+  --reveal-delay: 160ms;
+}
+
+.feature-card__copy {
+  --reveal-delay: 300ms;
+}
+
+.feature-card__title {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.5rem, 2.3vw, 2.4rem);
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  line-height: 1.16;
+}
+
+.feature-card__copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.98rem, 1.05vw, 1.18rem);
+  line-height: 1.66;
+}
+
+.feature-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: clamp(0.9rem, 1.4vw, 1.4rem);
+  background: var(--surface-flat);
+  box-shadow:
+    0 1.4rem 2.8rem rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme="light"] .feature-card__media {
+  box-shadow:
+    0 1.2rem 2.6rem rgba(44, 52, 35, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Blur-up wrapper: places a low-res blurred placeholder behind the actual
+   image. The placeholder paints near-instantly (inline base64 data URI),
+   then the full-resolution image fades in once its `data-loaded` flag
+   flips. Used by both feature cards and any other image that wants the
+   same treatment. */
+.blur-up {
+  position: relative;
+}
+
+.blur-up::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--blur-src);
+  background-position: center;
+  background-size: cover;
+  filter: blur(20px);
+  /* Scale up so blurred edges don't reveal background underneath. */
+  transform: scale(1.06);
+  z-index: 0;
+}
+
+.blur-up picture {
+  position: relative;
+  display: block;
+  z-index: 1;
+}
+
+.blur-up picture img {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.blur-up picture img[data-loaded="1"] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blur-up picture img {
+    transition: none;
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.2rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reveal-on-scroll system.
+ *
+ *   Default state (no attribute set): visible. That means SSR HTML always
+ *   paints with all content visible, so if JS fails or is delayed, nothing
+ *   stays invisible. It also means a mid-page refresh shows content above
+ *   the restored scroll position immediately — no white-flash while we wait
+ *   for an observer to fire on offscreen elements.
+ *
+ *   JS marks elements one of two ways:
+ *     - state="pending"  → hidden, waiting for an observer or a scroll.
+ *                          Only applied to elements that are below the fold
+ *                          at mount time.
+ *     - state="shown"    → animate in. Applied to in-view elements on a
+ *                          fresh top-of-page load, and to pending elements
+ *                          when they later cross into the viewport.
+ *
+ *   When an above-fold element is loaded mid-scroll (e.g. refresh at the
+ *   bottom of the page), JS leaves it unmarked so it stays visible without
+ *   replaying its entrance animation.
+ */
+[data-reveal-anim][data-reveal-state="pending"] {
+  opacity: 0;
+  transform: translate3d(0, 1.2rem, 0);
+}
+
+[data-reveal-anim][data-reveal-state="shown"] {
+  animation: reveal-in 820ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-anim][data-reveal-state="pending"],
+  [data-reveal-anim][data-reveal-state="shown"] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Hide all sections that contain translatable text until `data-ready` is
+   set on <html>. AppPreferences flips that flag once the language + theme
+   have been restored from localStorage, so this prevents the brief default
+   (English) flash before the user's preference snaps in.
+   The hero handles its own gating with the existing .hero__title /
+   .hero__copy / button opacity:0 rules. */
+html:not([data-ready]) .features,
+html:not([data-ready]) .home-cta,
+html:not([data-ready]) .subpage-shell {
+  visibility: hidden;
+}
+
+/* The features section and the CTA section both sit on the same page bg
+   (var(--page)) with no decorative gradient. The hero already fades into
+   var(--page) at its bottom, so the join is seamless and there's nothing
+   else to recolor before the page foot. */
+.home-cta {
+  position: relative;
+  padding: clamp(3.5rem, 6vw, 5.5rem) var(--page-pad-x) clamp(4rem, 9vw, 7rem);
+  background: transparent;
+}
+
+.home-cta__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-cta__title {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.9rem, 3vw, 3rem);
+  font-weight: 820;
+  letter-spacing: -0.04em;
+  line-height: 1.14;
+}
+
+.home-cta__copy {
+  margin: 0.3rem 0 0;
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.1vw, 1.18rem);
+  line-height: 1.66;
+}
+
+.home-cta__button {
+  margin-top: clamp(1.2rem, 2.2vw, 1.8rem);
 }
 
 .subpage-shell {
@@ -714,6 +1116,323 @@ html[data-ready] .author-card {
   font-weight: 760;
 }
 
+.download-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* Cancel the .subpage-shell extra bottom padding (clamp(3rem, 7vw, 7rem))
+     so the inner stack's `min-height: 100vh - var(--page-pad-y) * 2` math
+     is exact. Without this the page reads as 100vh + ~3rem and a useless
+     scrollbar appears even when everything fits in the viewport — same
+     fix that .about-shell already has. */
+  padding-bottom: var(--page-pad-y);
+}
+
+/* Inner stack mirrors the about-hero pattern: takes the full .subpage-shell
+   content height (100vh minus the subpage padding) and vertically centers
+   its children so the page reads middle-aligned on tall screens.
+
+   The paddings and gap are deliberately conservative so the whole stack
+   (header + grid + paddings) fits inside 100vh at the standard 1440×900
+   laptop viewport — without that you get a few-pixel overflow that
+   triggers a scrollbar even though everything visually fits. */
+.download-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(2.2rem, 4vw, 3.6rem);
+  min-height: calc(100vh - (var(--page-pad-y) * 2));
+  padding: clamp(4.5rem, 8vh, 6rem) 0 clamp(2.5rem, 4.5vh, 4rem);
+}
+
+.download-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.download-header h1 {
+  margin: 0.2rem 0 0;
+  color: var(--text);
+  font-size: clamp(2.4rem, 4vw, 4.4rem);
+  font-weight: 830;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.download-version {
+  margin: 0.3rem 0 0;
+  color: var(--green);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.download-grid {
+  /* The breakpoints below pin this to exactly 1, 2, or 4 columns so the grid
+     never lands on the ugly 3-then-1 row that auto-fit can produce with four
+     items. */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.1rem, 2vw, 1.6rem);
+  width: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .download-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1120px) {
+  .download-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.download-card {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.2rem, 1.9vw, 1.5rem);
+  padding: clamp(1.7rem, 2.6vw, 2.4rem);
+  border: 1px solid var(--panel-border);
+  border-radius: clamp(1.1rem, 1.8vw, 1.6rem);
+  background: var(--surface-flat);
+  box-shadow:
+    0 1.2rem 2.4rem rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="light"] .download-card {
+  box-shadow:
+    0 1.2rem 2.4rem rgba(44, 52, 35, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.download-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(47, 159, 100, 0.45);
+  box-shadow:
+    0 1.8rem 3.2rem rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(47, 159, 100, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.download-card__head {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 1.6vw, 1.2rem);
+}
+
+.platform-icon {
+  flex: 0 0 auto;
+  width: clamp(3rem, 3.5vw, 3.8rem);
+  height: clamp(3rem, 3.5vw, 3.8rem);
+  padding: 0.65rem;
+  border-radius: 0.95rem;
+  color: var(--green-bright);
+  background: rgba(47, 159, 100, 0.14);
+  fill: currentColor;
+}
+
+html[data-theme="light"] .platform-icon {
+  background: rgba(47, 134, 80, 0.12);
+}
+
+.download-card__title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.download-card__role {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-weight: 660;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.download-card__name {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.35rem, 1.7vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.download-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+  margin: 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.download-card__meta > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.download-card__meta dt {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.7rem;
+  font-weight: 660;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.download-card__meta dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 660;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-card__requirement {
+  grid-column: 1 / -1;
+}
+
+.download-card__requirement dd {
+  white-space: normal;
+}
+
+.download-card__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dl-button {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.05rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 0.85rem;
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  transition:
+    background 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  background: rgba(47, 159, 100, 0.14);
+  color: var(--green-bright);
+  flex: 0 0 auto;
+}
+
+.dl-button__icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.dl-button__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.dl-button__label {
+  color: var(--text);
+  font-size: 0.94rem;
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.dl-button__hint {
+  color: var(--faint);
+  font-size: 0.74rem;
+  font-weight: 580;
+  line-height: 1.3;
+}
+
+.dl-button--primary {
+  border-color: rgba(47, 159, 100, 0.5);
+  background: linear-gradient(135deg, rgba(47, 157, 100, 0.92), rgba(36, 130, 79, 0.92));
+  color: #fff;
+}
+
+.dl-button--primary .dl-button__icon {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.dl-button--primary .dl-button__label,
+.dl-button--primary .dl-button__hint {
+  color: #fff;
+}
+
+.dl-button--primary .dl-button__hint {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.dl-button--primary:hover {
+  background: linear-gradient(135deg, #37b372, #2a945b);
+  transform: translateY(-1px);
+  box-shadow: 0 0.9rem 1.8rem rgba(0, 0, 0, 0.22);
+}
+
+.dl-button--secondary:hover {
+  border-color: rgba(47, 159, 100, 0.55);
+  background: rgba(47, 159, 100, 0.06);
+  transform: translateY(-1px);
+}
+
+.dl-button--disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.dl-button--disabled .dl-button__icon {
+  background: rgba(127, 134, 124, 0.18);
+  color: var(--muted);
+}
+
+.dl-button:focus-visible {
+  outline: 2px solid rgba(58, 184, 111, 0.82);
+  outline-offset: 3px;
+}
+
 .privacy-shell {
   display: flex;
   flex-direction: column;
@@ -773,7 +1492,10 @@ html[data-ready] .privacy-document {
   }
 
   .hero {
-    padding: clamp(2rem, 5vh, 4rem) 0;
+    /* Keep the horizontal page padding — the old rule zeroed it and the
+       hero title would slide all the way to the left edge of the
+       viewport at tablet widths. */
+    padding: clamp(2rem, 5vh, 4rem) var(--page-pad-x);
   }
 
   .hero__content {
@@ -838,16 +1560,52 @@ html[data-ready] .privacy-document {
     display: none;
   }
 
+  /* Phone hero: drop the cinematic photo + its overlay and lean on the
+     decorative radial background from `.hero::before`. Centred content
+     gives much better breathing room at narrow widths. The `html` prefix
+     bumps the specificity above `html[data-hero-bg-loaded] .hero__bg-full`
+     and the theme overrides, so the fade-out actually wins on mobile. */
+  .hero {
+    text-align: center;
+  }
+
+  .hero::before {
+    opacity: 1;
+  }
+
+  /* `!important` because the wider-viewport rules use higher-specificity
+     selectors (`html[data-hero-bg-loaded] .hero__bg-full` etc.) — without
+     it the cinematic photo wins the cascade on phones. */
+  .hero__bg-placeholder,
+  .hero__bg-full,
+  .hero::after {
+    opacity: 0 !important;
+  }
+
   .hero__content {
     width: 100%;
+    margin-inline: auto;
   }
 
   .hero__title {
-    max-width: 8.5ch;
+    max-width: 100%;
+    margin: 0 auto;
+    font-size: clamp(2.4rem, 9.6vw, 4rem);
+    line-height: 1.08;
   }
 
   .hero__title span {
     white-space: normal;
+  }
+
+  .hero__copy {
+    max-width: 24rem;
+    margin: clamp(1rem, 2vh, 1.65rem) auto 0;
+  }
+
+  .hero__content .download-button {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .about-hero__copy h1,
@@ -857,8 +1615,34 @@ html[data-ready] .privacy-document {
 }
 
 @media (max-width: 430px) {
-  .site-nav__link[href="https://github.com/Linloir/mc-controller/releases"] {
+  .site-nav__link[href^="https://github.com/"] {
     display: none;
+  }
+}
+
+@media (max-width: 880px) {
+  .feature-card,
+  .feature-card:nth-child(even) {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card__media,
+  .feature-card:nth-child(even) .feature-card__media {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .feature-card__text,
+  .feature-card:nth-child(even) .feature-card__text {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .download-card__meta {
+    grid-template-columns: 1fr;
   }
 }
 

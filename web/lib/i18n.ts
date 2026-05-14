@@ -2,6 +2,7 @@ export const REPOSITORY_URL = "https://github.com/Linloir/mc-controller";
 export const ISSUES_URL = `${REPOSITORY_URL}/issues`;
 export const PROFILE_URL = "https://github.com/Linloir";
 export const RELEASES_URL = `${REPOSITORY_URL}/releases`;
+export const APP_STORE_URL = "";
 
 export type Language = "en" | "zh";
 
@@ -42,22 +43,70 @@ export const translations = {
       titleWhite: "to Couch",
       copy:
         "Enjoy a seamless Minecraft experience on any Java edition, on your couch. No keyboard, no controller, no mods - just pure fun.",
+      featuresTitle: "Mobile controls, made for Minecraft.",
       features: [
         {
-          title: "No Mod Needed",
-          copy: "No mods, no installations. Just download and play.",
+          title: "Same Wi-Fi, you're in.",
+          copy:
+            "Drop the phone and the PC onto the same network. CouchMC finds the server for you, no IP to type.",
+          alt: "Phone showing a list of saved and discovered CouchMC hosts on the local network",
         },
         {
-          title: "Super-Low Latency",
+          title: "Every button, tuned for Minecraft.",
           copy:
-            "Optimized LAN discovery and USB connection support keep input feeling immediate.",
+            "Sprint toggle, hotbar swipe, drop, off-hand — every common action has its own button. Keys are remappable, and every threshold dials in to taste.",
+          alt: "Settings screen showing layout editor entries and snap toggles for fine-grained controller tuning",
         },
         {
-          title: "Multi Platform Support",
+          title: "Zero learning curve.",
           copy:
-            "Use Windows or Mac as the server, and Android or iOS devices as the remote.",
+            "Stick, look pad, hotbar — they work the way you already expect from mobile games. First match in, you're playing.",
+          alt: "In-game controller layout with joystick, look pad, and hotbar overlaid on a Minecraft scene",
         },
       ],
+      cta: {
+        title: "Pick your platform.",
+        copy: "Windows or Mac on the desk, Android or iOS in hand. Grab the matching pair and play.",
+        button: "Go to downloads",
+      },
+    },
+    download: {
+      title: "Pick your platform.",
+      lede:
+        "Two sources per platform — pick whichever is faster from where you are. Both contain the same build.",
+      version: "v{version}",
+      role: {
+        server: "Server (PC)",
+        client: "Client (phone)",
+      },
+      platforms: {
+        windows: {
+          name: "Windows",
+          requirement: "Windows 10 1809+",
+        },
+        macos: {
+          name: "macOS",
+          requirement: "macOS 14 Sonoma+",
+        },
+        android: {
+          name: "Android",
+          requirement: "Android 8.0+",
+        },
+        ios: {
+          name: "iOS",
+          requirement: "iOS 16+",
+        },
+      },
+      buttons: {
+        cos: "Fast download",
+        cosHint: "via global CDN",
+        github: "GitHub release",
+        githubHint: "official mirror",
+        appStore: "App Store",
+        appStoreHint: "iOS app marketplace",
+        appStorePending: "Pending review",
+        appStorePendingHint: "We'll enable this when Apple approves the build.",
+      },
     },
     about: {
       eyebrow: "About the project",
@@ -178,20 +227,70 @@ export const translations = {
       titleWhite: "带到沙发上",
       copy:
         "在沙发上畅玩 Minecraft Java 版。不需要键盘，不需要手柄，也不需要安装 Mod - 打开就能玩。",
+      featuresTitle: "专为 MC 优化的移动操作体验",
       features: [
         {
-          title: "无需 Mod",
-          copy: "不修改游戏，不安装额外 Mod，下载后即可连接游玩。",
+          title: "连上同一个 Wi-Fi 就行。",
+          copy:
+            "把电脑和手机连进同一个局域网，CouchMC 会自动发现服务端，不用输 IP，点一下就开始。",
+          alt: "手机展示局域网内已保存与已发现的 CouchMC 主机列表",
         },
         {
-          title: "超低延迟",
-          copy: "针对局域网发现和 USB 连接优化，让输入反馈尽可能贴近原生。",
+          title: "每个按钮都为 MC 调过。",
+          copy:
+            "快速疾跑、物品栏滑切、丢弃、副手都有专属按钮，键位可改，每个阈值都能逐项自定义。",
+          alt: "设置页展示布局编辑入口与各类吸附开关",
         },
         {
-          title: "多平台支持",
-          copy: "Windows 与 Mac 可作为服务端，Android 与 iOS 设备可作为遥控端。",
+          title: "0 上手成本。",
+          copy:
+            "摇杆、视角、热键栏的手感沿用手机游戏的肌肉记忆，第一局就能找到节奏。",
+          alt: "游戏内的摇杆、视角板与物品栏覆盖在 Minecraft 场景上",
         },
       ],
+      cta: {
+        title: "挑选你的平台。",
+        copy: "桌面端选 Windows 或 Mac，手持端选 Android 或 iOS，搭配下载即可开始。",
+        button: "前往下载页",
+      },
+    },
+    download: {
+      title: "挑选你的平台。",
+      lede:
+        "每个平台都提供两个下载源，从你所在的位置挑更快的那一个。两边的安装包内容完全一致。",
+      version: "v{version}",
+      role: {
+        server: "桌面服务端",
+        client: "手机客户端",
+      },
+      platforms: {
+        windows: {
+          name: "Windows",
+          requirement: "Windows 10 1809+",
+        },
+        macos: {
+          name: "macOS",
+          requirement: "macOS 14 Sonoma+",
+        },
+        android: {
+          name: "Android",
+          requirement: "Android 8.0+",
+        },
+        ios: {
+          name: "iOS",
+          requirement: "iOS 16+",
+        },
+      },
+      buttons: {
+        cos: "高速下载",
+        cosHint: "国内 CDN",
+        github: "GitHub 仓库",
+        githubHint: "官方镜像",
+        appStore: "App Store",
+        appStoreHint: "iOS 应用商店",
+        appStorePending: "暂未上架",
+        appStorePendingHint: "上架后会自动放出此按钮。",
+      },
     },
     about: {
       eyebrow: "关于项目",

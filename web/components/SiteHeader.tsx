@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { usePreferences } from "@/components/AppPreferences";
-import { RELEASES_URL, REPOSITORY_URL } from "@/lib/i18n";
+import { REPOSITORY_URL } from "@/lib/i18n";
 
 const navItems = [
   { href: "/", key: "home" },
-  { href: RELEASES_URL, key: "download", external: true },
+  { href: "/download", key: "download" },
   { href: REPOSITORY_URL, key: "github", external: true },
   { href: "/about", key: "about" },
   { href: "/privacy", key: "privacy" },

@@ -43,6 +43,11 @@ type Preferences = {
   resolvedTheme: ResolvedTheme;
   cycleTheme: () => void;
   t: Translation;
+  // True once language + theme preferences have been restored from
+  // localStorage. Components that render translatable content should gate
+  // visibility / entrance animations on this so the page never paints with
+  // the wrong language and then snaps to the user's preference.
+  ready: boolean;
 };
 
 const PreferencesContext = createContext<Preferences | null>(null);
@@ -147,8 +152,9 @@ export function AppPreferencesProvider({ children }: { children: ReactNode }) {
       resolvedTheme,
       cycleTheme,
       t: translations[language],
+      ready,
     }),
-    [cycleTheme, language, resolvedTheme, setLanguage, theme, toggleLanguage],
+    [cycleTheme, language, ready, resolvedTheme, setLanguage, theme, toggleLanguage],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
