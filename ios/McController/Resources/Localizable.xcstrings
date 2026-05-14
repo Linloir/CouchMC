@@ -1,966 +1,2729 @@
 {
   "sourceLanguage" : "en",
-  "version" : "1.0",
   "strings" : {
-    "tab.home" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hosts" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "宿主机" } }
-      }
-    },
-    "tab.settings" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
-      }
-    },
-    "home.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hosts" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "宿主机" } }
-      }
-    },
-    "home.section.saved" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Saved" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已保存" } }
-      }
-    },
-    "home.section.discovered" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Discovered on LAN" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局域网发现" } }
-      }
-    },
-    "home.empty.saved" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "No saved hosts yet" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "暂无已保存宿主机" } }
-      }
-    },
-    "home.empty.discovered" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Scanning…" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在搜索…" } }
-      }
-    },
-    "home.discovered.hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Make sure the PC server is running on the same Wi-Fi network." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请确保 PC 端服务已在同一 Wi-Fi 网络下启动。" } }
-      }
-    },
-    "home.help.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Getting Started" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "使用说明" } }
-      }
-    },
-    "home.help.section.server.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "1. Install the PC Server" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "1. 在 PC 上安装服务端" } }
-      }
-    },
-    "home.help.section.server.body" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC needs an open-source companion server running on your Windows or Mac PC. Download it from the official site below." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 需要一个开源的 PC 端配套服务，运行在您的 Windows 或 Mac 上。请从下方官方网站下载。" } }
-      }
-    },
-    "home.help.section.server.footer" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "The PC server is free and open-source under the MIT License." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "PC 服务端基于 MIT 开源协议，完全免费开源。" } }
-      }
-    },
-    "home.help.section.discovery.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "2. Connect on the Same Wi-Fi" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "2. 在同一 Wi-Fi 下连接" } }
-      }
-    },
-    "home.help.section.discovery.body" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Make sure your iPhone and PC are on the same Wi-Fi. Once the server is running, your PC will appear in the “Discovered on LAN” list. Tap to connect — you'll be prompted for Local Network access on first use." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请确保 iPhone 和 PC 在同一 Wi-Fi 网络下。服务端启动后，您的 PC 会出现在「局域网发现」列表中，点按即可连接。首次使用时系统会请求「本地网络」权限。" } }
-      }
-    },
-    "home.help.section.demo.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Try the Offline Demo" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "体验离线演示模式" } }
-      }
-    },
-    "home.help.section.demo.body" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "No PC server handy? Tap “+” and enter the IP and port shown below to enter CouchMC's offline simulator. The simulator lets you explore every screen and gesture without any network." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有可用的 PC 服务端？点击「+」按钮，输入下方的 IP 和端口即可进入 CouchMC 的离线演示模式。演示模式允许您在无需任何网络的情况下完整体验所有界面和操作。" } }
-      }
-    },
-    "host.add.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Add Host" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "添加宿主机" } }
-      }
-    },
-    "host.demo_detected" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "This combination opens CouchMC's offline simulator (no PC server needed)." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "该组合将进入 CouchMC 内置演示模式（无需 PC 服务端）。" } }
-      }
-    },
-    "host.demo_name" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Demo (Offline Simulator)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "演示模式（离线模拟）" } }
-      }
-    },
-    "host.demo_subtitle" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Built-in simulator · no network" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "内置模拟 · 不连网络" } }
-      }
-    },
-    "host.demo_badge" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "DEMO" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "演示" } }
-      }
-    },
-    "host.field.name" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Name" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "名称" } }
-      }
-    },
-    "host.field.ip" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "IP Address" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "IP 地址" } }
-      }
-    },
-    "host.field.port" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Port" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "端口" } }
-      }
-    },
-    "host.rename" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名" } }
-      }
-    },
-    "host.remove" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Remove" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除" } }
-      }
-    },
-    "host.edit_port" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit Port" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "修改端口" } }
-      }
-    },
-    "common.cancel" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消" } }
-      }
-    },
-    "common.save" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } }
-      }
-    },
-    "common.done" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "完成" } }
-      }
-    },
-    "common.delete" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除" } }
-      }
-    },
-    "common.create" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Create" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "创建" } }
-      }
-    },
-    "error.connect.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cannot connect" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法连接" } }
-      }
-    },
-    "error.connect.busy" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "The server is already serving another client." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "服务器已有客户端连接。" } }
-      }
-    },
-    "error.connect.incompatible" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Protocol version mismatch — please upgrade either app." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "协议版本不匹配，请升级双端 App。" } }
-      }
-    },
-    "error.connect.failed" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Connection failed: %@" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "连接失败：%@" } }
-      }
-    },
-    "settings.title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
-      }
-    },
-    "settings.section.profile" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置文件" } }
-      }
-    },
-    "settings.profile.active" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Active profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前配置" } }
-      }
-    },
-    "settings.profile.row" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置" } }
-      }
-    },
-    "settings.profile.list_footer" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap a profile to make it active. Swipe a row to rename or delete." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "点按配置以激活；左滑配置可重命名或删除。" } }
-      }
-    },
-    "settings.profile.duplicate_name" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "A profile with this name already exists." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已存在同名配置。" } }
-      }
-    },
-    "common.rename" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名" } }
-      }
-    },
-    "settings.profile.pick" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Select a profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "选择配置文件" } }
-      }
-    },
-    "settings.profile.new" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "New profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "新建配置" } }
-      }
-    },
-    "settings.profile.rename" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Rename profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重命名配置" } }
-      }
-    },
-    "settings.profile.delete" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete profile" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "删除配置" } }
-      }
-    },
-    "settings.profile.cannot_delete_last" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Cannot delete the last profile." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法删除最后一个配置。" } }
-      }
-    },
-    "settings.profile.invalid_name" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Name is empty or already in use." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "名称为空或已存在。" } }
-      }
-    },
-    "settings.profile.delete_confirm_title" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Delete profile?" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "确认删除配置？" } }
-      }
-    },
-    "settings.profile.delete_confirm_msg" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "“%@” will be removed. This cannot be undone." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "“%@”将被删除，且无法撤销。" } }
-      }
-    },
-    "settings.profile.field.name" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Profile name" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置名称" } }
-      }
-    },
-    "settings.section.gameplay" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Gameplay" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "游戏体验" } }
-      }
-    },
-    "settings.section.hotbar" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
-      }
-    },
-    "settings.section.camera" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Camera" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角" } }
-      }
-    },
-    "settings.section.sprint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sprint" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "疾跑" } }
-      }
-    },
-    "settings.hotbar_step" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Swipe sensitivity" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "滑动灵敏度" } }
-      }
-    },
-    "settings.hotbar_step.hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Distance the finger has to travel to step through one hotbar slot. Lower is more sensitive. Only effective in Relative swipe mode." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "每移动一格物品栏所需的手指距离，数值越小越灵敏。只对相对滑动模式有效。" } }
-      }
-    },
-    "settings.camera_sensitivity" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Camera sensitivity" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角灵敏度" } }
-      }
-    },
-    "settings.camera_sensitivity.hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Multiplier applied to look-pad swipes before they're sent to the PC. Higher = faster camera turn." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板滑动发送到 PC 前的倍数。数值越大转动越快。" } }
-      }
-    },
-    "settings.sprint_from_joystick" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Quick sprint via joystick" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆触发快速疾跑" } }
-      }
-    },
-    "settings.sprint_engage" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Trigger distance" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "触发距离" } }
-      }
-    },
-    "settings.sprint.hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "When enabled, pushing the joystick past this multiple of its rim radius engages sprint automatically. The Sprint button on the controller always works regardless of this setting." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开启后，将摇杆推出此倍数的边缘半径时自动开启疾跑。无论本开关如何，操作界面上的疾跑按钮始终可用。" } }
-      }
-    },
-    "settings.editor.edge_snap" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Snap to edges" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动边缘吸附" } }
-      }
-    },
-    "settings.editor.spacing_snap" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Snap to equal spacing" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动间距吸附" } }
-      }
-    },
-    "settings.editor.snap_hint" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "While dragging a widget in the layout editor, a grey dashed line appears when its edge or centre is about to align with another widget's, and amber arrows mark equal spacing. After selecting a widget you can also swipe on empty canvas to fine-tune position (axis-locked, slower than your finger)." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在编辑器中拖动控件时，若边缘或中线即将与其他控件对齐会出现灰色虚线；琥珀色箭头则标示等距吸附。选中某控件后还可在空白区域滑动以进行轴向锁定的微调（按钮移动速度低于手指）。" } }
-      }
-    },
-    "settings.section.layout" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Layout" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "布局" } }
-      }
-    },
-    "settings.layout.edit_in_game" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit in-game layout" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑游戏内布局" } }
-      }
-    },
-    "settings.layout.edit_in_game_sub" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Joystick, action buttons, hotbar" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆 · 操作按钮 · 物品栏" } }
-      }
-    },
-    "settings.layout.edit_ui" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Edit UI layout" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑 UI 模式布局" } }
-      }
-    },
-    "settings.layout.edit_ui_sub" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Side buttons used while a Minecraft UI is open" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 打开界面时使用的侧栏按钮" } }
-      }
-    },
-    "settings.section.feedback" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Feedback" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "反馈" } }
-      }
-    },
-    "settings.section.about" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于" } }
-      }
-    },
-    "settings.in_game_quick_clicks" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Lookpad quick taps (in-game)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板快捷点击 (游戏中)" } }
-      }
-    },
-    "settings.ui_quick_clicks" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Lookpad quick taps (UI mode)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角板快捷点击 (UI 模式)" } }
-      }
-    },
-    "settings.hotbar_swipe" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar swipe" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏滑动" } }
-      }
-    },
-    "settings.hotbar_swipe.precise" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Precise (position)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "精准 (位置)" } }
-      }
-    },
-    "settings.hotbar_swipe.relative" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Relative (wheel)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "相对 (滚轮)" } }
-      }
-    },
-    "settings.left_margin_offset" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left edge offset (pt)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左侧边距偏移 (pt)" } }
-      }
-    },
-    "settings.right_margin_offset" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right edge offset (pt)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右侧边距偏移 (pt)" } }
-      }
-    },
-    "settings.haptics" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Haptic feedback" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "触觉反馈" } }
-      }
-    },
-    "settings.about.open" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About CouchMC" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于 CouchMC" } }
-      }
-    },
-    "about.subtitle" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Touch controller for Minecraft™ on PC" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "PC 端 Minecraft™ 的触屏控制器" } }
-      }
-    },
-    "about.section.info" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Info" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "信息" } }
-      }
-    },
-    "about.section.notes" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Notes" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "说明" } }
-      }
-    },
-    "about.version" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Version" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "版本" } }
+    "about.author" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Author"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作者"
+          }
+        }
       }
     },
     "about.build" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Build" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "构建号" } }
-      }
-    },
-    "about.notes.body" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Connect over your local Wi-Fi network. USB tethering is not yet supported on iOS." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请通过本地 Wi-Fi 网络连接。iOS 端暂不支持 USB 直连。" } }
-      }
-    },
-    "about.section.purpose" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "About this App" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于本 App" } }
-      }
-    },
-    "about.purpose.body" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC turns your iPhone into a touchscreen controller for the PC version of Minecraft. It pairs over local Wi-Fi with an open-source companion server you install on your own Windows or Mac PC, then sends keyboard / mouse events back to the game so you can play from the couch with a touch interface tuned for thumbs." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 把您的 iPhone 变成 PC 端 Minecraft 的触屏控制器。通过局域网 Wi-Fi 与您自行安装在 Windows 或 Mac 上的开源配套服务端配对，向游戏发送键盘 / 鼠标事件，让您能在沙发上用为拇指优化的触控界面舒适地游玩。" } }
-      }
-    },
-    "about.author" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Author" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "作者" } }
-      }
-    },
-    "about.license" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "License" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开源协议" } }
-      }
-    },
-    "about.section.links" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Links" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "相关链接" } }
-      }
-    },
-    "about.link.website" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Official Website" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "官方网站" } }
-      }
-    },
-    "about.link.server_download" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Download PC Server" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "下载 PC 服务端" } }
-      }
-    },
-    "about.link.github" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "GitHub Repository" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "GitHub 仓库" } }
-      }
-    },
-    "about.link.feedback" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Send Feedback" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "意见反馈" } }
-      }
-    },
-    "about.section.privacy" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Privacy" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐私" } }
-      }
-    },
-    "about.link.privacy" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Privacy Policy" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐私政策" } }
-      }
-    },
-    "about.privacy.footer" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC does not collect, transmit, or sell any personal data." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 不收集、不上传、不出售任何个人数据。" } }
-      }
-    },
-    "about.section.legal" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Legal" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "法律声明" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "构建号"
+          }
+        }
       }
     },
     "about.legal.body" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n\nCouchMC is an unofficial third-party touch-controller utility. References to “Minecraft” are nominative — used only to describe what game CouchMC is compatible with — and do not imply any partnership, sponsorship, endorsement, or affiliation with Mojang Studios, Mojang AB, Mojang Synergies AB, Microsoft Corporation, or Notch Development AB.\n\nMINECRAFT, MOJANG, and the Minecraft and Mojang logos are trademarks or registered trademarks of Mojang Synergies AB or its affiliates. Microsoft and Windows are trademarks of Microsoft Corporation. Apple, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. All other product and company names referenced in this app are trademarks of their respective holders.\n\nThe game itself is not bundled with this app. Players must own a separate, valid copy of Minecraft Java Edition installed on their own PC." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本 App 并非 Minecraft 官方产品，未获得 Mojang 或 Microsoft 的认可，与之亦无任何关联。\n\nCouchMC 是非官方第三方触屏控制器工具。文中出现的「Minecraft」属于指示性使用——仅为说明本 App 兼容哪款游戏，并不暗示与 Mojang Studios、Mojang AB、Mojang Synergies AB、Microsoft Corporation 或 Notch Development AB 之间存在任何合作、赞助、授权或隶属关系。\n\nMINECRAFT、MOJANG 以及 Minecraft 与 Mojang 的相关标识，均为 Mojang Synergies AB 或其关联公司之商标或注册商标。Microsoft 与 Windows 为 Microsoft Corporation 之商标。Apple、iPhone、iPad、macOS 与 iOS 为 Apple Inc. 之商标。文中其他产品与公司名称均为各自所有者之商标。\n\n本 App 不包含游戏本体。使用者须自行在 PC 上拥有合法授权的 Minecraft Java 版。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n\nCouchMC is an unofficial third-party touch-controller utility. References to “Minecraft” are nominative — used only to describe what game CouchMC is compatible with — and do not imply any partnership, sponsorship, endorsement, or affiliation with Mojang Studios, Mojang AB, Mojang Synergies AB, Microsoft Corporation, or Notch Development AB.\n\nMINECRAFT, MOJANG, and the Minecraft and Mojang logos are trademarks or registered trademarks of Mojang Synergies AB or its affiliates. Microsoft and Windows are trademarks of Microsoft Corporation. Apple, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. All other product and company names referenced in this app are trademarks of their respective holders.\n\nThe game itself is not bundled with this app. Players must own a separate, valid copy of Minecraft Java Edition installed on their own PC."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本 App 并非 Minecraft 官方产品，未获得 Mojang 或 Microsoft 的认可，与之亦无任何关联。\n\nCouchMC 是非官方第三方触屏控制器工具。文中出现的「Minecraft」属于指示性使用——仅为说明本 App 兼容哪款游戏，并不暗示与 Mojang Studios、Mojang AB、Mojang Synergies AB、Microsoft Corporation 或 Notch Development AB 之间存在任何合作、赞助、授权或隶属关系。\n\nMINECRAFT、MOJANG 以及 Minecraft 与 Mojang 的相关标识，均为 Mojang Synergies AB 或其关联公司之商标或注册商标。Microsoft 与 Windows 为 Microsoft Corporation 之商标。Apple、iPhone、iPad、macOS 与 iOS 为 Apple Inc. 之商标。文中其他产品与公司名称均为各自所有者之商标。\n\n本 App 不包含游戏本体。使用者须自行在 PC 上拥有合法授权的 Minecraft Java 版。"
+          }
+        }
       }
     },
-    "privacy.title" : {
+    "about.license" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC Privacy Policy" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 隐私政策" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "License"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开源协议"
+          }
+        }
       }
     },
-    "privacy.section.summary" : {
+    "about.link.feedback" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Summary" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "概述" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send Feedback"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意见反馈"
+          }
+        }
       }
     },
-    "privacy.body.summary" : {
+    "about.link.github" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC does not collect, transmit, sell, or share any personal information. The app does not include analytics, advertising, crash reporting, or any third-party tracking SDK. Everything you do in CouchMC stays on your iPhone and on the PC you connect to over your local Wi-Fi network." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 不收集、不上传、不出售、不分享任何个人信息。本 App 不内置任何分析、广告、崩溃统计或第三方追踪 SDK。您在 CouchMC 中的全部操作仅保留在您的 iPhone 与您通过本地 Wi-Fi 连接的 PC 之间。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub Repository"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub 仓库"
+          }
+        }
       }
     },
-    "privacy.section.collection" : {
+    "about.link.privacy" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Data We Store on Your Device" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本机存储的数据" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私政策"
+          }
+        }
       }
     },
-    "privacy.body.collection" : {
+    "about.link.server_download" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "The following items live in CouchMC's sandboxed Application Support folder on your iPhone:\n  • The list of saved hosts (a name, IP address, port, and last-connected timestamp per host you choose to save).\n  • Layout profiles (the positions and sizes of on-screen widgets that you arrange in the editor).\n  • App preferences (sensitivity, snap toggles, haptics on/off, etc.).\n\nNone of this data is sent off your device by CouchMC. iCloud Backup may include the app's container if you have it enabled at the system level — that's controlled by you in iOS Settings." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "以下数据保存在 iPhone 上 CouchMC 的沙盒「Application Support」目录内：\n  • 已保存宿主机列表（每条记录包含您填写的名称、IP 地址、端口及最近一次连接时间）。\n  • 布局配置文件（您在编辑器中为屏上控件设定的位置与尺寸）。\n  • App 偏好设置（灵敏度、吸附开关、触觉反馈开关等）。\n\nCouchMC 不会主动将上述任何数据传出您的设备。若您在系统设置中开启了 iCloud 备份，App 沙盒可能被一并备份——这一行为完全由您在 iOS「设置」中控制。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download PC Server"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载 PC 服务端"
+          }
+        }
       }
     },
-    "privacy.section.network" : {
+    "about.link.website" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Network Activity" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "网络活动" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Official Website"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方网站"
+          }
+        }
       }
     },
-    "privacy.body.network" : {
+    "about.notes.body" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC only contacts the user-configured PC server on your local Wi-Fi network. The traffic consists of:\n  • Discovery: a UDP broadcast / Bonjour browse on your LAN, used solely to populate the “Discovered on LAN” list.\n  • Control: a TCP control connection plus an optional UDP camera-delta channel, both directed at the IP and port you supply.\n\nCouchMC does not connect to any analytics endpoint, advertising network, content delivery network, or vendor cloud. The only outbound URLs the app references are the ones you can see and tap inside the About page (the official site, the GitHub repository, and the feedback page) — and only if you tap them yourself." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 仅与您手动配置的本地 Wi-Fi 网络中的 PC 服务端通信，流量仅包括：\n  • 发现：在局域网内进行 UDP 广播 / Bonjour 浏览，仅用于填充「局域网发现」列表。\n  • 控制：一条 TCP 控制连接，以及可选的 UDP 视角增量通道，均指向您填写的 IP 与端口。\n\nCouchMC 不连接任何分析服务、广告网络、CDN 或厂商云端。App 内对外引用的唯一 URL 是您可以在「关于」页面看到并自行点击的链接（官方网站、GitHub 仓库、反馈入口），且仅在您主动点击时才会跳转。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect over your local Wi-Fi network. USB tethering is not yet supported on iOS."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请通过本地 Wi-Fi 网络连接。iOS 端暂不支持 USB 直连。"
+          }
+        }
       }
     },
-    "privacy.section.permissions" : {
+    "about.privacy.footer" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "iOS Permissions" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "iOS 权限" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC does not collect, transmit, or sell any personal data."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 不收集、不上传、不出售任何个人数据。"
+          }
+        }
       }
     },
-    "privacy.body.permissions" : {
+    "about.purpose.body" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC requests one permission, and uses it only for the stated purpose:\n  • Local Network — required by iOS 14+ for any app that scans the LAN. CouchMC uses it to discover and connect to your PC server. Denying it does not affect manual host entry, but the auto-discovery list will be empty." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 仅请求一项权限，且仅用于声明用途：\n  • 本地网络（Local Network）——iOS 14+ 要求任何在局域网中扫描设备的 App 必须申请该权限。CouchMC 使用它来发现并连接您的 PC 服务端。拒绝该权限不影响手动添加宿主机，仅会导致自动发现列表为空。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC turns your iPhone into a touchscreen controller for the PC version of Minecraft. It pairs over local Wi-Fi with an open-source companion server you install on your own Windows or Mac PC, then sends keyboard / mouse events back to the game so you can play from the couch with a touch interface tuned for thumbs."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 把您的 iPhone 变成 PC 端 Minecraft 的触屏控制器。通过局域网 Wi-Fi 与您自行安装在 Windows 或 Mac 上的开源配套服务端配对，向游戏发送键盘 / 鼠标事件，让您能在沙发上用为拇指优化的触控界面舒适地游玩。"
+          }
+        }
       }
     },
-    "privacy.section.tracking" : {
+    "about.section.info" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "No Tracking, No Advertising" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无追踪 · 无广告" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信息"
+          }
+        }
       }
     },
-    "privacy.body.tracking" : {
+    "about.section.legal" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC does not show ads, does not use the Identifier for Advertisers (IDFA), does not request App Tracking Transparency permission, and does not link any of your data with data collected from other apps or websites for advertising or measurement purposes. The bundled PrivacyInfo.xcprivacy manifest declares “no tracking, no collected data, no required-reason API usage” — verifiable in the App Store Connect privacy report." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 不展示广告，不使用 IDFA（Identifier for Advertisers），不申请「App 跟踪透明度」权限，也不会把您的任何数据与其他 App 或网站收集到的数据进行关联以用于广告或效果评估。App 内置的 PrivacyInfo.xcprivacy 隐私清单已明确声明「无追踪、无数据收集、未使用任何受限原因 API」，可通过 App Store Connect 的隐私报告核验。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legal"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "法律声明"
+          }
+        }
       }
     },
-    "privacy.section.thirdparty" : {
+    "about.section.links" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Third-Party SDKs" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "第三方 SDK" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相关链接"
+          }
+        }
       }
     },
-    "privacy.body.thirdparty" : {
+    "about.section.notes" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "CouchMC contains no third-party SDKs. The app is built using Apple system frameworks only (SwiftUI, UIKit, Network, Combine, Foundation, CoreGraphics, os.lock)." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "CouchMC 未集成任何第三方 SDK。App 仅使用 Apple 系统框架构建（SwiftUI、UIKit、Network、Combine、Foundation、CoreGraphics、os.lock）。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "说明"
+          }
+        }
       }
     },
-    "privacy.section.changes" : {
+    "about.section.privacy" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Changes to this Policy" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本政策的变更" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私"
+          }
+        }
       }
     },
-    "privacy.body.changes" : {
+    "about.section.purpose" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "If a future release of CouchMC ever changes its data behaviour, an updated version of this policy will ship with that release and be visible from this same in-app screen before any new behaviour takes effect." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "如果未来版本的 CouchMC 在数据行为上发生变化，对应版本将随版本一并更新本政策，您可在该新版本上线、相关行为生效之前从同一个 App 内入口看到更新后的内容。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About this App"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于本 App"
+          }
+        }
       }
     },
-    "privacy.section.contact" : {
+    "about.subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Contact" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "联系方式" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch controller for Minecraft™ on PC"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PC 端 Minecraft™ 的触屏控制器"
+          }
+        }
       }
     },
-    "privacy.body.contact" : {
+    "about.version" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Privacy questions or reports can be filed publicly via GitHub Issues at https://github.com/Linloir/CouchMC/issues — the same channel used for general feedback." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "如有隐私相关疑问或反馈，请通过 GitHub Issues 公开提交：https://github.com/Linloir/CouchMC/issues 。此为统一的反馈渠道。" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本"
+          }
+        }
       }
     },
-    "privacy.last_updated" : {
+    "common.cancel" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Last updated: 14 May 2026" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "最后更新：2026 年 5 月 14 日" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
       }
     },
-    "controller.lock.message" : {
+    "common.create" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Minecraft is not in the foreground" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Minecraft 未处于前台" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建"
+          }
+        }
       }
     },
-    "demo.mode_button" : {
+    "common.delete" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Switch Mode" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换模式" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        }
       }
     },
-    "demo.mode.locked" : {
+    "common.done" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Anti-Mistouch (Locked)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "防误触模式" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
       }
     },
-    "demo.mode.in_game" : {
+    "common.rename" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "In-Game" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局内操作模式" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重命名"
+          }
+        }
       }
     },
-    "demo.mode.ui" : {
+    "common.save" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "UI Interact" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "UI 操作模式" } }
-      }
-    },
-    "demo.line.no_buttons" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "No buttons currently held" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前未按下任何按键" } }
-      }
-    },
-    "demo.line.active_buttons" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Held: %@" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下：%@" } }
-      }
-    },
-    "demo.line.joystick" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Joystick: x=%+0.2f y=%+0.2f" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆：x=%+0.2f y=%+0.2f" } }
-      }
-    },
-    "demo.line.look_delta" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Look Δ: dx=%+d dy=%+d  (total %+d/%+d)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "视角增量：dx=%+d dy=%+d（累计 %+d/%+d）" } }
-      }
-    },
-    "demo.line.hotbar" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar: slot %d" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏：第 %d 格" } }
-      }
-    },
-    "demo.tutorial.header" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Demo Mode — %@" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "演示模式 — %@" } }
-      }
-    },
-    "demo.tutorial.intro" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "You are inside CouchMC's offline simulator. No PC server is required. The HUD shows DEMO/SIMULATED so you can tell at a glance this is not a live network session." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前已进入 CouchMC 离线演示模式，无需连接任何 PC 服务端。HUD 上的 DEMO/SIMULATED 标识可帮助您一眼区分演示与真实联网会话。" } }
-      }
-    },
-    "demo.tutorial.dismiss" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Got it" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "我知道了" } }
-      }
-    },
-    "demo.tutorial.body.locked" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Anti-Mistouch (Locked) is the safe default. The PC server enters this mode whenever Minecraft is not in the foreground, blocking accidental input. Tap the orange “Switch Mode” chip in the top-left to cycle to In-Game or UI mode and try them out. The bottom strip shows the live input being captured (held buttons, joystick, look delta, hotbar slot)." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "防误触模式是安全默认状态。在真实使用中，当 Minecraft 不在前台时 PC 端会进入此模式以屏蔽误触输入。点按左上角橙色的「切换模式」按钮可循环切换至「局内」或「UI」模式进行体验。屏幕下方信息条会实时显示当前捕获到的输入（按下的按键、摇杆、视角增量、物品栏槽位）。" } }
-      }
-    },
-    "demo.tutorial.body.in_game" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "In-Game mode mirrors normal play: the joystick maps to WASD, the lookpad rotates the camera, the action buttons send LMB/RMB/Jump/Sneak/Sprint/Inv/Drop/Swap/Esc, and the hotbar selects slots 1–9. Try dragging on the lookpad to see camera deltas accumulate in the bottom strip. Use the “Switch Mode” chip to flip back to UI mode or Anti-Mistouch." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局内操作模式模拟正常游戏内的输入：摇杆对应 WASD，视角板旋转视角，操作按钮发送 LMB/RMB/跳跃/潜行/疾跑/物品栏/丢弃/换手/Esc，物品栏可选择 1–9 号格。在视角板上滑动可看到下方信息条中的视角增量累计变化。使用左上角的「切换模式」按钮可切换至 UI 模式或防误触模式。" } }
-      }
-    },
-    "demo.tutorial.body.ui" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "UI Interact mode is what activates whenever Minecraft opens an in-game menu (inventory, crafting, chest, etc.) on the PC. The lookpad now drives the cursor, the LMB/RMB buttons click items, and the side button column gives you Drop / Shift / Esc. The bottom strip continues to show captured input. Use the “Switch Mode” chip to return to In-Game or Anti-Mistouch." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "UI 操作模式对应真实使用中 PC 上 Minecraft 打开任何界面（背包、合成、箱子等）时的状态。此时视角板控制鼠标光标，LMB/RMB 按钮可点击界面元素，侧栏按钮提供丢弃 / Shift / Esc。下方信息条继续显示捕获到的输入。使用左上角的「切换模式」按钮可切换回局内模式或防误触模式。" } }
-      }
-    },
-    "controller.lock.back_to_home" : {
-      "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Back to host list" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "返回宿主机列表" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
       }
     },
     "controller.disconnected" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Disconnected from server" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已与服务器断开连接" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnected from server"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已与服务器断开连接"
+          }
+        }
       }
     },
-    "editor.title_in_game" : {
+    "controller.lock.back_to_home" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "In-game layout" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "局内布局" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to host list"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回宿主机列表"
+          }
+        }
       }
     },
-    "editor.title_ui" : {
+    "controller.lock.message" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "UI layout" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "UI 布局" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minecraft is not in the foreground"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minecraft 未处于前台"
+          }
+        }
       }
     },
-    "editor.reset" : {
+    "CouchMC" : {
+
+    },
+    "demo.line.active_buttons" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "恢复默认" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Held: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按下：%@"
+          }
+        }
       }
     },
-    "editor.reset_position" : {
+    "demo.line.hotbar" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset position" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重置位置" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hotbar: slot %d"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "物品栏：第 %d 格"
+          }
+        }
       }
     },
-    "editor.reset_size" : {
+    "demo.line.joystick" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Reset size" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重置尺寸" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joystick: x=%+0.2f y=%+0.2f"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摇杆：x=%+0.2f y=%+0.2f"
+          }
+        }
+      }
+    },
+    "demo.line.look_delta" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look Δ: dx=%+d dy=%+d  (total %+d/%+d)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角增量：dx=%+d dy=%+d（累计 %+d/%+d）"
+          }
+        }
+      }
+    },
+    "demo.line.no_buttons" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No buttons currently held"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前未按下任何按键"
+          }
+        }
+      }
+    },
+    "demo.mode_button" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch Mode"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换模式"
+          }
+        }
+      }
+    },
+    "demo.mode.in_game" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In-Game"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局内操作模式"
+          }
+        }
+      }
+    },
+    "demo.mode.locked" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anti-Mistouch (Locked)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防误触模式"
+          }
+        }
+      }
+    },
+    "demo.mode.ui" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI Interact"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI 操作模式"
+          }
+        }
+      }
+    },
+    "demo.tutorial.body.in_game" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In-Game mode mirrors normal play: the joystick maps to WASD, the lookpad rotates the camera, the action buttons send LMB/RMB/Jump/Sneak/Sprint/Inv/Drop/Swap/Esc, and the hotbar selects slots 1–9. Try dragging on the lookpad to see camera deltas accumulate in the bottom strip. Use the “Switch Mode” chip to flip back to UI mode or Anti-Mistouch."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局内操作模式模拟正常游戏内的输入：摇杆对应 WASD，视角板旋转视角，操作按钮发送 LMB/RMB/跳跃/潜行/疾跑/物品栏/丢弃/换手/Esc，物品栏可选择 1–9 号格。在视角板上滑动可看到下方信息条中的视角增量累计变化。使用左上角的「切换模式」按钮可切换至 UI 模式或防误触模式。"
+          }
+        }
+      }
+    },
+    "demo.tutorial.body.locked" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anti-Mistouch (Locked) is the safe default. The PC server enters this mode whenever Minecraft is not in the foreground, blocking accidental input. Tap the orange “Switch Mode” chip in the top-left to cycle to In-Game or UI mode and try them out. The bottom strip shows the live input being captured (held buttons, joystick, look delta, hotbar slot)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防误触模式是安全默认状态。在真实使用中，当 Minecraft 不在前台时 PC 端会进入此模式以屏蔽误触输入。点按左上角橙色的「切换模式」按钮可循环切换至「局内」或「UI」模式进行体验。屏幕下方信息条会实时显示当前捕获到的输入（按下的按键、摇杆、视角增量、物品栏槽位）。"
+          }
+        }
+      }
+    },
+    "demo.tutorial.body.ui" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI Interact mode is what activates whenever Minecraft opens an in-game menu (inventory, crafting, chest, etc.) on the PC. The lookpad now drives the cursor, the LMB/RMB buttons click items, and the side button column gives you Drop / Shift / Esc. The bottom strip continues to show captured input. Use the “Switch Mode” chip to return to In-Game or Anti-Mistouch."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI 操作模式对应真实使用中 PC 上 Minecraft 打开任何界面（背包、合成、箱子等）时的状态。此时视角板控制鼠标光标，LMB/RMB 按钮可点击界面元素，侧栏按钮提供丢弃 / Shift / Esc。下方信息条继续显示捕获到的输入。使用左上角的「切换模式」按钮可切换回局内模式或防误触模式。"
+          }
+        }
+      }
+    },
+    "demo.tutorial.dismiss" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我知道了"
+          }
+        }
+      }
+    },
+    "demo.tutorial.header" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo Mode — %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演示模式 — %@"
+          }
+        }
+      }
+    },
+    "demo.tutorial.intro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are inside CouchMC's offline simulator. No PC server is required. The HUD shows DEMO/SIMULATED so you can tell at a glance this is not a live network session."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前已进入 CouchMC 离线演示模式，无需连接任何 PC 服务端。HUD 上的 DEMO/SIMULATED 标识可帮助您一眼区分演示与真实联网会话。"
+          }
+        }
       }
     },
     "editor.hint" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Tap to select  ·  Drag to move  ·  Pinch to resize  ·  Swipe empty to fine-tune  ·  Tap empty to deselect" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "单击选中 · 拖动移动 · 双指缩放 · 空白处滑动微调 · 空白处单击取消选中" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to select  ·  Drag to move  ·  Pinch to resize  ·  Swipe empty to fine-tune  ·  Tap empty to deselect"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "单击选中 · 拖动移动 · 双指缩放 · 空白处滑动微调 · 空白处单击取消选中"
+          }
+        }
       }
     },
-    "widget.lmb" : {
+    "editor.reset" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left click" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复默认"
+          }
+        }
       }
     },
-    "widget.rmb" : {
+    "editor.reset_position" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right click" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右键" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset position"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置位置"
+          }
+        }
       }
     },
-    "widget.jump" : {
+    "editor.reset_size" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Jump" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "跳跃" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset size"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置尺寸"
+          }
+        }
       }
     },
-    "widget.sneak" : {
+    "editor.title_in_game" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sneak" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "潜行" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In-game layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局内布局"
+          }
+        }
       }
     },
-    "widget.sprint" : {
+    "editor.title_ui" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Sprint" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "冲刺" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI 布局"
+          }
+        }
       }
     },
-    "widget.inv" : {
+    "error.connect.busy" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Inventory" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server is already serving another client."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器已有客户端连接。"
+          }
+        }
       }
     },
-    "widget.swap" : {
+    "error.connect.failed" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Swap hand" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换主手" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection failed: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接失败：%@"
+          }
+        }
       }
     },
-    "widget.esc" : {
+    "error.connect.incompatible" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Esc / pause" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Esc / 暂停" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protocol version mismatch — please upgrade either app."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "协议版本不匹配，请升级双端 App。"
+          }
+        }
       }
     },
-    "widget.ui_lmb" : {
+    "error.connect.title" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Left click (UI)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键 (UI)" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot connect"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接"
+          }
+        }
       }
     },
-    "widget.ui_rmb" : {
+    "home.discovered.hint" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Right click (UI)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右键 (UI)" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make sure the PC server is running on the same Wi-Fi network."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请确保 PC 端服务已在同一 Wi-Fi 网络下启动。"
+          }
+        }
       }
     },
-    "widget.ui_q" : {
+    "home.empty.discovered" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Drop (Q)" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "丢弃 (Q)" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanning…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在搜索…"
+          }
+        }
       }
     },
-    "widget.ui_shift" : {
+    "home.empty.saved" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Shift" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Shift" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved hosts yet"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无已保存宿主机"
+          }
+        }
       }
     },
-    "widget.ui_esc" : {
+    "home.help.section.demo.body" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Esc / close UI" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Esc / 关闭界面" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No PC server handy? Tap “+” and enter the IP and port shown below to enter CouchMC's offline simulator. The simulator lets you explore every screen and gesture without any network."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有可用的 PC 服务端？点击「+」按钮，输入下方的 IP 和端口即可进入 CouchMC 的离线演示模式。演示模式允许您在无需任何网络的情况下完整体验所有界面和操作。"
+          }
+        }
       }
     },
-    "widget.joystick" : {
+    "home.help.section.demo.title" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Joystick" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "摇杆" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try the Offline Demo"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体验离线演示模式"
+          }
+        }
       }
     },
-    "widget.hotbar" : {
+    "home.help.section.discovery.body" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Hotbar" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "物品栏" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make sure your iPhone and PC are on the same Wi-Fi. Once the server is running, your PC will appear in the “Discovered on LAN” list. Tap to connect — you'll be prompted for Local Network access on first use."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请确保 iPhone 和 PC 在同一 Wi-Fi 网络下。服务端启动后，您的 PC 会出现在「局域网发现」列表中，点按即可连接。首次使用时系统会请求「本地网络」权限。"
+          }
+        }
+      }
+    },
+    "home.help.section.discovery.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Connect on the Same Wi-Fi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 在同一 Wi-Fi 下连接"
+          }
+        }
+      }
+    },
+    "home.help.section.server.body" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC needs an open-source companion server running on your Windows or Mac PC. Download it from the official site below."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 需要一个开源的 PC 端配套服务，运行在您的 Windows 或 Mac 上。请从下方官方网站下载。"
+          }
+        }
+      }
+    },
+    "home.help.section.server.footer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The PC server is free and open-source under the MIT License."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PC 服务端基于 MIT 开源协议，完全免费开源。"
+          }
+        }
+      }
+    },
+    "home.help.section.server.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Install the PC Server"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. 在 PC 上安装服务端"
+          }
+        }
+      }
+    },
+    "home.help.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getting Started"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用说明"
+          }
+        }
+      }
+    },
+    "home.section.discovered" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discovered on LAN"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局域网发现"
+          }
+        }
+      }
+    },
+    "home.section.saved" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已保存"
+          }
+        }
+      }
+    },
+    "home.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hosts"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宿主机"
+          }
+        }
+      }
+    },
+    "host.add.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Host"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加宿主机"
+          }
+        }
+      }
+    },
+    "host.demo_badge" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEMO"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演示"
+          }
+        }
+      }
+    },
+    "host.demo_detected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This combination opens CouchMC's offline simulator (no PC server needed)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该组合将进入 CouchMC 内置演示模式（无需 PC 服务端）。"
+          }
+        }
+      }
+    },
+    "host.demo_name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo (Offline Simulator)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演示模式（离线模拟）"
+          }
+        }
+      }
+    },
+    "host.demo_subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in simulator · no network"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内置模拟 · 不连网络"
+          }
+        }
+      }
+    },
+    "host.edit_port" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Port"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修改端口"
+          }
+        }
+      }
+    },
+    "host.field.ip" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IP Address"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IP 地址"
+          }
+        }
+      }
+    },
+    "host.field.name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称"
+          }
+        }
+      }
+    },
+    "host.field.port" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Port"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端口"
+          }
+        }
+      }
+    },
+    "host.remove" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        }
+      }
+    },
+    "host.rename" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重命名"
+          }
+        }
+      }
+    },
+    "privacy.body.changes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If a future release of CouchMC ever changes its data behaviour, an updated version of this policy will ship with that release and be visible from this same in-app screen before any new behaviour takes effect."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果未来版本的 CouchMC 在数据行为上发生变化，对应版本将随版本一并更新本政策，您可在该新版本上线、相关行为生效之前从同一个 App 内入口看到更新后的内容。"
+          }
+        }
+      }
+    },
+    "privacy.body.collection" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The following items live in CouchMC's sandboxed Application Support folder on your iPhone:\n  • The list of saved hosts (a name, IP address, port, and last-connected timestamp per host you choose to save).\n  • Layout profiles (the positions and sizes of on-screen widgets that you arrange in the editor).\n  • App preferences (sensitivity, snap toggles, haptics on/off, etc.).\n\nNone of this data is sent off your device by CouchMC. iCloud Backup may include the app's container if you have it enabled at the system level — that's controlled by you in iOS Settings."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以下数据保存在 iPhone 上 CouchMC 的沙盒「Application Support」目录内：\n  • 已保存宿主机列表（每条记录包含您填写的名称、IP 地址、端口及最近一次连接时间）。\n  • 布局配置文件（您在编辑器中为屏上控件设定的位置与尺寸）。\n  • App 偏好设置（灵敏度、吸附开关、触觉反馈开关等）。\n\nCouchMC 不会主动将上述任何数据传出您的设备。若您在系统设置中开启了 iCloud 备份，App 沙盒可能被一并备份——这一行为完全由您在 iOS「设置」中控制。"
+          }
+        }
+      }
+    },
+    "privacy.body.contact" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy questions or reports can be filed publicly via GitHub Issues at https://github.com/Linloir/CouchMC/issues — the same channel used for general feedback."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如有隐私相关疑问或反馈，请通过 GitHub Issues 公开提交：https://github.com/Linloir/CouchMC/issues 。此为统一的反馈渠道。"
+          }
+        }
+      }
+    },
+    "privacy.body.network" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC only contacts the user-configured PC server on your local Wi-Fi network. The traffic consists of:\n  • Discovery: a UDP broadcast / Bonjour browse on your LAN, used solely to populate the “Discovered on LAN” list.\n  • Control: a TCP control connection plus an optional UDP camera-delta channel, both directed at the IP and port you supply.\n\nCouchMC does not connect to any analytics endpoint, advertising network, content delivery network, or vendor cloud. The only outbound URLs the app references are the ones you can see and tap inside the About page (the official site, the GitHub repository, and the feedback page) — and only if you tap them yourself."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 仅与您手动配置的本地 Wi-Fi 网络中的 PC 服务端通信，流量仅包括：\n  • 发现：在局域网内进行 UDP 广播 / Bonjour 浏览，仅用于填充「局域网发现」列表。\n  • 控制：一条 TCP 控制连接，以及可选的 UDP 视角增量通道，均指向您填写的 IP 与端口。\n\nCouchMC 不连接任何分析服务、广告网络、CDN 或厂商云端。App 内对外引用的唯一 URL 是您可以在「关于」页面看到并自行点击的链接（官方网站、GitHub 仓库、反馈入口），且仅在您主动点击时才会跳转。"
+          }
+        }
+      }
+    },
+    "privacy.body.permissions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC requests one permission, and uses it only for the stated purpose:\n  • Local Network — required by iOS 14+ for any app that scans the LAN. CouchMC uses it to discover and connect to your PC server. Denying it does not affect manual host entry, but the auto-discovery list will be empty."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 仅请求一项权限，且仅用于声明用途：\n  • 本地网络（Local Network）——iOS 14+ 要求任何在局域网中扫描设备的 App 必须申请该权限。CouchMC 使用它来发现并连接您的 PC 服务端。拒绝该权限不影响手动添加宿主机，仅会导致自动发现列表为空。"
+          }
+        }
+      }
+    },
+    "privacy.body.summary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC does not collect, transmit, sell, or share any personal information. The app does not include analytics, advertising, crash reporting, or any third-party tracking SDK. Everything you do in CouchMC stays on your iPhone and on the PC you connect to over your local Wi-Fi network."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 不收集、不上传、不出售、不分享任何个人信息。本 App 不内置任何分析、广告、崩溃统计或第三方追踪 SDK。您在 CouchMC 中的全部操作仅保留在您的 iPhone 与您通过本地 Wi-Fi 连接的 PC 之间。"
+          }
+        }
+      }
+    },
+    "privacy.body.thirdparty" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC contains no third-party SDKs. The app is built using Apple system frameworks only (SwiftUI, UIKit, Network, Combine, Foundation, CoreGraphics, os.lock)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 未集成任何第三方 SDK。App 仅使用 Apple 系统框架构建（SwiftUI、UIKit、Network、Combine、Foundation、CoreGraphics、os.lock）。"
+          }
+        }
+      }
+    },
+    "privacy.body.tracking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC does not show ads, does not use the Identifier for Advertisers (IDFA), does not request App Tracking Transparency permission, and does not link any of your data with data collected from other apps or websites for advertising or measurement purposes. The bundled PrivacyInfo.xcprivacy manifest declares “no tracking, no collected data, no required-reason API usage” — verifiable in the App Store Connect privacy report."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 不展示广告，不使用 IDFA（Identifier for Advertisers），不申请「App 跟踪透明度」权限，也不会把您的任何数据与其他 App 或网站收集到的数据进行关联以用于广告或效果评估。App 内置的 PrivacyInfo.xcprivacy 隐私清单已明确声明「无追踪、无数据收集、未使用任何受限原因 API」，可通过 App Store Connect 的隐私报告核验。"
+          }
+        }
+      }
+    },
+    "privacy.last_updated" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last updated: 14 May 2026"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最后更新：2026 年 5 月 14 日"
+          }
+        }
+      }
+    },
+    "privacy.section.changes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes to this Policy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本政策的变更"
+          }
+        }
+      }
+    },
+    "privacy.section.collection" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data We Store on Your Device"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本机存储的数据"
+          }
+        }
+      }
+    },
+    "privacy.section.contact" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "联系方式"
+          }
+        }
+      }
+    },
+    "privacy.section.network" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network Activity"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网络活动"
+          }
+        }
+      }
+    },
+    "privacy.section.permissions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS Permissions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS 权限"
+          }
+        }
+      }
+    },
+    "privacy.section.summary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "概述"
+          }
+        }
+      }
+    },
+    "privacy.section.thirdparty" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Third-Party SDKs"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第三方 SDK"
+          }
+        }
+      }
+    },
+    "privacy.section.tracking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Tracking, No Advertising"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无追踪 · 无广告"
+          }
+        }
+      }
+    },
+    "privacy.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC Privacy Policy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CouchMC 隐私政策"
+          }
+        }
+      }
+    },
+    "settings.about.open" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About CouchMC"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于 CouchMC"
+          }
+        }
+      }
+    },
+    "settings.camera_sensitivity" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera sensitivity"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角灵敏度"
+          }
+        }
+      }
+    },
+    "settings.camera_sensitivity.hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multiplier applied to look-pad swipes before they're sent to the PC. Higher = faster camera turn."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角板滑动发送到 PC 前的倍数。数值越大转动越快。"
+          }
+        }
+      }
+    },
+    "settings.editor.edge_snap" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snap to edges"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动边缘吸附"
+          }
+        }
+      }
+    },
+    "settings.editor.snap_hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While dragging a widget in the layout editor, a grey dashed line appears when its edge or centre is about to align with another widget's, and amber arrows mark equal spacing. After selecting a widget you can also swipe on empty canvas to fine-tune position (axis-locked, slower than your finger)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在编辑器中拖动控件时，若边缘或中线即将与其他控件对齐会出现灰色虚线；琥珀色箭头则标示等距吸附。选中某控件后还可在空白区域滑动以进行轴向锁定的微调（按钮移动速度低于手指）。"
+          }
+        }
+      }
+    },
+    "settings.editor.spacing_snap" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snap to equal spacing"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动间距吸附"
+          }
+        }
+      }
+    },
+    "settings.haptics" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptic feedback"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触觉反馈"
+          }
+        }
+      }
+    },
+    "settings.hotbar_step" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe sensitivity"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑动灵敏度"
+          }
+        }
+      }
+    },
+    "settings.hotbar_step.hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance the finger has to travel to step through one hotbar slot. Lower is more sensitive. Only effective in Relative swipe mode."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每移动一格物品栏所需的手指距离，数值越小越灵敏。只对相对滑动模式有效。"
+          }
+        }
+      }
+    },
+    "settings.hotbar_swipe" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hotbar swipe"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "物品栏滑动"
+          }
+        }
+      }
+    },
+    "settings.hotbar_swipe.precise" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precise (position)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精准 (位置)"
+          }
+        }
+      }
+    },
+    "settings.hotbar_swipe.relative" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative (wheel)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相对 (滚轮)"
+          }
+        }
+      }
+    },
+    "settings.in_game_quick_clicks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lookpad quick taps (in-game)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角板快捷点击 (游戏中)"
+          }
+        }
+      }
+    },
+    "settings.layout.edit_in_game" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit in-game layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑游戏内布局"
+          }
+        }
+      }
+    },
+    "settings.layout.edit_in_game_sub" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joystick, action buttons, hotbar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摇杆 · 操作按钮 · 物品栏"
+          }
+        }
+      }
+    },
+    "settings.layout.edit_ui" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit UI layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑 UI 模式布局"
+          }
+        }
+      }
+    },
+    "settings.layout.edit_ui_sub" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Side buttons used while a Minecraft UI is open"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minecraft 打开界面时使用的侧栏按钮"
+          }
+        }
+      }
+    },
+    "settings.left_margin_offset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left edge offset (pt)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左侧边距偏移 (pt)"
+          }
+        }
+      }
+    },
+    "settings.profile.active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前配置"
+          }
+        }
+      }
+    },
+    "settings.profile.cannot_delete_last" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot delete the last profile."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法删除最后一个配置。"
+          }
+        }
+      }
+    },
+    "settings.profile.delete" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除配置"
+          }
+        }
+      }
+    },
+    "settings.profile.delete_confirm_msg" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” will be removed. This cannot be undone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”将被删除，且无法撤销。"
+          }
+        }
+      }
+    },
+    "settings.profile.delete_confirm_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete profile?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认删除配置？"
+          }
+        }
+      }
+    },
+    "settings.profile.duplicate_name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A profile with this name already exists."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已存在同名配置。"
+          }
+        }
+      }
+    },
+    "settings.profile.field.name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile name"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置名称"
+          }
+        }
+      }
+    },
+    "settings.profile.invalid_name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name is empty or already in use."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称为空或已存在。"
+          }
+        }
+      }
+    },
+    "settings.profile.list_footer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a profile to make it active. Swipe a row to rename or delete."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按配置以激活；左滑配置可重命名或删除。"
+          }
+        }
+      }
+    },
+    "settings.profile.new" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建配置"
+          }
+        }
+      }
+    },
+    "settings.profile.pick" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择配置文件"
+          }
+        }
+      }
+    },
+    "settings.profile.rename" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重命名配置"
+          }
+        }
+      }
+    },
+    "settings.profile.row" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置"
+          }
+        }
+      }
+    },
+    "settings.right_margin_offset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right edge offset (pt)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右侧边距偏移 (pt)"
+          }
+        }
+      }
+    },
+    "settings.section.about" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于"
+          }
+        }
+      }
+    },
+    "settings.section.camera" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角"
+          }
+        }
+      }
+    },
+    "settings.section.feedback" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "反馈"
+          }
+        }
+      }
+    },
+    "settings.section.gameplay" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gameplay"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "游戏体验"
+          }
+        }
+      }
+    },
+    "settings.section.hotbar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hotbar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "物品栏"
+          }
+        }
+      }
+    },
+    "settings.section.layout" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "布局"
+          }
+        }
+      }
+    },
+    "settings.section.profile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置文件"
+          }
+        }
+      }
+    },
+    "settings.section.sprint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprint"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "疾跑"
+          }
+        }
+      }
+    },
+    "settings.sprint_engage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trigger distance"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触发距离"
+          }
+        }
+      }
+    },
+    "settings.sprint_from_joystick" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick sprint via joystick"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摇杆触发快速疾跑"
+          }
+        }
+      }
+    },
+    "settings.sprint.hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When enabled, pushing the joystick past this multiple of its rim radius engages sprint automatically. The Sprint button on the controller always works regardless of this setting."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后，将摇杆推出此倍数的边缘半径时自动开启疾跑。无论本开关如何，操作界面上的疾跑按钮始终可用。"
+          }
+        }
+      }
+    },
+    "settings.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置"
+          }
+        }
+      }
+    },
+    "settings.ui_quick_clicks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lookpad quick taps (UI mode)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视角板快捷点击 (UI 模式)"
+          }
+        }
+      }
+    },
+    "tab.home" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hosts"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宿主机"
+          }
+        }
+      }
+    },
+    "tab.settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置"
+          }
+        }
       }
     },
     "widget.close" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en"      : { "stringUnit" : { "state" : "translated", "value" : "Close" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关闭" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        }
+      }
+    },
+    "widget.esc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esc / pause"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esc / 暂停"
+          }
+        }
+      }
+    },
+    "widget.hotbar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hotbar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "物品栏"
+          }
+        }
+      }
+    },
+    "widget.inv" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "物品栏"
+          }
+        }
+      }
+    },
+    "widget.joystick" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joystick"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摇杆"
+          }
+        }
+      }
+    },
+    "widget.jump" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jump"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳跃"
+          }
+        }
+      }
+    },
+    "widget.lmb" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left click"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左键"
+          }
+        }
+      }
+    },
+    "widget.rmb" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right click"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右键"
+          }
+        }
+      }
+    },
+    "widget.sneak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sneak"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "潜行"
+          }
+        }
+      }
+    },
+    "widget.sprint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprint"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "冲刺"
+          }
+        }
+      }
+    },
+    "widget.swap" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swap hand"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换主手"
+          }
+        }
+      }
+    },
+    "widget.ui_esc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esc / close UI"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esc / 关闭界面"
+          }
+        }
+      }
+    },
+    "widget.ui_lmb" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left click (UI)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左键 (UI)"
+          }
+        }
+      }
+    },
+    "widget.ui_q" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop (Q)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "丢弃 (Q)"
+          }
+        }
+      }
+    },
+    "widget.ui_rmb" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right click (UI)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右键 (UI)"
+          }
+        }
+      }
+    },
+    "widget.ui_shift" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift"
+          }
+        }
       }
     }
-  }
+  },
+  "version" : "1.0"
 }
