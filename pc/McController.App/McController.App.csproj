@@ -5,7 +5,17 @@
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>McController.App</RootNamespace>
-    <AssemblyName>McController.App</AssemblyName>
+    <!--
+      Output binary name. Kept in sync with the macOS PRODUCT_NAME and
+      iOS CFBundleDisplayName so users see the same brand name on every
+      platform: "CouchMC.exe" in the start menu / Add-Remove Programs,
+      "CouchMC.app" in /Applications, and "CouchMC" on the iPhone home
+      screen. The C# RootNamespace stays as "McController.App" because
+      renaming the namespace would mean touching every Swift mirror,
+      every test, and every using-statement in the codebase for a
+      purely cosmetic gain — the namespace is invisible to end users.
+    -->
+    <AssemblyName>CouchMC</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <Version>1.0.1</Version>

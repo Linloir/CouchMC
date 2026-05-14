@@ -23,7 +23,7 @@
 #define AppName       "CouchMC"
 #define AppVersion    "1.0.1"
 #define AppPublisher  "Linloir"
-#define AppExe        "McController.App.exe"
+#define AppExe        "CouchMC.exe"
 #define BuildOutputDir "..\pc\McController.App\bin\x64\Release\net8.0-windows10.0.19041.0\win-x64"
 
 [Setup]
@@ -83,7 +83,7 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
     Tasks: runatlogon; Flags: uninsdeletevalue
 
 [Run]
-Filename: "{app}\{#AppExe}"; Description: "Launch MC Controller"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExe}"; Description: "Launch CouchMC"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; Wipe transient state unconditionally.

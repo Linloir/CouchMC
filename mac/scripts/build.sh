@@ -62,7 +62,7 @@ xcodebuild \
     CONFIGURATION_BUILD_DIR="${BUILD_DIR}/${CONFIG}" \
     build > "${BUILD_DIR}/last-build.log" 2>&1
 
-APP_PATH="${BUILD_DIR}/${CONFIG}/McController.app"
+APP_PATH="${BUILD_DIR}/${CONFIG}/CouchMC.app"
 if [ ! -d "${APP_PATH}" ]; then
     echo "✗ Build failed. See ${BUILD_DIR}/last-build.log"
     tail -40 "${BUILD_DIR}/last-build.log" >&2
@@ -83,4 +83,4 @@ fi
 echo "✅ Built ${APP_PATH}"
 echo
 echo "  Launch:   open '${APP_PATH}'"
-echo "  Or:       '${APP_PATH}/Contents/MacOS/McController'"
+echo "  Or:       '${APP_PATH}/Contents/MacOS/CouchMC'"

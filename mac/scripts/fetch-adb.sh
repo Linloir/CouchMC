@@ -3,7 +3,7 @@
 # binary into `mac/McController/Resources/adb/`. The Xcode build phase
 # (or `build.sh`) copies the folder into the app bundle's Resources, so
 # the bundled adb is available at
-#     McController.app/Contents/Resources/adb/adb
+#     CouchMC.app/Contents/Resources/adb/adb
 # without the user having to install Android SDK separately.
 #
 # Re-run if Google ships a new platform-tools release. The bundle is

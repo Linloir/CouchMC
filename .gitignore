@@ -95,3 +95,7 @@ config.json
 *.pfx
 *.snk
 release-artifacts/
+
+# DMG / installer outputs
+mac/dist/
+installer/out/

@@ -2,7 +2,7 @@
 # Build MC Controller and install it into /Applications.
 #
 # Why this script exists: launching the app directly from
-# `mac/build/Debug/McController.app` works for code iteration but
+# `mac/build/Debug/CouchMC.app` works for code iteration but
 # the menu-bar status item gets misplaced by macOS's layout engine
 # (e.g. behind the MBP-14 notch, or at off-screen X coordinates),
 # because ad-hoc-signed apps in user / DerivedData paths aren't
@@ -43,8 +43,8 @@ case "${CONFIG}" in
     *) echo "Usage: $0 [debug|release]" >&2; exit 1 ;;
 esac
 
-SOURCE_APP="${PROJECT_ROOT}/build/${CONFIG}/McController.app"
-TARGET_APP="/Applications/McController.app"
+SOURCE_APP="${PROJECT_ROOT}/build/${CONFIG}/CouchMC.app"
+TARGET_APP="/Applications/CouchMC.app"
 BUNDLE_ID="cn.linloir.couchmc.mac"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
 
@@ -59,6 +59,9 @@ fi
 # Stop the previous instance (if any) so we can replace its bundle.
 # This only kills the McController process — never anything else.
 echo "→ Stopping any running MC Controller instance..."
+pkill -f "CouchMC.app/Contents/MacOS/CouchMC" 2>/dev/null || true
+# Also kill any leftover legacy McController.app process from earlier
+# pre-rename installs.
 pkill -f "McController.app/Contents/MacOS/McController" 2>/dev/null || true
 sleep 1
 

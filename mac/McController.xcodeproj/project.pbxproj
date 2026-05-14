@@ -46,7 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-	CD494C46394BE7D42A927FFA /* McController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = McController.app; sourceTree = BUILT_PRODUCTS_DIR; };
+	D77BF9A2D0AA8AD1B3F2B3EA /* CouchMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CouchMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 	B0F9350CC07956E73DBA92F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 	4FA9D7BF31A9F0DF7BFEE066 /* McController.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = McController.entitlements; sourceTree = "<group>"; };
 	3EA82C75DEA02095B9834247 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -99,7 +99,7 @@
 	2F3A6B1E78F896718625FF06 /* Products */ = {
 		isa = PBXGroup;
 		children = (
-			CD494C46394BE7D42A927FFA /* McController.app */,
+			D77BF9A2D0AA8AD1B3F2B3EA /* CouchMC.app */,
 		);
 		name = Products;
 		sourceTree = "<group>";
@@ -312,7 +312,7 @@
 		);
 		name = McController;
 		productName = McController;
-		productReference = CD494C46394BE7D42A927FFA /* McController.app */;
+		productReference = D77BF9A2D0AA8AD1B3F2B3EA /* CouchMC.app */;
 		productType = "com.apple.product-type.application";
 	};
 /* End PBXNativeTarget section */
@@ -420,7 +420,7 @@
 			MACOSX_DEPLOYMENT_TARGET = 14.0;
 			MARKETING_VERSION = 1.0.1;
 			PRODUCT_BUNDLE_IDENTIFIER = cn.linloir.couchmc.mac;
-			PRODUCT_NAME = "$(TARGET_NAME)";
+			PRODUCT_NAME = CouchMC;
 			SWIFT_EMIT_LOC_STRINGS = YES;
 			SWIFT_VERSION = 5.0;
 		};
@@ -447,7 +447,7 @@
 			MACOSX_DEPLOYMENT_TARGET = 14.0;
 			MARKETING_VERSION = 1.0.1;
 			PRODUCT_BUNDLE_IDENTIFIER = cn.linloir.couchmc.mac;
-			PRODUCT_NAME = "$(TARGET_NAME)";
+			PRODUCT_NAME = CouchMC;
 			SWIFT_EMIT_LOC_STRINGS = YES;
 			SWIFT_VERSION = 5.0;
 		};
