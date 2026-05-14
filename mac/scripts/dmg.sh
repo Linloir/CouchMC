@@ -232,24 +232,80 @@ tell application "Finder"
         set background picture of viewOptions to file ".background:background.png"
         set position of item "CouchMC.app" of container window to {165, 220}
         set position of item "Applications" of container window to {435, 220}
-        -- Force Finder to flush the .DS_Store before we unmount.
+        -- Force Finder to flush the .DS_Store before we unmount. The
+        -- close → open → update → long-delay → close dance is the
+        -- create-dmg recipe. "update without registering applications"
+        -- alone does NOT synchronously persist .DS_Store, and a 1-second
+        -- delay races the async Finder writer on most machines. Without a
+        -- persisted .DS_Store the resulting DMG opens with default view
+        -- settings (no background, no icon positions).
+        close
+        open
         update without registering applications
-        delay 1
+        delay 5
         close
     end tell
 end tell
 APPLESCRIPT_EOF
 )
-osascript -e "${APPLESCRIPT}" >/dev/null
-
-# Make sure .DS_Store is flushed.
-sync; sleep 1
+osascript -e "${APPLESCRIPT}" || {
+    echo "✗ osascript reported a failure while laying out the DMG window." >&2
+    echo "  The DMG may build but open without background/icon positions." >&2
+}
 
 # Set the .app's permissions and ensure the symlink is correct
 chmod -Rf go-w "${MOUNT_POINT}" 2>/dev/null || true
 
-echo "→ Detaching"
-hdiutil detach "${DMG_DEV}" -quiet || hdiutil detach "${DMG_DEV}" -force
+# CRITICAL: ejecting via Finder (not bash's `hdiutil detach`) is what
+# actually persists .DS_Store. Finder writes .DS_Store through its own
+# buffered IPC path; the kernel only sees a dentry-cache update, so a
+# bash-level `sync` followed by `hdiutil detach` will appear to succeed
+# while silently discarding the dirty pages — the unmounted DMG ends up
+# missing .DS_Store entirely and Finder opens it with default view
+# settings (no background, no icon layout). Telling Finder itself to
+# eject forces it to flush its own caches before the volume goes away.
+echo "→ Asking Finder to eject (flushes .DS_Store)"
+osascript -e "tell application \"Finder\" to eject disk \"${VOL_NAME}\"" || true
+
+# Wait for the volume to actually disappear from /Volumes.
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+    [[ -d "${MOUNT_POINT}" ]] || break
+    sleep 0.4
+done
+if [[ -d "${MOUNT_POINT}" ]]; then
+    echo "  Finder eject did not unmount — falling back to hdiutil detach" >&2
+    hdiutil detach "${DMG_DEV}" -force >/dev/null 2>&1 || true
+fi
+
+# Diagnostic: re-mount the UDRW DMG read-only and confirm .DS_Store
+# survived the unmount. Finder may still be holding the DMG handle for
+# a moment after eject, so retry a few times. Non-fatal if it can't
+# probe — we'll still build the DMG and the user can spot a missing
+# background empirically.
+DIAG_MOUNT="${BUILD_DIR}/diag-mount"
+mkdir -p "${DIAG_MOUNT}"
+DIAG_OK=0
+for _ in 1 2 3 4 5; do
+    if hdiutil attach "${DMG_TEMP}" -readonly -noverify -noautoopen \
+        -mountpoint "${DIAG_MOUNT}" >/dev/null 2>&1; then
+        DIAG_OK=1
+        break
+    fi
+    sleep 1
+done
+if [[ ${DIAG_OK} -eq 1 ]]; then
+    if [[ -f "${DIAG_MOUNT}/.DS_Store" ]]; then
+        DS_SIZE=$(stat -f '%z' "${DIAG_MOUNT}/.DS_Store")
+        echo "  .DS_Store persisted (${DS_SIZE} bytes)"
+    else
+        echo "  ⚠ .DS_Store NOT persisted to the UDRW DMG — the final DMG" >&2
+        echo "    will open with default view settings (no background)." >&2
+    fi
+    hdiutil detach "${DIAG_MOUNT}" -quiet >/dev/null 2>&1 || true
+else
+    echo "  (skipped persisted-check: UDRW DMG still busy)"
+fi
+rmdir "${DIAG_MOUNT}" 2>/dev/null || true
 
 # --- 5. Convert to compressed read-only DMG ---------------------------
 
