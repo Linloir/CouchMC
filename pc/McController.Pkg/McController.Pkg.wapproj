@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Windows Application Packaging Project (.wapproj) that wraps the unpackaged
+  WinUI 3 server (pc/McController.App) into an MSIX suitable for the
+  Microsoft Store.
+
+  Why a separate project instead of converting the existing csproj to
+  packaged: we still want Inno Setup (CouchMC-Setup-X.Y.Z.exe) to ship as
+  the public-website "direct download". A side-by-side .wapproj keeps both
+  outputs alive — the unpackaged Release build feeds Inno Setup, this
+  project feeds the Store.
+
+  Build (after running the icon script + restoring NuGet packages once):
+
+    & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" `
+        pc\McController.Pkg\McController.Pkg.wapproj `
+        -p:Configuration=Release -p:Platform=x64 -p:AppxBundle=Never `
+        -p:UapAppxPackageBuildMode=StoreUpload -t:Rebuild
+
+  The Store-upload msixupload lands under
+  pc/McController.Pkg/AppPackages/McController.Pkg_<version>_Test/.
+
+  Note: this project requires the Windows 10 SDK and the
+  "MSIX Packaging Tools" workload in the Visual Studio Build Tools
+  installer. The relevant component IDs are
+  Microsoft.VisualStudio.Component.UWP.VC.v143 and
+  Microsoft.VisualStudio.Workload.Universal.
+-->
+<Project ToolsVersion="15.0" DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
+  <PropertyGroup Label="Globals">
+    <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
+  </PropertyGroup>
+
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
+
+  <PropertyGroup>
+    <ProjectGuid>{6F4D2E70-1A53-4D5E-9E1F-3F2F0B7A9C44}</ProjectGuid>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <EntryPointProjectUniqueName>..\McController.App\McController.App.csproj</EntryPointProjectUniqueName>
+    <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <AppxBundle>Never</AppxBundle>
+    <AppxPackageDir>AppPackages\</AppxPackageDir>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Images\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\McController.App\McController.App.csproj">
+      <SkipGetTargetFrameworkProperties>True</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
+</Project>

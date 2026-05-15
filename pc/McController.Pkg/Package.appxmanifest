@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap rescap">
+
+  <!--
+    Identity Name + Publisher MUST be replaced before a Store submission:
+
+      Name      → "Reserve a name" in Partner Center; copy "Package/Identity/Name"
+      Publisher → also in Partner Center, "Package/Identity/Publisher" (begins
+                  with CN=… and is bound to your developer account)
+
+    Until then the placeholder below lets you build the MSIX locally and
+    install it with a self-signed cert for testing.
+  -->
+  <Identity Name="Linloir.CouchMC"
+            Publisher="CN=Linloir, O=Linloir, C=CN"
+            Version="1.0.1.0" />
+
+  <Properties>
+    <DisplayName>CouchMC</DisplayName>
+    <PublisherDisplayName>Linloir</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <!--
+      MinVersion 10.0.17763.0 = Windows 10 1809, matches the unpackaged
+      installer's floor. MaxVersionTested is the latest Windows we have
+      smoke-tested against; bump as needed.
+    -->
+    <TargetDeviceFamily Name="Windows.Desktop"
+                        MinVersion="10.0.17763.0"
+                        MaxVersionTested="10.0.22631.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="zh-CN" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="App"
+                 Executable="CouchMC.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="CouchMC"
+                          Description="Bring Minecraft Java Edition to your couch — use your phone as a touchscreen controller."
+                          BackgroundColor="#050504"
+                          Square150x150Logo="Images\Square150x150Logo.png"
+                          Square44x44Logo="Images\Square44x44Logo.png" />
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!--
+      runFullTrust lets the WinUI 3 desktop app keep using the Win32 APIs
+      it already depends on: SendInput / SetCursorPos for input injection,
+      GetCursorInfo / GetForegroundWindow for the 3-state mode detector,
+      Process.Start("adb") for USB device discovery, registry writes for
+      "start at sign-in", and direct %APPDATA% reads/writes for the user
+      config + profile JSON.
+
+      runFullTrust is gated on Microsoft Store review and not auto-granted
+      for new individual accounts — see docs/microsoft-store.md.
+    -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>
