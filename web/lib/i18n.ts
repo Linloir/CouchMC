@@ -106,6 +106,8 @@ export const translations = {
         appStoreHint: "iOS app marketplace",
         appStorePending: "Pending review",
         appStorePendingHint: "We'll enable this when Apple approves the build.",
+        iosSource: "Build from source",
+        iosSourceHint: "GitHub repository",
       },
     },
     about: {
@@ -290,6 +292,8 @@ export const translations = {
         appStoreHint: "iOS 应用商店",
         appStorePending: "暂未上架",
         appStorePendingHint: "上架后会自动放出此按钮。",
+        iosSource: "GitHub 源码",
+        iosSourceHint: "克隆后自行编译",
       },
     },
     about: {

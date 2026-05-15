@@ -52,7 +52,10 @@ export const DOWNLOADS: Record<PlatformKey, PlatformDownload> = {
     filename: null,
     size: "",
     cosUrl: null,
-    githubUrl: null,
+    // Points at the ios/ source folder rather than a release binary: iOS
+    // doesn't ship a sideload artefact, so the GitHub button is "clone &
+    // build yourself" for developers who want the source.
+    githubUrl: `${REPOSITORY_URL}/tree/master/ios`,
     appStoreUrl: "https://apps.apple.com/cn/app/couchmc/id6768538710",
   },
 };

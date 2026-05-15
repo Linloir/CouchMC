@@ -212,23 +212,34 @@ export default function DownloadPage() {
 
               <div className="download-card__buttons" suppressHydrationWarning>
                 {isIos ? (
-                  info.appStoreUrl ? (
-                    <DownloadButton
-                      href={info.appStoreUrl}
-                      variant="primary"
-                      icon={ICON_APPSTORE}
-                      label={t.download.buttons.appStore}
-                      hint={t.download.buttons.appStoreHint}
-                    />
-                  ) : (
-                    <DownloadButton
-                      href="#"
-                      variant="disabled"
-                      icon={ICON_APPSTORE}
-                      label={t.download.buttons.appStorePending}
-                      hint={t.download.buttons.appStorePendingHint}
-                    />
-                  )
+                  <>
+                    {info.appStoreUrl ? (
+                      <DownloadButton
+                        href={info.appStoreUrl}
+                        variant="primary"
+                        icon={ICON_APPSTORE}
+                        label={t.download.buttons.appStore}
+                        hint={t.download.buttons.appStoreHint}
+                      />
+                    ) : (
+                      <DownloadButton
+                        href="#"
+                        variant="disabled"
+                        icon={ICON_APPSTORE}
+                        label={t.download.buttons.appStorePending}
+                        hint={t.download.buttons.appStorePendingHint}
+                      />
+                    )}
+                    {info.githubUrl && (
+                      <DownloadButton
+                        href={info.githubUrl}
+                        variant="secondary"
+                        icon={ICON_GITHUB}
+                        label={t.download.buttons.iosSource}
+                        hint={t.download.buttons.iosSourceHint}
+                      />
+                    )}
+                  </>
                 ) : (
                   <>
                     {info.cosUrl && (
