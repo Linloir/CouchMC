@@ -196,7 +196,9 @@ export default function DownloadPage() {
               <dl className="download-card__meta" suppressHydrationWarning>
                 <div suppressHydrationWarning>
                   <dt suppressHydrationWarning>Version</dt>
-                  <dd suppressHydrationWarning>{isIos ? "—" : versionLabel}</dd>
+                  <dd suppressHydrationWarning>
+                    {isIos && !info.appStoreUrl ? "—" : versionLabel}
+                  </dd>
                 </div>
                 <div suppressHydrationWarning>
                   <dt suppressHydrationWarning>Size</dt>
@@ -210,13 +212,23 @@ export default function DownloadPage() {
 
               <div className="download-card__buttons" suppressHydrationWarning>
                 {isIos ? (
-                  <DownloadButton
-                    href="#"
-                    variant="disabled"
-                    icon={ICON_APPSTORE}
-                    label={t.download.buttons.appStorePending}
-                    hint={t.download.buttons.appStorePendingHint}
-                  />
+                  info.appStoreUrl ? (
+                    <DownloadButton
+                      href={info.appStoreUrl}
+                      variant="primary"
+                      icon={ICON_APPSTORE}
+                      label={t.download.buttons.appStore}
+                      hint={t.download.buttons.appStoreHint}
+                    />
+                  ) : (
+                    <DownloadButton
+                      href="#"
+                      variant="disabled"
+                      icon={ICON_APPSTORE}
+                      label={t.download.buttons.appStorePending}
+                      hint={t.download.buttons.appStorePendingHint}
+                    />
+                  )
                 ) : (
                   <>
                     {info.cosUrl && (

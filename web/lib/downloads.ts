@@ -53,7 +53,6 @@ export const DOWNLOADS: Record<PlatformKey, PlatformDownload> = {
     size: "",
     cosUrl: null,
     githubUrl: null,
-    // Empty string means "not yet available" — the page surfaces a pending state.
-    appStoreUrl: "",
+    appStoreUrl: "https://apps.apple.com/cn/app/couchmc/id6768538710",
   },
 };

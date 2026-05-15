@@ -19,7 +19,7 @@
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%2F11-0078D4?style=for-the-badge&logo=windows11&logoColor=white">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-000000?style=for-the-badge&logo=apple&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white">
-  <img alt="iOS" src="https://img.shields.io/badge/iOS-18%2B%20Preparing-000000?style=for-the-badge&logo=ios&logoColor=white">
+  <a href="https://apps.apple.com/cn/app/couchmc/id6768538710"><img alt="iOS App Store" src="https://img.shields.io/badge/iOS-App_Store-000000?style=for-the-badge&logo=apple&logoColor=white"></a>
 </div>
 
 <a id="中文"></a>
@@ -41,7 +41,7 @@ CouchMC 的初衷来自一个很普通的晚上：我刚搬到新家，买了一
 - **Windows 10/11 服务端**：WinUI 3 桌面应用，带托盘、开机启动、全局设置、按键绑定、窗口透明度和 Inno Setup 安装包。
 - **macOS 14+ 服务端**：原生 Swift / SwiftUI 应用，支持菜单栏、Accessibility 输入注入、Liquid Glass 设置、Bonjour / UDP 发现和 bundled adb。签名与 DMG 尚未完成，所以暂不提供 DMG 安装说明。
 - **Android 8.0+ 客户端**：Kotlin 原生应用，支持 Wi-Fi / USB、局域网发现、布局编辑器、触摸手势、摇杆、视角板、按钮与快捷栏。
-- **iOS / iPadOS 18+ 客户端**：Swift / SwiftUI + UIKit 客户端源码已在仓库内，正在筹备 App Store 上架；目前可用 Xcode 进行开发者安装，连接方式以 Wi-Fi 为主。
+- **iOS 16+ 客户端**：Swift / SwiftUI + UIKit 客户端，已在 [App Store](https://apps.apple.com/cn/app/couchmc/id6768538710) 上架（目前仅 iPhone，未适配 iPad）。
 
 ### 特点
 
@@ -118,11 +118,13 @@ bash scripts/install.sh
 
 如果浏览器提示“此文件可能有风险”，这是因为 APK 不是从应用商店下载。确认来源是本仓库 Release 后，选择继续下载。
 
-#### iPhone / iPad
+#### iPhone
 
-iOS 客户端正在筹备 App Store 上架，暂时还不能直接下载。正式上架后，这里会放 App Store 链接，普通用户只需要像安装普通 App 一样点击下载。
+iOS 客户端已经在 App Store 上架（**仅 iPhone，未适配 iPad**），直接在 App Store 搜索 "CouchMC" 或点下方按钮安装：
 
-在上架前，如果你有 Mac、Xcode 和 Apple 开发者签名环境，可以参考下方 **本地开发、打包与部署 → iOS 客户端** 自己构建并安装到真机。iOS 版本目前以 Wi-Fi 连接为主，首次连接前请允许 Local Network 权限，否则无法发现电脑端服务。
+<a href="https://apps.apple.com/cn/app/couchmc/id6768538710"><img alt="Download on the App Store" src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/zh-cn?releaseDate=2026-05-13" height="56"></a>
+
+首次连接前请允许 Local Network 权限，否则无法发现电脑端服务。iOS 版本目前以 Wi-Fi 连接为主。
 
 ### 使用方法
 
@@ -259,7 +261,7 @@ The key idea is the **three-state mode system**. The desktop app detects whether
 - **Windows 10/11 server**: WinUI 3 app with tray support, launch-at-login, global settings, key bindings, transparency preferences and an Inno Setup installer.
 - **macOS 14+ server**: Native Swift / SwiftUI app with menu bar support, Accessibility input injection, Liquid Glass preferences, Bonjour / UDP discovery and bundled adb. A signed DMG is not available yet because signing and notarization are still pending.
 - **Android 8.0+ client**: Native Kotlin app with Wi-Fi / USB connection, LAN discovery, layout editor, touch gestures, joystick, look pad, buttons and hotbar.
-- **iOS / iPadOS 18+ client**: Swift / SwiftUI + UIKit client source is in the repository. App Store release is being prepared; developer installation through Xcode is available today.
+- **iOS 16+ client**: Swift / SwiftUI + UIKit client, [live on the App Store](https://apps.apple.com/cn/app/couchmc/id6768538710) (iPhone only; iPad not adapted yet).
 
 ### Highlights
 
@@ -336,11 +338,13 @@ Regular users do not need Android Studio or command-line tools. Install the APK 
 
 If the browser warns that the file may be risky, that is expected for APKs installed outside an app store. Continue only after confirming the file came from this repository's Release page.
 
-#### iPhone / iPad
+#### iPhone
 
-The iOS client is being prepared for the App Store and cannot be downloaded directly yet. Once it is listed, this section will point to the App Store page, and normal users will install it like any other app.
+The iOS client is live on the App Store (**iPhone only; iPad not adapted yet**). Search "CouchMC" on the App Store or tap the badge below:
 
-Before the App Store release, users with a Mac, Xcode and Apple signing setup can build it manually from source. See **Local Build, Packaging And Deployment → iOS Client** below. The current iOS path is Wi-Fi first; allow Local Network permission on first launch so the app can discover desktop servers.
+<a href="https://apps.apple.com/cn/app/couchmc/id6768538710"><img alt="Download on the App Store" src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?releaseDate=2026-05-13" height="56"></a>
+
+On first launch, allow Local Network permission so the app can discover desktop servers. The current iOS path is Wi-Fi first.
 
 ### How To Use
 
